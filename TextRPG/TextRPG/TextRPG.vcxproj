@@ -127,7 +127,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConsolUI.cpp" />
+    <ClCompile Include="GameContext.cpp" />
+    <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="InputManager.h" />
     <ClCompile Include="TextRPG.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConsolUI.h" />
+    <ClInclude Include="GameContext.h" />
+    <ClInclude Include="GameManager.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
