@@ -34,9 +34,13 @@ public:
     // 예: ConsoleUI::PrintTitle("상점");
     static void PrintTitle(const std::string& title);
 
-    // 안내 메세지 함수
+    // 안내 메세지 함수 (*한줄짜리 문자열)
     // 예: ConsoleUI::PrintMessage("상점에 입장했습니다.");
     static void PrintMessage(const std::string& message);
+
+    // 문자열 + 숫자 함수
+    // 예: ConsoleUi::PrintMessage("플레이어 hp",플레이어 현재 체력-GetHp 등등)
+    static void PrintMessageValue(const std::string& message, int value);
 
     // 오류 메시지 함수
     // 예: ConsoleUI::PrintError("골드가 부족합니다.");

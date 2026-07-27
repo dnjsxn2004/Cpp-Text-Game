@@ -13,33 +13,72 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="헤더 파일\Manager">
-      <UniqueIdentifier>{abb92c32-ee3e-451b-9bd2-70abf75314a6}</UniqueIdentifier>
+    <Filter Include="소스 파일\Core">
+      <UniqueIdentifier>{baa0dff5-b95a-44e9-9bcc-cbabb7855fde}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\Manager">
-      <UniqueIdentifier>{e84d50d6-0965-4e75-8a11-19614919a435}</UniqueIdentifier>
+    <Filter Include="소스 파일\Player">
+      <UniqueIdentifier>{24e658a3-9483-4a39-b571-63cc795eed1c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Monster">
+      <UniqueIdentifier>{d664b3d9-6d98-4482-8404-8b03d842d7f0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Inventory">
+      <UniqueIdentifier>{166528af-a302-4eaf-ad72-bc934354647b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\Battle">
+      <UniqueIdentifier>{9910174f-618d-4a3b-b7dc-8b6069cfd489}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\UI">
+      <UniqueIdentifier>{81261f79-4ea5-4bdd-aafd-6e669dfb443d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Core">
+      <UniqueIdentifier>{17566bb6-a0b8-4261-bb4f-3bc0a641e5a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Player">
+      <UniqueIdentifier>{9d370293-188c-458f-b38a-befefcbf3958}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Monster">
+      <UniqueIdentifier>{8e5dc816-f977-4949-8426-6fda665b8a5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Inventory">
+      <UniqueIdentifier>{4c9a7743-c069-4fd6-a59e-3d3ce70c95aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\Battle">
+      <UniqueIdentifier>{d20f1c2b-8cff-4608-80a0-1b52a8fc6bff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="헤더 파일\UI">
+      <UniqueIdentifier>{6ff7b6bd-8fc4-48b6-b47e-6057e14572c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="TextRPG.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="InputManager.h">
-      <Filter>헤더 파일\Manager</Filter>
-    </ClCompile>
-    <ClCompile Include="InputManager.cpp">
-      <Filter>소스 파일\Manager</Filter>
+    <ClCompile Include="GameContext.cpp">
+      <Filter>소스 파일\Core</Filter>
     </ClCompile>
     <ClCompile Include="GameManager.cpp">
-      <Filter>소스 파일\Manager</Filter>
+      <Filter>소스 파일\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="ConsolUI.cpp">
+      <Filter>소스 파일\UI</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.h">
+      <Filter>헤더 파일\UI</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolUI.h">
-      <Filter>헤더 파일\Manager</Filter>
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="GameContext.h">
+      <Filter>헤더 파일\Core</Filter>
     </ClInclude>
     <ClInclude Include="GameManager.h">
-      <Filter>헤더 파일\Manager</Filter>
+      <Filter>헤더 파일\Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
