@@ -65,3 +65,5 @@ void Player::SetExp(int newExp) {
 void Player::SetMaxExp(int newMaxExp) {
     MaxExp = newMaxExp;
 }
+
+int a = 0;
