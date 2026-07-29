@@ -7,7 +7,7 @@ class Gang : public Player
 public:
     Gang();
 
-    int GetMeleeDamage(const StatBonus& bonus) override;
-    int GetSkillDamage(const StatBonus& bonus) override;
+    int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus) override;
+    int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus) override;
 };
 

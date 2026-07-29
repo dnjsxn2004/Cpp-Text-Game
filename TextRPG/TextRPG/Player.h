@@ -6,14 +6,29 @@ struct StatBonus
     int hp = 0;
     int mp = 0;
     int str = 0;
+    int att = 0;
     int def = 0;
     int dex = 0;
     int intel = 0;
     int luk = 0;
 
+    StatBonus operator+(const StatBonus& other) const
+    {
+        StatBonus result;
+        result.hp = hp + other.hp;
+        result.mp = mp + other.mp;
+        result.str = str + other.str;
+        result.att = att + other.att;
+        result.def = def + other.def;
+        result.dex = dex + other.dex;
+        result.intel = intel + other.intel;
+        result.luk = luk + other.luk;
+        return result;
+    }
+
     // 편하게 값을 넣기 위한 생성자 추가
-    StatBonus(int _hp = 0, int _mp = 0, int _str = 0, int _def = 0, int _dex = 0, int _intel = 0, int _luk = 0)
-        : hp(_hp), mp(_mp), str(_str), def(_def), dex(_dex), intel(_intel), luk(_luk) {
+    StatBonus(int _hp = 0, int _mp = 0, int _str = 0, int _att = 0, int _def = 0, int _dex = 0, int _intel = 0, int _luk = 0)
+        : hp(_hp), mp(_mp), str(_str), att(_att), def(_def), dex(_dex), intel(_intel), luk(_luk) {
     }
 };
 
@@ -93,7 +108,12 @@ public:
     bool IsLevelUpCheck(int NewExp);
 
     //실질적 데미지 관련 함수
-    virtual int GetMeleeDamage(const StatBonus& bonus); // 평타
-    virtual int GetSkillDamage(const StatBonus& bonus); // 스킬
+    virtual int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 평타
+    virtual int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 스킬
+
+    //장비 보너스 적용 / 포션 보너스 적용 여부
+    void SetEquipBonus(bool Equip);
+    void SetPotionBouns(int count);
+
 
 };

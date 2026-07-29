@@ -206,8 +206,3 @@ bool Player::IsLevelUpCheck(int newExp) {
     }
 }
 
-// 전투에 활용될 실적용치 공식
-
-// 평타 공식
-
-
