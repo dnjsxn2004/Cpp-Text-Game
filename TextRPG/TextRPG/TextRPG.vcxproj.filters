@@ -69,6 +69,9 @@
     <ClCompile Include="InputManager.h">
       <Filter>헤더 파일\UI</Filter>
     </ClCompile>
+    <ClCompile Include="Battle.cpp">
+      <Filter>소스 파일\Battle</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolUI.h">
@@ -79,6 +82,9 @@
     </ClInclude>
     <ClInclude Include="GameManager.h">
       <Filter>헤더 파일\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Battle.h">
+      <Filter>헤더 파일\Battle</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
