@@ -132,13 +132,19 @@
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="InputManager.h" />
+    <ClCompile Include="Jin.cpp" />
+    <ClCompile Include="Gang.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Ryu.cpp" />
     <ClCompile Include="TextRPG.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolUI.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Jin.h" />
+    <ClInclude Include="Gang.h" />
+    <ClInclude Include="Ryu.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
