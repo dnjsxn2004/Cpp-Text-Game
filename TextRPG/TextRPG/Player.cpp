@@ -215,13 +215,15 @@ void Player::ApplyEquipBonus(bool EquipCheck, StatBonus Bonus) //장비 착용 확인(
 }
 
 
-void Player::DrinkPotion(StatBonus AppliedBonus, int Duration) //포션을 마셨을 때, 불러와 지속 시간과 보너스를 적용시키는 함수.
+void Player::DrinkPotion(StatBonus AppliedBonus) //포션을 마셨을 때, 불러와 지속 시간과 보너스를 적용시키는 함수.
 {
     // 포션의 스탯 보너스를 적용
     SetPotionBonus(AppliedBonus);
 
     // 지속될 턴 수를 세팅
-    SetPotionEffectCount(Duration);
+    SetPotionEffectCount(5);
+
+    PotionCheck = true;
 }
 
 
@@ -239,7 +241,12 @@ void Player::UpdatePotionTurn() //포션 지속 시간 함수.
         if (GetPotionEffectCount() == 0)
         {
             SetPotionBonus({ 0 });
+            PotionCheck = false;
         }
+    }
+    if (CurrentCount > 0 && PotionCheck)
+    {
+        SetPotionEffectCount(5);
     }
 }
 
