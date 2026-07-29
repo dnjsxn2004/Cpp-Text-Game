@@ -23,4 +23,7 @@ public:
 
 	//아이템 사용
 	bool UseItem(int index, GameContext& context);
+
+	//장비 아이템
+	bool EquipItem(int index, GameContext& context);
 };
