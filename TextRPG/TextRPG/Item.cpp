@@ -1,8 +1,8 @@
 #include "Item.h"
 
-//Item 適掘什 持失切
-Item::Item(const std::string& name, ItemType type, int effectAmount)
-	:name(name), type(type), effectAmount(effectAmount) {
+//Item 持失切
+Item::Item(const std::string& name, ItemType type, int effectAmount,int quantity)
+	:name(name), type(type), effectAmount(effectAmount), quantity(quantity) {
 
 }
 
