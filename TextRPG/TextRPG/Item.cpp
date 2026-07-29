@@ -1,8 +1,8 @@
 #include "Item.h"
 
 //Item 생성자
-Item::Item(const std::string& name, ItemType type, int hpRecovery, int mpRecovery, int attackBonus, int defenceBonus, int quantity)
-	:name(name), type(type), hpRecovery(hpRecovery), mpRecovery(mpRecovery), attackBonus(attackBonus), defenceBonus(defenceBonus), quantity(quantity) {
+Item::Item(const std::string& name, ItemType type, EquipmentType equipmentType, int hpRecovery, int mpRecovery, int attackBonus, int defenceBonus, int quantity)
+	:name(name), type(type), equipmentType(equipmentType), hpRecovery(hpRecovery), mpRecovery(mpRecovery), attackBonus(attackBonus), defenceBonus(defenceBonus), quantity(quantity) equipped(false){
 
 }
 
@@ -13,6 +13,9 @@ std::string Item::GetName() const {
 //아이템 타입 반환
 ItemType Item::GetType() const {
 	return type;
+}
+EquipmentType Item::getEquipmentType() const {
+	return equipmentType;
 }
 //아이템 수량 반환
 int Item::GetQuantity() const {
@@ -37,4 +40,12 @@ int Item::GetAttackBonus() const {
 
 int Item::GetDefenceBonus() const {
 	return defenceBonus;
+}
+
+bool Item::IsEquipped() const {
+	return equipped;
+}
+
+void Item::SetEquipped(bool equipped) {
+	this->equipped = equipped;
 }
