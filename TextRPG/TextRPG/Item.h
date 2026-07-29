@@ -35,5 +35,11 @@ public:
 
 	int GetEffectAmount() const;
 
+	//아이템 수량 반환
+	int GetQuantity() const;
+
+	//아이템 수샹 변경
+	void SetQuantity(int quantity);
+
 };
 
