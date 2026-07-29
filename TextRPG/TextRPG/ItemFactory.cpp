@@ -77,10 +77,10 @@ Item ItemFactory::CreateKnife() {
 	return Item(
 		"나이프",
 		ItemType::Equipment,
-		0,
-		0,
-		25,
-		0,
+		0, // HP 회복
+		0, // MP 회복
+		25, // 공격력 증가
+		0,  // 방어력 증가
 		1
 	);
 }
@@ -89,10 +89,10 @@ Item ItemFactory::CreateBat() {
 	return Item(
 		"야구배트",
 		ItemType::Equipment,
-		0,
-		0,
-		15,
-		0,
+		0, // HP 회복
+		0, // MP 회복
+		15, // 공격력 증가
+		0,  // 방어력 증가
 		1
 	);
 }
@@ -101,10 +101,10 @@ Item ItemFactory::CreateKnuckle() {
 	return Item(
 		"너클",
 		ItemType::Equipment,
-		0,
-		0,
-		20,
-		0,
+		0, // HP 회복
+		0, // MP 회복
+		20, // 공격력 증가
+		0,  // 방어력 증가
 		1
 	);
 }
@@ -113,10 +113,35 @@ Item ItemFactory::CreateKatana() {
 	return Item(
 		"카타나",
 		ItemType::Equipment,
-		0,
-		0,
-		30,
-		0,
+		0, // HP 회복
+		0, // MP 회복
+		30, // 공격력 증가
+		0,  // 방어력 증가
+		1
+	);
+}
+
+//장비 아이템(아머)
+Item ItemFactory::CreateThomBrowne() {
+	return Item(
+		"톰 브라운",
+		ItemType::Equipment,
+		0, // HP 회복
+		0, // MP 회복
+		0, // 공격력 증가
+		20,  // 방어력 증가
+		1
+	);
+}
+
+Item ItemFactory::CreateGucci() {
+	return Item(
+		"구찌",
+		ItemType::Equipment,
+		0, // HP 회복
+		0, // MP 회복
+		0, // 공격력 증가
+		20,  // 방어력 증가
 		1
 	);
 }
