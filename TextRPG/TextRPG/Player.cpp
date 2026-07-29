@@ -175,10 +175,10 @@ void Player::SetLuk(int value) {
     Luk = value;
 }
 
+//경험치 입력 시 획득 및 누적하는 함수.
 void Player::GainExp(int Exp)
 {
-    SetExp()
-
+    SetExp(GetExp() + Exp);
 }
 
 //경험치 획득 후, 현재 경험치가 최대 경험치 이상이고, 현재 레벨이 최대 레벨 캡인 10 미만일 때 레벨을 올리고 스텟을 조정하는 함수.
@@ -214,16 +214,32 @@ void Player::ApplyEquipBonus(bool EquipCheck, StatBonus Bonus) //장비 착용 확인(
     }
 }
 
-void Player::ApplyPotionBonus(int Count, StatBonus Bonus) //포션 지속 확인(count > 0 일시 / 지속 시간이 0 이하일 시 보너스를 0으로 초기화) 후, 포션 보너스를 세트하는 함수
-{
-    if (Count > 0)
-    {
-        SetPotionBonus(Bonus);
-    }
-    else
-    {
-        SetPotionBonus({0});
-    }
 
+void Player::DrinkPotion(StatBonus AppliedBonus, int Duration) //포션을 마셨을 때, 불러와 지속 시간과 보너스를 적용시키는 함수.
+{
+    // 포션의 스탯 보너스를 적용
+    SetPotionBonus(AppliedBonus);
+
+    // 지속될 턴 수를 세팅
+    SetPotionEffectCount(Duration);
+}
+
+
+void Player::UpdatePotionTurn() //포션 지속 시간 함수.
+{
+    // 현재 남은 턴 수
+    int CurrentCount = GetPotionEffectCount();
+
+    // 턴이 남아있다면 1을 감소
+    if (CurrentCount > 0)
+    {
+        SetPotionEffectCount(CurrentCount - 1);
+
+        // 깎은 직후 남은 턴이 0이 되었다면, 보너스를 초기화
+        if (GetPotionEffectCount() == 0)
+        {
+            SetPotionBonus({ 0 });
+        }
+    }
 }
 

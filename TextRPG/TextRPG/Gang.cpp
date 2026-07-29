@@ -46,3 +46,18 @@ int Gang::GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBon
 
     return Damage;
 }
+
+int Gang::GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonus)
+{
+    //장비 보너스와 포션 보너스를 하나로 통합
+    StatBonus totalBonus = equipBonus + potionBonus;
+
+    //통합된 보너스를 내 기본 스탯과 합산
+    int finalStr = Str + totalBonus.str;
+    int finalDex = Dex + totalBonus.dex;
+
+    //최종 스탯을 공식에 대입
+    int FinalDefense = Defense + (finalStr * 0.5) + (finalDex * 0.5);
+
+    return FinalDefense;
+}

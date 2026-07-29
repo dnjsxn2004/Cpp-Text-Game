@@ -109,10 +109,12 @@ public:
     //실적용 데미지 관련 함수
     virtual int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 평타 (Str과 Dex기반 보너스 적용)
     virtual int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 스킬 (Intel과 Luk기반 보너스 적용) 
+    virtual int GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonus); // 실적용 방어력
 
     //장비 보너스 적용 / 포션 보너스 적용 여부
     void ApplyEquipBonus(bool EquipCheck, StatBonus Bonus); //장비 착용 확인(bool을 통해 체크 / 착용하지 않을 시 보너스를 0으로 초기화) 후, 장비 보너스를 세트하는 함수
-    void ApplyPotionBonus(int Count, StatBonus Bonus);  //포션 지속 확인(count > 0 일시 / 지속 시간이 0 이하일 시 보너스를 0으로 초기화) 후, 포션 보너스를 세트하는 함수
+    void DrinkPotion(StatBonus AppliedBonus, int Duration); //포션을 마셨을 때, 지속 시간과 보너스를 적용하는 함수.
+    void UpdatePotionTurn();  //포션 지속 확인(count > 0 일시 / 지속 시간이 0 이하일 시 보너스를 0으로 초기화) 함수.
 
 
 };
