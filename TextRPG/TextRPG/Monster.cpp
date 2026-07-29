@@ -1,75 +1,75 @@
 #include "Monster.h"
 #include <cstdlib>
 #include <ctime>
+#include <Player.h>
 
 // 생성자 초기화
-Monster::Monster(string name, int hp, int attack, int defense, int expReward, int goldReward)
-    : name(name), hp(hp), maxHp(hp), attack(attack), defense(defense), expReward(expReward), goldReward(goldReward) {}
+Monster::Monster(string Name, int Hp, int Attack, int Defense, int ExpReward, int GoldReward)
+    : Name(Name), Hp(Hp), MaxHp(Hp), Attack(Attack), Defense(Defense), ExpReward(ExpReward), GoldReward(GoldReward) {}
 
 // 데미지 처리 함수 (방어력 계산 포함)
-void Monster::takeDamage(int damage) {
-    int actualDamage = damage - defense;
-    if (actualDamage < 1) actualDamage = 1; // 최소 데미지 1 보장
+int Monster::TakeDamage(int Damage) {
+    int ActualDamage = Damage - Defense;
+    if (ActualDamage < 1) ActualDamage = 1; // 최소 데미지 1 보장
 
-    hp -= actualDamage;
-    if (hp < 0) hp = 0;
+ 
 
-    cout << name << "이(가) " << actualDamage << "의 피해를 입었습니다! (남은 HP: " << hp << "/" << maxHp << ")\n";
+    return ActualDamage;
 }
 
 // 사망 체크
-bool Monster::isDead() const {
-    return hp <= 0;
+bool Monster::IsDead() const {
+    return Hp <= 0;
 }
 
 // 몬스터 정보 출력
-void Monster::printInfo() const {
-    cout << "[" << name << "] HP: " << hp << " | ATK: " << attack
-        << " | DEF: " << defense << " | 보상: " << expReward << "EXP, " << goldReward << "G\n";
+void Monster::PrintInfo() const {
+    cout << "[" << Name << "] HP: " << Hp << " | ATK: " << Attack
+        << " | DEF: " << Defense << " | 보상: " << ExpReward << "EXP, " << GoldReward << "G\n";
 }
 
 // =========================================================================
 // [기획서 반영] 몬스터 랜덤 생성 및 스케일링 로직
 // =========================================================================
-int GetRandomNum(int min, int max) {
-    return min + rand() % ((max - min) + 1);
+int GetRandomNum(int Min, int Max) {
+    return Min + rand() % ((Max - Min) + 1);
 }
 
-Monster SpawnRandomMonster(int playerLevel) {
+Monster SpawnRandomMonster() {
     // 1. 기획서 1번 요구사항: 레벨 비례 랜덤 스탯 베이스 계산
-    int baseHp = GetRandomNum(playerLevel * 20, playerLevel * 30);
-    int baseAtk = GetRandomNum(playerLevel * 5, playerLevel * 10);
+    int BaseHp = GetRandomNum(Player.GetLevel() * 20, Player.GetLevel() * 30);
+    int BaseAtk = GetRandomNum(Player.GetLevel() * 5, Player.GetLevel() * 10);
 
     // (방어력, 경험치, 골드는 기획서에 공식이 없어 임의의 스케일링 적용)
-    int baseDef = GetRandomNum(playerLevel * 2, playerLevel * 4);
-    int baseExp = GetRandomNum(playerLevel * 10, playerLevel * 15);
-    int baseGold = GetRandomNum(playerLevel * 20, playerLevel * 30);
+    int BaseDef = GetRandomNum(Player.GetLevel() * 2, Player.GetLevel() * 4);
+    int BaseExp = GetRandomNum(Player.GetLevel() * 10, Player.GetLevel() * 15);
+    int BaseGold = GetRandomNum(Player.GetLevel() * 20, Player.GetLevel() * 30);
 
     // 2. 기획서 2번 요구사항: 3종의 일반 몬스터 목록 및 특징 부여
-    int monsterType = rand() % 3; // 0, 1, 2 랜덤 조우
+    int MonsterType = rand() % 3; // 0, 1, 2 랜덤 조우
 
-    string name;
-    int finalHp, finalAtk, finalDef, finalExp, finalGold;
+    string Name;
+    int FinalHp, FinalAtk, FinalDef, FinalExp, FinalGold;
 
-    if (monsterType == 0) {
+    if (MonsterType == 0) {
         // [짭새] 체력이 높고 방어력이 낮음, 골드를 적게 줌
-        name = "짭새";
-        finalHp = (int)(baseHp * 1.2);   finalAtk = baseAtk;
-        finalDef = (int)(baseDef * 0.5); finalExp = baseExp;       finalGold = (int)(baseGold * 0.5);
+        Name = "짭새";
+        FinalHp = (int)(BaseHp * 1.2);   FinalAtk = BaseAtk;
+        FinalDef = (int)(BaseDef * 0.5); FinalExp = BaseExp;       FinalGold = (int)(BaseGold * 0.5);
     }
-    else if (monsterType == 1) {
+    else if (MonsterType == 1) {
         // [짜바리] 표준적인 스탯, 골드를 많이 줌
-        name = "짜바리";
-        finalHp = baseHp;                finalAtk = baseAtk;
-        finalDef = baseDef;              finalExp = baseExp;       finalGold = (int)(baseGold * 1.5);
+        Name = "짜바리";
+        FinalHp = BaseHp;                FinalAtk = BaseAtk;
+        FinalDef = BaseDef;              FinalExp = BaseExp;       FinalGold = (int)(BaseGold * 1.5);
     }
     else {
         // [칼잽이] 체력이 낮지만 공격력/방어력이 매우 높음, 경험치를 많이 줌
-        name = "칼잽이";
-        finalHp = (int)(baseHp * 0.8);   finalAtk = (int)(baseAtk * 1.3);
-        finalDef = (int)(baseDef * 1.2); finalExp = (int)(baseExp * 1.5); finalGold = baseGold;
+        Name = "칼잽이";
+        FinalHp = (int)(BaseHp * 0.8);   FinalAtk = (int)(BaseAtk * 1.3);
+        FinalDef = (int)(BaseDef * 1.2); FinalExp = (int)(BaseExp * 1.5); FinalGold = BaseGold;
     }
 
     // 최종 완성된 몬스터 객체 반환
-    return Monster(name, finalHp, finalAtk, finalDef, finalExp, finalGold);
+    return Monster(Name, FinalHp, FinalAtk, FinalDef, FinalExp, FinalGold);
 }
