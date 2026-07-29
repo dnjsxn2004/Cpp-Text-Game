@@ -1,9 +1,15 @@
 ﻿#include "GameManager.h"
+#include "Monster.h"
+#include <ctime>
+#include <cstdlib>
 
 int main()
 {
+    srand(static_cast<unsigned int>(time(nullptr)));
     GameManager gameManager;
     gameManager.Run();
+
+    
 
     return 0;
 }
