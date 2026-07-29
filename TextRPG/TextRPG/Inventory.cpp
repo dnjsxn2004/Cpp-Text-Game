@@ -7,3 +7,8 @@ void Inventory::AddItem(const Item& item) {
 	items.push_back(item);
 }
 
+//인벤토리에 저장된 모든 아이템 목록을 반환
+const std::vector<Item>& Inventory::GetItems() const {
+	return items;
+}
+
