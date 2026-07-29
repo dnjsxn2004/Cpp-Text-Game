@@ -1,7 +1,7 @@
 #pragma once
 #include "Player.h"
 
-// 2. Gang 클래스 (예: 도적/궁수 타입)
+// 2. Gang 클래스
 class Gang : public Player
 {
 public:

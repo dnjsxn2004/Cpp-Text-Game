@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-struct StatBonus
+struct StatBonus // 장비와 포션을 통해 얻는 보너스를 넣기 위한 구조체
 {
     int hp = 0;
     int mp = 0;
@@ -12,7 +12,7 @@ struct StatBonus
     int intel = 0;
     int luk = 0;
 
-    StatBonus operator+(const StatBonus& other) const
+    StatBonus operator+(const StatBonus& other) const // 장비 보너스와 포션 보너스를 합쳐서 계산하기 위한 코드
     {
         StatBonus result;
         result.hp = hp + other.hp;
@@ -59,9 +59,9 @@ protected:
 public:
 
     Player();          // 기본 생성자
-    virtual ~Player(); // ★ 상속을 위한 가상 소멸자 (필수)
+    virtual ~Player(); // 가상 소멸자
 
-    // Getter 선언 (멤버 변수를 변경하지 않으므로 const 키워드 사용)
+    // Getter 선언
     std::string GetName() const;
     int GetHp() const;
     int GetMaxHp() const;
@@ -74,8 +74,6 @@ public:
     int GetMaxExp() const;
     int GetDefense() const;
     int GetGold() const;
-    int GetPotionBonus() const;
-    int GetEquipBonus() const;
     int GetPotionEffectCount() const;
     int GetStr() const;
     int GetDex() const;
@@ -105,15 +103,16 @@ public:
 
 
     //LevelUp 관련
-    bool IsLevelUpCheck(int NewExp);
+    bool IsLevelUpCheck(int NewExp); // 조건 만족 시, 레벨 업 적용 함수
+    void GainExp(int Exp); // 경험치 획득 함수
 
-    //실질적 데미지 관련 함수
-    virtual int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 평타
-    virtual int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 스킬
+    //실적용 데미지 관련 함수
+    virtual int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 평타 (Str과 Dex기반 보너스 적용)
+    virtual int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // 스킬 (Intel과 Luk기반 보너스 적용) 
 
     //장비 보너스 적용 / 포션 보너스 적용 여부
-    void SetEquipBonus(bool Equip);
-    void SetPotionBouns(int count);
+    void ApplyEquipBonus(bool EquipCheck, StatBonus Bonus); //장비 착용 확인(bool을 통해 체크 / 착용하지 않을 시 보너스를 0으로 초기화) 후, 장비 보너스를 세트하는 함수
+    void ApplyPotionBonus(int Count, StatBonus Bonus);  //포션 지속 확인(count > 0 일시 / 지속 시간이 0 이하일 시 보너스를 0으로 초기화) 후, 포션 보너스를 세트하는 함수
 
 
 };

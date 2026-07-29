@@ -22,11 +22,11 @@ int Gang::GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBon
     StatBonus totalBonus = equipBonus + potionBonus;
 
     //통합된 보너스를 내 기본 스탯과 합산
-    int finalStr = Str + totalBonus.str;
-    int finalDex = Dex + totalBonus.dex;
+    int FinalStr = Str + totalBonus.str;
+    int FinalDex = Dex + totalBonus.dex;
 
     //최종 스탯을 공식에 대입
-    int Damage = Attack + (finalStr * 0.5) + (finalDex * 0.5);
+    int Damage = Attack + (FinalStr * 0.5) + (FinalDex * 0.5);
 
     return Damage;
 }
@@ -38,11 +38,11 @@ int Gang::GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBon
     StatBonus totalBonus = equipBonus + potionBonus;
 
     //통합된 보너스를 내 기본 스탯과 합산
-    int finalIntel = Intel + totalBonus.intel;
-    int finalLuk = Luk + totalBonus.luk;
+    int FinalIntel = Intel + totalBonus.intel;
+    int FinalLuk = Luk + totalBonus.luk;
 
     //최종 스탯을 공식에 대입
-    int Damage = Attack + (finalIntel * 0.8) + (finalLuk * 0.8);
+    int Damage = Attack + (FinalIntel * 0.8) + (FinalLuk * 0.8);
 
     return Damage;
 }
