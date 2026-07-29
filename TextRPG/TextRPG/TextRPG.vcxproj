@@ -139,6 +139,8 @@
     <ClInclude Include="ConsolUI.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Inventory.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="Player.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
