@@ -78,4 +78,8 @@ bool Inventory::UseItem(int index, GameContext& context) {
 		return false;
 	}
 
+	//아이템 사용에 성공한 경우에만 수량 감소
+	item.SetQuantity(item.GetQuantity() - 1);
+	
+	return true;
 }
