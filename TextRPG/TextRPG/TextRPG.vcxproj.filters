@@ -80,5 +80,11 @@
     <ClInclude Include="GameManager.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Inventory.h">
+      <Filter>헤더 파일\Inventory</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>헤더 파일\Inventory</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
