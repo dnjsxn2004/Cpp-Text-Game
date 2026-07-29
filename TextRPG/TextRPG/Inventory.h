@@ -1,7 +1,10 @@
 #pragma once
+
 #include <vector>
 #include "Item.h"
+#include "Player.h"
 
+class GameContext;
 //인벤토리 클래스
 class Inventory {
 private:
@@ -17,4 +20,7 @@ public:
 
 	//특정 타입의 아이템 목록을 반환
 	std::vector<Item> GetItemsByType(ItemType type) const;
+
+	//아이템 사용
+	bool UseItem(int index, GameContext& context);
 };

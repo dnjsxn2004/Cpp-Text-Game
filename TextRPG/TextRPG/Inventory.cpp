@@ -1,5 +1,5 @@
 #include "Inventory.h"
-
+#include <vector>
 using namespace std;
 
 //인벤토리에 아이템을 추가

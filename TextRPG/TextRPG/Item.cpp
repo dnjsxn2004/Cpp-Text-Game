@@ -24,5 +24,5 @@ int Item::GetQuantity() const {
 }
 //아이템 수량 변경
 void Item::SetQuantity(int quantity) {
-
+	this->quantity = quantity;
 }

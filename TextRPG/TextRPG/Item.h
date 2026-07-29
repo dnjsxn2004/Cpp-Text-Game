@@ -3,7 +3,7 @@
 
 //아이템타입 클래스
 enum class ItemType {
-	Consumalbe, //소비 아이템
+	Consumable, //소비 아이템
 	Equipment, //장비 아이템
 	Quest //퀘스트 아이템
 };
@@ -11,7 +11,7 @@ enum class ItemType {
 //아이템 효과 종류
 enum class ItemEffect {
 	HpRecovery, //HP 회복
-	MpRecovrty,	//
+	MpRecovery	//MP 회복
 };
 
 //아이템 클래스
@@ -38,7 +38,7 @@ public:
 	//아이템 수량 반환
 	int GetQuantity() const;
 
-	//아이템 수샹 변경
+	//아이템 수량 변경
 	void SetQuantity(int quantity);
 
 };
