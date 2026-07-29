@@ -4,6 +4,19 @@ using namespace std;
 
 //인벤토리에 아이템을 추가
 void Inventory::AddItem(const Item& item) {
+	
+	//같은 이름의 아이템이 있는지 확인
+	for (Item& inventoryItem : items) {
+		if (inventoryItem.GetName() == item.GetName()) {
+			
+			//같은 아이템이면 수량만 증가
+			inventoryItem.SetQuantity(
+				inventoryItem.GetQuantity() + item.GetQuantity()
+			);
+			return;
+		}
+	}
+	
 	items.push_back(item);
 }
 
