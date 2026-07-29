@@ -2,7 +2,7 @@
 #include <iostream>
 #include "ConsolUI.h"
 
-// °ÔÀÓ ½ÃÀÛ
+// ê²Œì„ ì‹œì‘
 void GameManager::Run()
 {
     Initialize();
@@ -34,7 +34,7 @@ void GameManager::Run()
     ExitGame();
 }
 
-// ÃÊ±â°ª ¼¼ÆÃ
+// ì´ˆê¸°ê°’ ì„¸íŒ…
 void GameManager::Initialize()
 {
     phaseEnum = Phase::InitialStage;
@@ -52,26 +52,22 @@ void GameManager::Initialize()
     enemyHp = 50;
 }
 
-// °ÔÀÓ Á¾·á Ã³¸®
+// ê²Œì„ ì¢…ë£Œ ì²˜ë¦¬
 void GameManager::ExitGame()
 {
     // TODO:
-    // - °ÔÀÓ Á¾·á Àü ÀúÀåÀÌ ÇÊ¿äÇÏ¸é ÀúÀå Ã³¸®
-    // - Á¾·á ¸Ş½ÃÁö Ãâ·Â
-    std::cout << "°ÔÀÓÀ» Á¾·áÇÕ´Ï´Ù.\n";
+    // - ê²Œì„ ì¢…ë£Œ ì „ ì €ì¥ì´ í•„ìš”í•˜ë©´ ì €ì¥ ì²˜ë¦¬
+    // - ì¢…ë£Œ ë©”ì‹œì§€ ì¶œë ¥
+    std::cout << "ê²Œì„ì„ ì¢…ë£Œí•©ë‹ˆë‹¤.\n";
 }
 
-// ½ÃÀÛ ´Ü°è Ã³¸®
-
+// ì‹œì‘ ë‹¨ê³„ ì²˜ë¦¬
 void GameManager::UpdateInit()
 {
     switch (initialStateEnum)
     {
     case InitialState::CheckSavesSlot:
     {
-        // TODO:
-        // - ½ÇÁ¦ ¼¼ÀÌºê ÆÄÀÏ/½½·ÔÀÌ Á¸ÀçÇÏ´ÂÁö °Ë»ç
-        // - ÆÄÀÏ ½Ã½ºÅÛ, DB, ÅØ½ºÆ® ÆÄÀÏ µî ³× ÀúÀå ¹æ½Ä¿¡ ¸ÂÃç ±¸Çö
         hasSave = CheckSaveSlot();
 
         if (hasSave)
@@ -87,26 +83,16 @@ void GameManager::UpdateInit()
 
     case InitialState::SelectSave:
     {
-        // TODO:
-        // - ¼¼ÀÌºê ¸ñ·Ï Ãâ·Â
-        // - ºÒ·¯¿À±â / Ã³À½ºÎÅÍ / Ãë¼Ò °°Àº ¸Ş´º Á¦°ø
         ShowSaveMenu();
-
-        // TODO:
-        // - ¼±ÅÃÇÑ ¼¼ÀÌºê¸¦ ½ÇÁ¦·Î ·Îµå
-        // - ·Îµå ¼º°ø ½Ã true
-        // - Ãë¼Ò ¶Ç´Â ½ÇÆĞ ½Ã false
         loadSuccess = LoadSelectedSave();
 
         if (loadSuccess)
         {
-            // ¼¼ÀÌºê ·Îµå ¼º°ø ¡æ ¸ŞÀÎ ·çÇÁ·Î ÀÌµ¿
             phaseEnum = Phase::MainLoop;
             mainMenuStateEnum = MainMenuState::MainMenu;
         }
         else
         {
-            // ºÒ·¯¿À±â Ãë¼Ò ¶Ç´Â ½ÇÆĞ ¡æ »õ °ÔÀÓ ÁøÇàÀ¸·Î ÀÌµ¿
             initialStateEnum = InitialState::CharacterSelect;
         }
         break;
@@ -114,25 +100,14 @@ void GameManager::UpdateInit()
 
     case InitialState::CharacterSelect:
     {
-        // TODO:
-        // - Ä³¸¯ÅÍ Á÷¾÷/¿ÜÇü/ÀÌ¸§ ¼±ÅÃ È­¸é Ãâ·Â
-        // - ¼±ÅÃ °á°ú¸¦ ÇÃ·¹ÀÌ¾î µ¥ÀÌÅÍ¿¡ ÀúÀå
         ShowCharacterSelect();
-
-        // Ä³¸¯ÅÍ ¼±ÅÃ ÈÄ Æ©Åä¸®¾ó·Î ÀÌµ¿
         initialStateEnum = InitialState::PrologueTutorial;
         break;
     }
 
     case InitialState::PrologueTutorial:
     {
-        // TODO:
-        // - Æ©Åä¸®¾ó ´ë»ç Ãâ·Â
-        // - ±âº» Á¶ÀÛ ¼³¸í
-        // - Ã¹ ÀüÅõ/±âº» ½Ã½ºÅÛ Ã¼Çè
         RunPrologueTutorial();
-
-        // Æ©Åä¸®¾ó ¿Ï·á ÈÄ ¸ŞÀÎ ·çÇÁ·Î ÀÌµ¿
         phaseEnum = Phase::MainLoop;
         mainMenuStateEnum = MainMenuState::MainMenu;
         break;
@@ -143,9 +118,7 @@ void GameManager::UpdateInit()
     }
 }
 
-
-// ¸ŞÀÎ ·çÇÁ Ã³¸®
-
+// ë©”ì¸ ë£¨í”„ ì²˜ë¦¬
 void GameManager::UpdateMainMenu()
 {
     switch (mainMenuStateEnum)
@@ -191,29 +164,23 @@ void GameManager::UpdateMainMenu()
     }
 }
 
-// ¸ŞÀÎ ¸Ş´º È­¸é
+// ë©”ì¸ ë©”ë‰´ í™”ë©´
 void GameManager::HandleMainMenu()
 {
-    // TODO:
-    // - ¸ŞÀÎ ¸Ş´º UI Ãâ·Â
-    // - ÇÃ·¹ÀÌ¾î »óÅÂ(HP, °ñµå, ·¹º§, ½ºÅä¸® ÁøÇàµµ µî) Ç¥½Ã °¡´É
-    std::cout << "\n=== ¸ŞÀÎ ¸Ş´º ===\n";
-    std::cout << "1. ÀÏ¹İ ÀüÅõ\n";
-    std::cout << "2. »óÁ¡\n";
-    std::cout << "3. ½ºÅä¸®\n";
-    std::cout << "4. ÀÎº¥Åä¸®\n";
-    std::cout << "0. °ÔÀÓ Á¾·á\n";
+    std::cout << "\n=== ë©”ì¸ ë©”ë‰´ ===\n";
+    std::cout << "1. ì¼ë°˜ ì „íˆ¬\n";
+    std::cout << "2. ìƒì \n";
+    std::cout << "3. ìŠ¤í† ë¦¬\n";
+    std::cout << "4. ì¸ë²¤í† ë¦¬\n";
+    std::cout << "0. ê²Œì„ ì¢…ë£Œ\n";
 
-    // TODO:
-    // - °æÇèÄ¡/·¹º§ Á¶°Ç °Ë»ç
-    // - ·¹º§¾÷ Á¶°Ç ¸¸Á· ½Ã ·¹º§¾÷ »óÅÂ·Î ¸ÕÀú º¸³»±â
     if (playerLevelUp)
     {
         mainMenuStateEnum = MainMenuState::LevelUp;
         return;
     }
 
-    int choice = inputManager.InputInMassegeToRange("¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä: ", 0, 4);
+    int choice = inputManager.InputInMassegeToRange("ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”: ", 0, 4);
 
     switch (choice)
     {
@@ -243,9 +210,7 @@ void GameManager::HandleMainMenu()
     }
 }
 
-
-// ÀÏ¹İ ÀüÅõ Ã³¸®
-
+// ì¼ë°˜ ì „íˆ¬ ì²˜ë¦¬
 void GameManager::HandleNormalBattle()
 {
     switch (battleStateEnum)
@@ -260,10 +225,6 @@ void GameManager::HandleNormalBattle()
 
     case BattleState::EnemyTurn:
     {
-        // TODO:
-        // - Àû °ø°İ ÇÔ¼ö
-        // - ÇÃ·¹ÀÌ¾î HP °¨¼Ò ÇÔ¼ö
-
         battleStateEnum = BattleState::CheckResult;
         break;
     }
@@ -302,51 +263,34 @@ void GameManager::HandleNormalBattle()
     }
 }
 
-// ÀüÅõ ½ÃÀÛ
+// ì „íˆ¬ ì‹œì‘
 void GameManager::StartBattle()
 {
-    // TODO:
-    // - ¸ó½ºÅÍ »ı¼º
-    // - ÇÃ·¹ÀÌ¾î/Àû ÀüÅõ ½ÃÀÛ ¿¬Ãâ
-    // - ÃÊ±â ÅÏ ¼³Á¤
-
     battleStateEnum = BattleState::PlayerTurn;
 }
 
-// ÇÃ·¹ÀÌ¾î ÅÏ ÁøÇà
+// í”Œë ˆì´ì–´ í„´ ì§„í–‰
 void GameManager::UpdateBattle()
 {
-    std::cout << "\n=== ÇÃ·¹ÀÌ¾î ÅÏ ===\n";
-    std::cout << "1. ¹°¸® °ø°İ\n";
-    std::cout << "2. ½ºÅ³ °ø°İ\n";
-    std::cout << "0. µµ¸Á/Ãë¼Ò(ÀÓ½Ã)\n";
+    std::cout << "\n=== í”Œë ˆì´ì–´ í„´ ===\n";
+    std::cout << "1. ë¬¼ë¦¬ ê³µê²©\n";
+    std::cout << "2. ìŠ¤í‚¬ ê³µê²©\n";
+    std::cout << "0. ë„ë§/ì·¨ì†Œ(ì„ì‹œ)\n";
 
-    int battleChoice = inputManager.InputInMassegeToRange("¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä: ", 0, 2);
+    int battleChoice = inputManager.InputInMassegeToRange("ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”: ", 0, 2);
 
     switch (battleChoice)
     {
     case 1:
-        // TODO:
-        // - ÇÃ·¹ÀÌ¾î ±âº» °ø°İ µ¥¹ÌÁö °è»ê
-        // - Àû HP °¨¼Ò
-
         battleStateEnum = BattleState::CheckResult;
         break;
 
     case 2:
-        // TODO:
-        // - ½ºÅ³ ¸ñ·Ï Ãâ·Â
-        // - ¸¶³ª »ç¿ë·® °Ë»ç
-        // - ½ºÅ³ µ¥¹ÌÁö °è»ê ÈÄ Àû¿ë
-
         battleStateEnum = BattleState::CheckResult;
         break;
 
     case 0:
-        // TODO:
-        // - µµ¸Á °¡´É ¿©ºÎ ÆÇÁ¤
-        // - µµ¸Á ¼º°ø/½ÇÆĞ ·ÎÁ÷
-        std::cout << "ÀüÅõ¸¦ Á¾·áÇÏ°í ¸ŞÀÎ ¸Ş´º·Î µ¹¾Æ°©´Ï´Ù. (ÀÓ½Ã)\n";
+        std::cout << "ì „íˆ¬ë¥¼ ì¢…ë£Œí•˜ê³  ë©”ì¸ ë©”ë‰´ë¡œ ëŒì•„ê°‘ë‹ˆë‹¤. (ì„ì‹œ)\n";
         mainMenuStateEnum = MainMenuState::MainMenu;
         break;
 
@@ -355,51 +299,31 @@ void GameManager::UpdateBattle()
     }
 }
 
-// ÀüÅõ Á¾·á Ã³¸®
+// ì „íˆ¬ ì¢…ë£Œ ì²˜ë¦¬
 void GameManager::EndBattle()
 {
-    // TODO:
-    // - ÀüÅõ Á¾·á ½Ã »óÅÂ Á¤¸®
-    // - ¹öÇÁ/µğ¹öÇÁ Á¦°Å
-    // - ÀüÅõ º¸»ó µ¥ÀÌÅÍ ÁØºñ
-    std::cout << "ÀüÅõ Á¾·á\n";
+    std::cout << "ì „íˆ¬ ì¢…ë£Œ\n";
 }
-
-// ³ª¸ÓÁö ¸Ş´º Ã³¸®
 
 void GameManager::HandleShop()
 {
-    // TODO:
-    // - »óÁ¡ ¸ñ·Ï Ãâ·Â
-    // - ±¸¸Å / ÆÇ¸Å / ³ª°¡±â ±â´É
-    std::cout << "\n=== »óÁ¡ ===\n";
-    std::cout << "»óÁ¡ ±â´É ±¸Çö ¿¹Á¤\n";
-
+    std::cout << "\n=== ìƒì  ===\n";
+    std::cout << "ìƒì  ê¸°ëŠ¥ êµ¬í˜„ ì˜ˆì •\n";
     mainMenuStateEnum = MainMenuState::MainMenu;
 }
 
 void GameManager::HandleStory()
 {
-    // TODO:
-    // - ½ºÅä¸® ÁøÇàµµ¿¡ µû¶ó ÀÌº¥Æ®/´ë»ç/ÀüÅõ ºĞ±â
-    std::cout << "\n=== ½ºÅä¸® ===\n";
+    std::cout << "\n=== ìŠ¤í† ë¦¬ ===\n";
 
     switch (storyLevel)
     {
     case 0:
-        // TODO:
-        // - Ã¹ ¹øÂ° ½ºÅä¸® ´ë»ç/¿¬Ãâ
-        // - ÇÊ¿ä ½Ã ½ºÅä¸® ÀüÅõ ÁøÀÔ
-
         storyLevel = 1;
         break;
 
     case 1:
-        // TODO:
-        // - µÎ ¹øÂ° ½ºÅä¸® ´ë»ç/¿¬Ãâ
-
         storyLevel = 2;
-
         break;
 
     default:
@@ -411,17 +335,11 @@ void GameManager::HandleStory()
 
 void GameManager::HandleReward()
 {
-    // TODO:
-    // - ÀüÅõ ½Â¸® º¸»ó °è»ê
-    // - °æÇèÄ¡, °ñµå, ¾ÆÀÌÅÛ Áö±Ş
-    // - ·¹º§¾÷ Á¶°Ç ¸¸Á· ½Ã playerLevelUp = true
-    std::cout << "\n=== º¸»ó È­¸é ===\n";
+    std::cout << "\n=== ë³´ìƒ í™”ë©´ ===\n";
 
     if (isWin)
     {
-        std::cout << "ÀüÅõ ½Â¸® º¸»ó Áö±Ş\n";
-
-        // ¿¹½Ã
+        std::cout << "ì „íˆ¬ ìŠ¹ë¦¬ ë³´ìƒ ì§€ê¸‰\n";
         playerLevelUp = true;
     }
 
@@ -430,90 +348,53 @@ void GameManager::HandleReward()
 
 void GameManager::HandleLevelUp()
 {
-    // TODO:
-    // - ·¹º§¾÷ ¿¬Ãâ
-    // - ´É·ÂÄ¡ »ó½Â
-
     playerLevelUp = false;
     mainMenuStateEnum = MainMenuState::MainMenu;
 }
 
 void GameManager::HandleInventory()
 {
-    // TODO:
-    // - º¸À¯ ¾ÆÀÌÅÛ ¸ñ·Ï Ãâ·Â
-    // - ÀåÂø/ÇØÁ¦/»ç¿ë ±â´É
-    std::cout << "\n=== ÀÎº¥Åä¸® ===\n";
-    std::cout << "ÀÎº¥Åä¸® ±â´É ±¸Çö ¿¹Á¤\n";
-
+    std::cout << "\n=== ì¸ë²¤í† ë¦¬ ===\n";
+    std::cout << "ì¸ë²¤í† ë¦¬ ê¸°ëŠ¥ êµ¬í˜„ ì˜ˆì •\n";
     mainMenuStateEnum = MainMenuState::MainMenu;
 }
 
 void GameManager::HandleBossBattle()
 {
-    // TODO:
-    // - º¸½º ÀüÅõ Àü¿ë ÃÊ±âÈ­
-    // - ÀÏ¹İ ÀüÅõ¿Í ´Ù¸¥ ÆĞÅÏ Àû¿ë
-
-
     mainMenuStateEnum = MainMenuState::MainMenu;
 }
 
-
-// ¿£µù Ã³¸®
-
+// ì—”ë”© ì²˜ë¦¬
 void GameManager::UpdateEnding()
 {
-    // TODO:
-    // - ¿£µù ¿¬Ãâ
-    // - ¿£µù ¿¬Ãâ ºĞ±â º¯¼ö, ÇÔ¼ö ÇÊ¿ä
-    // - º¯¼ö GameManager ¿¡¼­ Á¦ÀÛ
-    // - ÇÔ¼ö UI ¿¡¼­ ¸¸µé °Í
-
     phaseEnum = Phase::GameOver;
 }
 
-// º¸Á¶ ÇÔ¼ö
+// ë³´ì¡° í•¨ìˆ˜
 bool GameManager::CheckSaveSlot()
 {
-    // TODO:
-    // - ½ÇÁ¦ ¼¼ÀÌºê ÆÄÀÏ Á¸Àç ¿©ºÎ È®ÀÎ
-
     return false;
 }
 
 void GameManager::ShowSaveMenu()
 {
-    // TODO:
-    // - ¼¼ÀÌºê ½½·Ô ¸ñ·Ï Ç¥½Ã
-    // - ¿¹: ½½·Ô1 / ½½·Ô2 / Ã³À½ºÎÅÍ / Ãë¼Ò
-
 }
 
 bool GameManager::LoadSelectedSave()
 {
-    // TODO:
-    // - ½ÇÁ¦·Î´Â ¼¼ÀÌºê ¼±ÅÃ ÀÔ·ÂÀ» ¹Ş°í
-    // - ¼±ÅÃ ½½·Ô µ¥ÀÌÅÍ ·Îµå ¼º°ø/½ÇÆĞ¸¦ ¹İÈ¯ÇØ¾ß ÇÔ
-
-    int choice = inputManager.InputInMassegeToRange("¹øÈ£¸¦ ÀÔ·ÂÇØÁÖ¼¼¿ä: ", 1, 3);
+    int choice = inputManager.InputInMassegeToRange("ë²ˆí˜¸ë¥¼ ì…ë ¥í•´ì£¼ì„¸ìš”: ", 1, 3);
 
     switch (choice)
     {
     case 1:
-        // TODO:
-        // - ½½·Ô 1 µ¥ÀÌÅÍ ·Îµå
-        std::cout << "½½·Ô 1 ·Îµå\n";
+        std::cout << "ìŠ¬ë¡¯ 1 ë¡œë“œ\n";
         return true;
 
     case 2:
-        // TODO:
-        // - ½½·Ô 2 µ¥ÀÌÅÍ ·Îµå
-        std::cout << "½½·Ô 2 ·Îµå\n";
+        std::cout << "ìŠ¬ë¡¯ 2 ë¡œë“œ\n";
         return true;
 
     case 3:
-        // »õ °ÔÀÓ ¼±ÅÃ
         return false;
 
     default:
@@ -523,17 +404,8 @@ bool GameManager::LoadSelectedSave()
 
 void GameManager::ShowCharacterSelect()
 {
-    // TODO:
-    // - Ä³¸¯ÅÍ ¼±ÅÃ ¸Ş´º Ãâ·Â
-    // - Á÷¾÷, ÀÌ¸§, ½ÃÀÛ ´É·ÂÄ¡ °áÁ¤ µî
-
 }
 
 void GameManager::RunPrologueTutorial()
 {
-    // TODO:
-    // - ±âº» ÀÌµ¿/ÀüÅõ/¸Ş´º Á¶ÀÛ ¼³¸í
-    // - ÂªÀº Æ©Åä¸®¾ó ÀüÅõ ¹èÄ¡ 
-    // - Æ©Åä¸®¾ó ¾ÆÀÌÅÛ »ç¿ë ¹èÄ¡
- 
 }
