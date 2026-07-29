@@ -145,3 +145,16 @@ Item ItemFactory::CreateGucci() {
 		1
 	);
 }
+
+//퀘스트 아이템(효과 없음)
+Item ItemFactory::CreateQuestkey() {
+	return Item(
+		"퀘스트 키",
+		ItemType::Quest,
+		0, // HP 회복
+		0, // MP 회복
+		0, // 공격력 증가
+		0,  // 방어력 증가
+		1
+	);
+}
