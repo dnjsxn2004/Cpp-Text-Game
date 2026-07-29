@@ -8,6 +8,12 @@ enum class ItemType {
 	Quest //퀘스트 아이템
 };
 
+//아이템 효과 종류
+enum class ItemEffect {
+	HpRecovery, //HP 회복
+	MpRecovrty,	//
+};
+
 //아이템 클래스
 class Item {
 private:
@@ -24,3 +30,4 @@ public:
 	int GetEffectAmount() const;
 
 };
+
