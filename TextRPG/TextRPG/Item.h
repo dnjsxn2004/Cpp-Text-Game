@@ -25,12 +25,14 @@ private:
 
 	int quantity; // 아이템 수량
 
-//생성자
+//아이템 생성자
 public:
-	Item(const std::string& name, ItemType type, int effectAmount);
+	Item(const std::string& name, ItemType type, int effectAmount, int quantity = 1);
 
 	std::string GetName() const;
+
 	ItemType GetType() const;
+
 	int GetEffectAmount() const;
 
 };
