@@ -103,7 +103,5 @@ private:
     bool playerLevelUp = false; // 레벨업 여부
     int storyLevel = 0;         // 스토리 진행도
 
-    // 전투 관련 예시 데이터
-    int playerHp = 100;
-    int enemyHp = 50;
+
 };
