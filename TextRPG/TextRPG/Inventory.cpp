@@ -12,3 +12,15 @@ const std::vector<Item>& Inventory::GetItems() const {
 	return items;
 }
 
+//지정한 타입의 아이템만 반환
+std::vector<Item> Inventory::GetItemsByType(ItemType type) const {
+
+	std::vector<Item> result;
+
+	for (const Item& item : items) {
+		if (item.GetType() == type) {
+			result.push_back(item);
+		}
+	}
+	return result;
+}
