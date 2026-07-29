@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Battle.cpp" />
     <ClCompile Include="ConsolUI.cpp" />
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="GameManager.cpp" />
@@ -136,6 +137,7 @@
     <ClCompile Include="TextRPG.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Battle.h" />
     <ClInclude Include="ConsolUI.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameManager.h" />
