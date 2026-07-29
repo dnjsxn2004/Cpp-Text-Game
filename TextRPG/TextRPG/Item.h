@@ -18,8 +18,12 @@ enum class ItemEffect {
 class Item {
 private:
 	std::string name; //이름
+
 	ItemType type; //타입
+
 	int effectAmount; //효과량
+
+	int quantity; // 아이템 수량
 
 //생성자
 public:
