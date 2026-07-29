@@ -18,3 +18,11 @@ ItemType Item::GetType() const {
 int Item::GetEffectAmount() const {
 	return effectAmount;
 }
+//아이템 수량 반환
+int Item::GetQuantity() const {
+	return quantity;
+}
+//아이템 수량 변경
+void Item::SetQuantity(int quantity) {
+
+}
