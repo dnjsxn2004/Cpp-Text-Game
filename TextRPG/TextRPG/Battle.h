@@ -1,18 +1,30 @@
 #ifndef BATTLE_H_
 #define BATTLE_H_
+#include <iostream>
 
+class GameContext;
 class Player;
 class Monster;
+
+enum class DiceType
+{
+	Normal,  // 일반 주사위: 1부터 6까지 동일한 확률도 등장
+	//Lucky,   // 럭키 다이스: 주사위 결과에 1을 더하며 최대값은 6
+	//Double,  // 더블 다이스: 두번 굴린 후 더 높은 값을 사용
+	//extreme,  //
+};
 
 class Battle
 {
 public:
-	Battle(Player* player, Monster* monster)
+	Battle(GameContext& context) {  
 
-	void StartBattle();             // 전투 전체를 시작하고 반복하는 멤버함수
-	void ProcessTurn();             // 한턴을 진행하는 멤버함수
-	void PlayerTurn();              // 플레이어 행동처리하는 멤버함수
-	void MonsterTurn();             // 몬스터 행동처리하는 멤버함수
+	}
+
+	bool StartBattle();             // 전투 전체를 시작하고 반복하는 멤버함수
+	int ProcessTurn();             // 한턴을 진행하는 멤버함수
+	int PlayerTurn();              // 플레이어 행동처리하는 멤버함수
+	int MonsterTurn();             // 몬스터 행동처리하는 멤버함수
 	
 
 
@@ -20,11 +32,12 @@ public:
 
 	int GetDiceValue() { return DiceValue; }
 private:
-	Player* player;
-	Monster* monster;
-
 	int TrunCount;  // 턴의 값을 나타내는 멤버변수
 	int DiceValue;  // 주사위 값을 나타내는 멤버변수
+
+	bool IsBattleOver;        //전투종료여부
+	bool IsPlayerDefending;   // 플레이어가 현재 방어 상태인지 확인
+	bool IsMonsterStunned;    // 몬스터스턴상태 여부
 
 };
 
