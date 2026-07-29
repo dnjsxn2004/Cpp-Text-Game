@@ -51,4 +51,12 @@ bool Inventory::UseItem(int index, GameContext& context) {
 		return false;
 	}
 
+	//소비 아이템이 아닌 경우
+	if (item.GetType() != ItemType::Consumable) {
+		return false;
+	}
+
+	Player& player = context.GetPlayer();
+
+	bool itemUsed = false;
 }
