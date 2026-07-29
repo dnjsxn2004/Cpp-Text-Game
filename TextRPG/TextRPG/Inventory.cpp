@@ -1,6 +1,5 @@
 #include "Inventory.h"
-#include <vector>
-using namespace std;
+#include "GameContext.h"
 
 //인벤토리에 아이템을 추가
 void Inventory::AddItem(const Item& item) {
@@ -46,5 +45,10 @@ bool Inventory::UseItem(int index, GameContext& context) {
 	}
 	
 	Items& item = items[index];
+
+	//아이템 수량이 없는 경우
+	if (item.GetQuantity() <= 0) {
+		return false;
+	}
 
 }
