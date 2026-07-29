@@ -64,10 +64,12 @@ public:
     // 게임종료 메세지 출력 함수
     static void PrintGameOver();
 
+    //PrintStartScreen() 함수 안에서 사용
     // 콘솔 화면 전체를 공백으로 덮어서 지우고,
     // 커서 위치를 화면의 맨 왼쪽 위(0, 0)로 되돌리는 함수
     static void ClearScreen();
 
+    //PrintStartScreen() 함수 안에서 사용
     // 콘솔 커서를 원하는 좌표(x, y)로 이동시키는 함수
     static void MoveCursor(int x, int y);
 
