@@ -35,6 +35,9 @@ public:
 
 	int GetEffectAmount() const;
 
+	int GetHpRecovery() const;
+	int GetMpRecovery() const;
+
 	//아이템 수량 반환
 	int GetQuantity() const;
 

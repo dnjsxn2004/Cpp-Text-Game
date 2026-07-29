@@ -44,7 +44,7 @@ bool Inventory::UseItem(int index, GameContext& context) {
 		return false;
 	}
 	
-	Items& item = items[index];
+	Item& item = items[index];
 
 	//아이템 수량이 없는 경우
 	if (item.GetQuantity() <= 0) {
@@ -59,4 +59,19 @@ bool Inventory::UseItem(int index, GameContext& context) {
 	Player& player = context.GetPlayer();
 
 	bool itemUsed = false;
+
+	//HP 회복
+	if (item.GetHpRecovery() > 0) {
+		int newHp = player.GetHp() + item.GetHpRecovery();
+
+		//최대 HP를 넘지 않도록 제한
+		if (newHp > player.GetMaxHp()) {
+			newHp = player.GetMaxHp();
+		}
+
+		player.SetHp(newHp);
+		itemUsed = true;
+
+
+	}
 }
