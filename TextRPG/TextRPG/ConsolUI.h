@@ -19,10 +19,13 @@
 //2. 단순 메시지는 ConsoleUI::PrintMessage()를 사용한다.
 //3. 오류 메시지는 ConsoleUI::PrintError()를 사용한다.
 //4. 성공 메시지는 ConsoleUI::PrintSuccess()를 사용한다.
+///
 
 #pragma once
 
+#include <iostream>
 #include <string>
+#include <windows.h> // Windows API 헤더 추가
 
 class ConsoleUI
 {
@@ -61,4 +64,19 @@ public:
     // 게임종료 메세지 출력 함수
     static void PrintGameOver();
 
+    //PrintStartScreen() 함수 안에서 사용
+    // 콘솔 화면 전체를 공백으로 덮어서 지우고,
+    // 커서 위치를 화면의 맨 왼쪽 위(0, 0)로 되돌리는 함수
+    static void ClearScreen();
+
+    //PrintStartScreen() 함수 안에서 사용
+    // 콘솔 커서를 원하는 좌표(x, y)로 이동시키는 함수
+    static void MoveCursor(int x, int y);
+
+    // 시작 화면 출력 함수
+    // 게임 로고, 타이틀, 시작 안내 문구 출력
+    // 예: ConsoleUI::PrintStartScreen();
+    static void PrintStartScreen();
+
+    
 };
