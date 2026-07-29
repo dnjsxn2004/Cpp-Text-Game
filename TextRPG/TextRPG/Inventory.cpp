@@ -71,7 +71,11 @@ bool Inventory::UseItem(int index, GameContext& context) {
 
 		player.SetHp(newHp);
 		itemUsed = true;
-
-
 	}
+
+	//HP와 MP회복량이 모두 0이면 사용할 수 없는 아이템
+	if (!itemUsed) {
+		return false;
+	}
+
 }
