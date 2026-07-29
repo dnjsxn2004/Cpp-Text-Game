@@ -132,8 +132,11 @@
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="Jin.cpp" />
+    <ClCompile Include="Gang.cpp" />
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Ryu.cpp" />
     <ClCompile Include="TextRPG.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -142,6 +145,9 @@
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Jin.h" />
+    <ClInclude Include="Gang.h" />
+    <ClInclude Include="Ryu.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />

@@ -75,6 +75,15 @@
     <ClCompile Include="Battle.cpp">
       <Filter>소스 파일\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="Jin.cpp">
+      <Filter>소스 파일\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Gang.cpp">
+      <Filter>소스 파일\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Ryu.cpp">
+      <Filter>소스 파일\Player</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolUI.h">
@@ -102,6 +111,15 @@
       <Filter>헤더 파일\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
+      <Filter>헤더 파일\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Jin.h">
+      <Filter>헤더 파일\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Gang.h">
+      <Filter>헤더 파일\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Ryu.h">
       <Filter>헤더 파일\Player</Filter>
     </ClInclude>
   </ItemGroup>
