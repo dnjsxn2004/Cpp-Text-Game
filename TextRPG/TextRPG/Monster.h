@@ -37,6 +37,10 @@ public:
     void PrintInfo() const;
 };
 
+
+// GameContext 클래스 전방 선언
+class GameContext;
+
 // 랜덤 조우를 위한 몬스터 생성 도우미 함수 (레벨 스케일링 적용)
 Monster SpawnRandomMonster(int playerLevel);
 

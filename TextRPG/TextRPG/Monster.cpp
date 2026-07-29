@@ -1,7 +1,8 @@
 #include "Monster.h"
 #include <cstdlib>
 #include <ctime>
-#include <Player.h>
+#include "Player.h"
+#include "GameContext.h"
 
 // 생성자 초기화
 Monster::Monster(string Name, int Hp, int Attack, int Defense, int ExpReward, int GoldReward)
@@ -35,7 +36,10 @@ int GetRandomNum(int Min, int Max) {
     return Min + rand() % ((Max - Min) + 1);
 }
 
-Monster SpawnRandomMonster() {
+Monster SpawnRandomMonster(GameContext& context) 
+{
+    Player& Player = context.GetPlayer();
+
     // 1. 기획서 1번 요구사항: 레벨 비례 랜덤 스탯 베이스 계산
     int BaseHp = GetRandomNum(Player.GetLevel() * 20, Player.GetLevel() * 30);
     int BaseAtk = GetRandomNum(Player.GetLevel() * 5, Player.GetLevel() * 10);
