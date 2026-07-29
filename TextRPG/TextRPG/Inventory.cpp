@@ -37,3 +37,14 @@ std::vector<Item> Inventory::GetItemsByType(ItemType type) const {
 	}
 	return result;
 }
+
+bool Inventory::UseItem(int index, GameContext& context) {
+	
+	//잘못된 번호를 선택했는지 확인
+	if (index < 0 || index >= static_cast<int>(items.size())) {
+		return false;
+	}
+	
+	Items& item = items[index];
+
+}
