@@ -16,7 +16,7 @@ void Inventory::AddItem(const Item& item) {
 			return;
 		}
 	}
-	
+	//같은 아이템이 없으면 새로 추가
 	items.push_back(item);
 }
 
