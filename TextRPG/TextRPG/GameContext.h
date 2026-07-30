@@ -63,6 +63,7 @@ public:
 
     Inventory& GetInventory();
 
+    Item& GetItem();
 private:
 
     // [공통 / 게임 진행 상태] 멤버 변수
@@ -82,6 +83,7 @@ private:
     Player player;
     Monster monster;
     Inventory inventory;
+    Item item;
 };
 
 // GameContext 사용법 예시

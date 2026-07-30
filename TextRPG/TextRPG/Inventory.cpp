@@ -83,3 +83,56 @@ bool Inventory::UseItem(int index, GameContext& context) {
 	
 	return true;
 }
+
+Inventory::Inventory()
+	: equippedWeaponIndex(-1),
+	  equippedArmorIndex(-1) {
+
+}
+
+//장비 장착 함수
+bool Inventory::EquipItem(int index, GameContext& context) {
+
+	//잘못된 인덱스인지 확인
+	if (index < 0 || index >= static_cast<int>(items.size())) {
+		return false;
+	}
+
+	//인덱스로 아이템 접근
+	Item& newItem = items[index];
+
+	//장비 아이템이 아니면 장착할 수 없음
+	if (newItem.IsEquipped()) {
+		return false;
+	}
+
+	Player& player = context.GetPlayer();
+
+	//무기 장착
+	if (newItem.getEquipmentType() == EquipmentType::Weapon) {
+
+		//기존에 장착한 무기가 있으면 해제
+		if (equippedWeaponIndex != -1) {
+			Item& oldWeapon = items[equippedWeaponIndex];
+
+			//기존 무기의 공격력 증가분 제거
+			player.SetAtt(
+				player.GetAtt() - oldWeapon.GetAttackBonus()
+			);
+
+			oldWeapon.SetEquipped(false);
+		}
+
+		//새 무기의 공격력 적용
+		player.SetAtt(
+			player.GetAtt() + newItem.GetAttackBonus()
+		);
+
+		newItem.SetEquipped(true);
+		equippedWeaponIndex = index;
+
+		return true;
+	}
+
+
+}

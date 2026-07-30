@@ -4,6 +4,7 @@ Item ItemFactory::CreateCigarette(int quantity) {
 	return Item(
 		"담배",
 		ItemType::Consumable,
+		EquipmentType::None,
 		20, // HP 회복
 		0,  // MP 회복
 		0,  // 공격력 증가
@@ -16,6 +17,7 @@ Item ItemFactory::CreateAlcohol(int quantity) {
 	return Item(
 		"술",
 		ItemType::Consumable,
+		EquipmentType::None,
 		0, // HP 회복
 		20,  // MP 회복
 		0,  // 공격력 증가
@@ -28,6 +30,7 @@ Item ItemFactory::CreateDrug(int quantity) {
 	return Item(
 		"마약",
 		ItemType::Consumable,
+		EquipmentType::None,
 		40, // HP 회복
 		0,  // MP 회복
 		0,  // 공격력 증가
