@@ -37,50 +37,63 @@ std::vector<Item> Inventory::GetItemsByType(ItemType type) const {
 	return result;
 }
 
-bool Inventory::UseItem(int index, GameContext& context) {
-	
-	//잘못된 번호를 선택했는지 확인
-	if (index < 0 || index >= static_cast<int>(items.size())) {
+bool Inventory::UseItem(int index, GameContext& context)
+{
+	// 잘못된 번호를 선택했는지 검사
+	if (index < 0 ||
+		index >= static_cast<int>(items.size()))
+	{
 		return false;
 	}
-	
+
 	Item& item = items[index];
 
-	//아이템 수량이 없는 경우
-	if (item.GetQuantity() <= 0) {
+	// 소비 아이템인지 검사
+	if (item.GetType() != ItemType::Consumable)
+	{
 		return false;
 	}
 
-	//소비 아이템이 아닌 경우
-	if (item.GetType() != ItemType::Consumable) {
+	// 수량이 있는지 검사
+	if (item.GetQuantity() <= 0)
+	{
 		return false;
 	}
 
+	const StatBonus& bonus = item.GetStatBonus();
+
+	// HP와 MP 효과가 모두 없으면 사용할 수 없음
+	if (bonus.hp == 0 && bonus.mp == 0)
+	{
+		return false;
+	}
+
+	// GameContext에서 Player 가져오기
 	Player& player = context.GetPlayer();
 
-	bool itemUsed = false;
+	// 실제 HP/MP 효과는 Player에서 적용
+	player.DrinkPotion(item.GetStatBonus());
 
-	//HP 회복
-	if (item.GetHpRecovery() > 0) {
-		int newHp = player.GetHp() + item.GetHpRecovery();
+	// 수량 1 감소
+	item.SetQuantity(item.GetQuantity() - 1);
 
-		//최대 HP를 넘지 않도록 제한
-		if (newHp > player.GetMaxHp()) {
-			newHp = player.GetMaxHp();
+	// 수량이 0이 되면 인벤토리에서 삭제
+	if (item.GetQuantity() <= 0)
+	{
+		items.erase(items.begin() + index);
+
+		// 삭제된 위치보다 뒤에 있는 장비 인덱스 조정
+		if (equippedWeaponIndex > index)
+		{
+			equippedWeaponIndex--;
 		}
 
-		player.SetHp(newHp);
-		itemUsed = true;
+		if (equippedArmorIndex > index)
+		{
+			equippedArmorIndex--;
+		}
 	}
 
-	//HP와 MP회복량이 모두 0이면 사용할 수 없는 아이템
-	if (!itemUsed) {
-		return false;
-	}
-
-	//아이템 사용에 성공한 경우에만 수량 감소
-	item.SetQuantity(item.GetQuantity() - 1);
-	
 	return true;
 }
 
@@ -105,39 +118,64 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 	if (newItem.GetType() != ItemType::Equipment) {
 		return false;
 	}
-	
-	//이미 장착한 아이템이면 다시 장착하지 않음
-	if (newItem.IsEquipped()) {
+
+	EquipmentType equipmentType = selectedItem.GetEquipmentType();
+
+	//무기 장착
+	if (equipmentType == EquipmentType::Weapon) {
+		//기존 무기가 있으면 장착 상태 해제
+		if (equippedWeaponIndex != -1) {
+			items[equippedWeaponIndex].SetEquipped(false);
+		}
+		equippedWeaponIndex = index;
+		selectedItem.SetEquipped(true);
+	}
+	//방어구 장착
+	else if (equipmentType == EquipmentType::Armor) {
+		//기존 방어구가 있으면 장착 상태 해제
+		if (equippedArmorIndex != -1) {
+			items[equippedArmorIndex].SetEquipped(false);
+		}
+
+		equippedArmorIndex = index;
+		selecetItem.SetEquipped(true);
+	}
+	else {
 		return false;
 	}
 
 	Player& player = context.GetPlayer();
 
-	//무기 장착
-	if (newItem.getEquipmentType() == EquipmentType::Weapon) {
+	//정착 중인 장비 전체 보너스 계산
+	StatBonus totalBonus;
 
-		//기존에 장착한 무기가 있으면 해제
-		if (equippedWeaponIndex != -1) {
-			Item& oldWeapon = items[equippedWeaponIndex];
+	if (equippedWeaponIndex != -1) {
+		const StatBonus& weaponBonus = items[equippedWeaponIndex].GetStatBonus();
 
-			//기존 무기의 공격력 증가분 제거
-			player.SetAtt(
-				player.GetAtt() - oldWeapon.GetAttackBonus()
-			);
+		totalBonus.hp += weaponBonus.hp;
+		totalBonus.mp += weaponBonus.mp;
+		totalBonus.str += weaponBonus.str;
+		totalBonus.att += weaponBonus.att;
+		totalBonus.def += weaponBonus.def;
+		totalBonus.dex += weaponBonus.dex;
+		totalBonus.intel += weaponBonus.intel;
+		totalBonus.luk += weaponBonus.luk;
+	}
+	if (equippedArmorIndex != -1) {
+		const StatBonus& armorBonus = items[equippedArmorIndex].GetStatBonus();
 
-			oldWeapon.SetEquipped(false);
-		}
-
-		//새 무기의 공격력 적용
-		player.SetAtt(
-			player.GetAtt() + newItem.GetAttackBonus()
-		);
-
-		newItem.SetEquipped(true);
-		equippedWeaponIndex = index;
-
-		return true;
+		totalBonus.hp += armorBonus.hp;
+		totalBonus.mp += armorBonus.mp;
+		totalBonus.str += armorBonus.str;
+		totalBonus.att += armorBonus.att;
+		totalBonus.def += armorBonus.def;
+		totalBonus.dex += armorBonus.dex;
+		totalBonus.intel += armorBonus.intel;
+		totalBonus.luk += armorBonus.luk;
 	}
 
+	//Player가 기존 장비 보너스를 새 보너스로 교체
+	player.ApplyEquipBonus(true, totalBonus);
 
+	return true;
 }

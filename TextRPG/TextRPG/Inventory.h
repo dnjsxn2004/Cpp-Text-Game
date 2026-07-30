@@ -2,7 +2,6 @@
 
 #include <vector>
 #include "Item.h"
-#include "Player.h"
 
 class GameContext;
 //인벤토리 클래스
@@ -18,6 +17,9 @@ private:
 	int equippedArmorIndex;
 
 public:
+	//장착 인덱스를 -1로 초기화
+	Inventory();
+
 	//인벤토리에 아이템 추가
 	void AddItem(const Item& item);
 	
@@ -27,7 +29,7 @@ public:
 	//특정 타입의 아이템 목록을 반환
 	std::vector<Item> GetItemsByType(ItemType type) const;
 
-	//아이템 사용
+	//소비아이템 사용
 	bool UseItem(int index, GameContext& context);
 
 	//장비 장착
@@ -41,4 +43,5 @@ public:
 
 	int GetEquippedWeaponIndex() const;
 	int GetEquippedArmorIndex() const;
+
 };
