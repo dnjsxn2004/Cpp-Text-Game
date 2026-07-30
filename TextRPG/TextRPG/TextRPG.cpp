@@ -1,7 +1,9 @@
 ﻿#include "GameManager.h"
+#include "ConsolUI.h"
 
 int main()
 {
+	ConsoleUI::PrintJinImage();
     GameManager gameManager;
     gameManager.Run();
 

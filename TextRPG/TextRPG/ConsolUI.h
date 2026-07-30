@@ -78,5 +78,50 @@ public:
     // 예: ConsoleUI::PrintStartScreen();
     static void PrintStartScreen();
 
+
+    // 진태식 캐릭터 흑색 이미지 출력 함수
+    static void PrintJinBlackImage();
+
+    // 진태식 캐릭터 백색 이미지 출력 함수
+    static void PrintJinWhiteImage();
+
+
+    // 강사라 캐릭터 흑색 이미지 출력 함수
+    static void PrintKangBlackImage();
+
+    // 강사라 캐릭터 백색 이미지 출력 함수
+    static void PrintKangWhiteImage();
+
+
+    // 류노스케 캐릭터 흑색 이미지 출력 함수
+    static void PrintRyuBlackImage();
+
+    // 류노스케 캐릭터 백색 이미지 출력 함수
+    static void PrintRyuWhiteImage();
+
+
+    // 진태식 캐릭터 로고(간단한 이미지, 픽토그래픽) 출력 함수
+    static void PrintJinLogo();
+
+    // 강사라 캐릭터 로고(간단한 이미지, 픽토그래픽) 출력 함수
+    static void PrintKangLogo();
+
+    // 류노스케 캐릭터 로고(간단한 이미지, 픽토그래픽) 출력 함수
+    static void PrintRyuLogo();
+
+
+    // 진태식 캐릭터 등장 장면과 소개 문구 출력 함수
+    static void ShowJinIntro();
+
+    // 강사라 캐릭터 등장 장면과 소개 문구 출력 함수
+    static void ShowKangIntro();
+
+    // 류노스케 캐릭터 등장 장면과 소개 문구 출력 함수
+    static void ShowRyuIntro();
+
+
+    // 캐릭터의 등장 장면과 소개 문구를 출력하는 함수
+    static void ShowCharacterIntro();
     
+
 };
