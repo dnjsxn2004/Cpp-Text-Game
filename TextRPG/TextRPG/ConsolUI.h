@@ -123,5 +123,39 @@ public:
     // 캐릭터의 등장 장면과 소개 문구를 출력하는 함수
     static void ShowCharacterIntro();
     
+    // Cut 1: 어린 시절 진태식, 강사라, 류노스케가 만나 즐겁게 노는 장면 출력 함수
+    static void ShowCutScene1();
 
+    // Cut 2: 불법 시술을 하는 의사 강사라의 장면 출력 함수
+    static void ShowCutScene2();
+
+    // Cut 3: 의사가 된 강사라 앞에서 진태식과 류노스케가 치료를 받으러 왔다가 마주치는 장면 출력 함수
+    static void ShowCutScene3();
+
+    // Cut 4: 류노스케와 진태식의 도박 승부가 본격적으로 진행되는 장면 출력 함수
+    static void ShowCutScene4();
+
+    // Cut 5: 도박판이 뒤집히고 류노스케와 진태식의 싸움이 클라이맥스로 치닫는 장면 출력 함수
+    static void ShowCutScene5();
+
+    // Cut 6: 진태식이 류노스케에게 패배하고 결정적인 위기에 빠지는 장면 출력 함수
+    static void ShowCutScene6();
+
+    // Cut 7: 진태식이 치명상을 입고 고통 속에서 버티는 장면 출력 함수
+    static void ShowCutScene7();
+
+    // CutScene 이미지 출력 함수
+    static void PrintCutScene1Image();
+    static void PrintCutScene2Image();
+    static void PrintCutScene3Image();
+    static void PrintCutScene4Image();
+    static void PrintCutScene5Image();
+    static void PrintCutScene6Image();
+    static void PrintCutScene7Image();
+
+    // Cut 5: 도박판이 뒤집히고 싸움이 클라이맥스로 치닫는 애니메이션 출력 함수
+    static void PlayCutScene5Animation();
+
+    // Cut 6: 진태식이 패배하고 위기에 빠지는 애니메이션 출력 함수
+    static void PlayCutScene6Animation();
 };
