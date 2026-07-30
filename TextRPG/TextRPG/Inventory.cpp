@@ -323,3 +323,36 @@ bool Inventory::RemoveItem(int index, int quantity) {
 	}
 	return true;
 }
+
+bool Inventory::BuyItem(const Item& item, int quantity, GameContext& context) {
+
+	//구매 수량 검사
+	if (quantity <= 0) {
+		return false;
+	}
+
+	//퀘스트 아이템은 구매 불가
+	if (item.GetType() == ItemType::Quest) {
+		return false;
+	}
+
+	Player& player = context.GetPlayer();
+
+	int totalPrice = item.GetPrice() * quantity;
+
+	//돈이 부족한지 검사
+	if (player.GetGold() < totalPrice) {
+		return false;
+	}
+
+	//돈 차감
+	player.SetGold(player.GetGold() - totalPrice);
+
+	//구매한 아이템 생성
+	Item purchasedItem(item.GetName(), item.GetType(), item.GetEquipmentType(), item.GetStatBonus(), quantity, item.GetPrice());
+
+	//인벤토리에 추가
+	AddItem(purchasedItem);
+
+	return true;
+}

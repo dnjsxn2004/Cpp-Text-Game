@@ -45,4 +45,6 @@ public:
 	int GetEquippedArmorIndex() const;
 
 	bool RemoveItem(int index, int quantity = 1);
+
+	bool BuyItem(const Item& item, int quantity, GameContext& context);
 };
