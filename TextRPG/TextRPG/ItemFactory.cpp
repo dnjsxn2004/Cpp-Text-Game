@@ -5,12 +5,18 @@ Item ItemFactory::CreateCigarette(int quantity) {
 		"담배",
 		ItemType::Consumable,
 		EquipmentType::None,
-		20, // HP 회복
-		0,  // MP 회복
-		0,  // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		quantity
-		);
+	);
 }
 
 Item ItemFactory::CreateAlcohol(int quantity) {
@@ -18,10 +24,16 @@ Item ItemFactory::CreateAlcohol(int quantity) {
 		"술",
 		ItemType::Consumable,
 		EquipmentType::None,
-		0, // HP 회복
-		20,  // MP 회복
-		0,  // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		quantity
 	);
 }
@@ -31,10 +43,16 @@ Item ItemFactory::CreateDrug(int quantity) {
 		"마약",
 		ItemType::Consumable,
 		EquipmentType::None,
-		40, // HP 회복
-		0,  // MP 회복
-		0,  // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		quantity
 	);
 }
@@ -44,10 +62,16 @@ Item ItemFactory::CreateWhiskey(int quantity) {
 		"위스키",
 		ItemType::Consumable,
 		EquipmentType::None,
-		0, // HP 회복
-		40,  // MP 회복
-		0,  // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		quantity
 	);
 }
@@ -57,10 +81,16 @@ Item ItemFactory::CreateSyringe(int quantity) {
 		"주사기",
 		ItemType::Consumable,
 		EquipmentType::None,
-		0, // HP 회복
-		0,  // MP 회복
-		10,  // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		quantity
 	);
 }
@@ -70,10 +100,16 @@ Item ItemFactory::CreateCannabis(int quantity) {
 		"대마초",
 		ItemType::Consumable,
 		EquipmentType::None,
-		40, // HP 회복
-		0,  // MP 회복
-		0,  // 공격력 증가
-		10,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		quantity
 	);
 }
@@ -84,10 +120,16 @@ Item ItemFactory::CreateKnife() {
 		"나이프",
 		ItemType::Equipment,
 		EquipmentType::Weapon,
-		0, // HP 회복
-		0, // MP 회복
-		25, // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		1
 	);
 }
@@ -97,10 +139,16 @@ Item ItemFactory::CreateBat() {
 		"야구배트",
 		ItemType::Equipment,
 		EquipmentType::Weapon,
-		0, // HP 회복
-		0, // MP 회복
-		15, // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		1
 	);
 }
@@ -110,10 +158,16 @@ Item ItemFactory::CreateKnuckle() {
 		"너클",
 		ItemType::Equipment,
 		EquipmentType::Weapon,
-		0, // HP 회복
-		0, // MP 회복
-		20, // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		1
 	);
 }
@@ -123,10 +177,16 @@ Item ItemFactory::CreateKatana() {
 		"카타나",
 		ItemType::Equipment,
 		EquipmentType::Weapon,
-		0, // HP 회복
-		0, // MP 회복
-		30, // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		1
 	);
 }
@@ -137,10 +197,16 @@ Item ItemFactory::CreateThomBrowne() {
 		"톰 브라운",
 		ItemType::Equipment,
 		EquipmentType::Armor,
-		0, // HP 회복
-		0, // MP 회복
-		0, // 공격력 증가
-		20,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		1
 	);
 }
@@ -150,24 +216,27 @@ Item ItemFactory::CreateGucci() {
 		"구찌",
 		ItemType::Equipment,
 		EquipmentType::Armor,
-		0, // HP 회복
-		0, // MP 회복
-		0, // 공격력 증가
-		20,  // 방어력 증가
+		StatBonus(
+			10,// hp
+			0, // mp
+			0, // str
+			0, // att
+			0, // def
+			0, // dex
+			0, // intel
+			0 // luk 
+		),
 		1
 	);
 }
 
 //퀘스트 아이템(효과 없음)
-Item ItemFactory::CreateQuestkey() {
+Item ItemFactory::CreateQuestKey() {
 	return Item(
 		"퀘스트 키",
 		ItemType::Quest,
 		EquipmentType::None,
-		0, // HP 회복
-		0, // MP 회복
-		0, // 공격력 증가
-		0,  // 방어력 증가
+		StatBonus(),
 		1
 	);
 }

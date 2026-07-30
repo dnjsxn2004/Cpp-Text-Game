@@ -1,6 +1,5 @@
 #pragma once
 #include <string>
-#include "Player.h"
 #include "StatBonus.h"
 
 //아이템타입 클래스
@@ -34,7 +33,7 @@ public:
 
 	std::string GetName() const;
 	ItemType GetType() const;
-	EquipmentType getEquipmentType() const;
+	EquipmentType GetEquipmentType() const;
 
 	//아이템 수량 반환
 	int GetQuantity() const;

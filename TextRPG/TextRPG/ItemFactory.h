@@ -31,5 +31,5 @@ public:
     static Item CreateGucci();
 
     //퀘스트 아이템
-    static Item CreateQuestkey();
+    static Item CreateQuestKey();
 };

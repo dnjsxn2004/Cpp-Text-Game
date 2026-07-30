@@ -14,7 +14,7 @@ std::string Item::GetName() const {
 ItemType Item::GetType() const {
 	return type;
 }
-EquipmentType Item::getEquipmentType() const {
+EquipmentType Item::GetEquipmentType() const {
 	return equipmentType;
 }
 //아이템 수량 반환
