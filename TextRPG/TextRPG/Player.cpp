@@ -250,3 +250,36 @@ void Player::UpdatePotionTurn() //포션 지속 시간 함수.
     }
 }
 
+void Player::ApplyEquipHpMpBonus(bool IsEquip, StatBonus Bonus)
+{
+    if (IsEquip == true)
+    {
+        // 최대치를 먼저 늘려준 뒤 현재치를 증가
+        SetMaxHp(GetMaxHp() + Bonus.hp);
+        SetHp(GetHp() + Bonus.hp);
+
+        SetMaxMp(GetMaxMp() + Bonus.mp);
+        SetMp(GetMp() + Bonus.mp);
+    }
+    else
+    {
+        // 현재치를 먼저 깎은 뒤 최대치를 감소
+        SetHp(GetHp() - Bonus.hp);
+        SetMaxHp(GetMaxHp() - Bonus.hp);
+
+        SetMp(GetMp() - Bonus.mp);
+        SetMaxMp(GetMaxMp() - Bonus.mp);
+
+        // 체력 템을 벗었다고 해서 캐릭터가 즉사하는 것을 방지
+        if (GetHp() <= 0)
+        {
+            SetHp(1); // 최소 체력 1 유지
+        }
+
+        // 마나도 음수가 되지 않도록 방지
+        if (GetMp() < 0)
+        {
+            SetMp(0);
+        }
+    }
+}

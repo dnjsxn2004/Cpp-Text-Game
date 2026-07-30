@@ -116,6 +116,6 @@ public:
     void ApplyEquipBonus(bool EquipCheck, StatBonus Bonus); //장비 착용 확인(bool을 통해 체크 / 착용하지 않을 시 보너스를 0으로 초기화) 후, 장비 보너스를 세트하는 함수
     void DrinkPotion(StatBonus AppliedBonus); //포션을 마셨을 때, 지속 시간과 보너스를 적용하는 함수.
     void UpdatePotionTurn();  //포션 지속 확인(count > 0 일시 / 지속 시간이 0 이하일 시 보너스를 0으로 초기화) 함수.
-
+    void ApplyEquipHpMpBonus(bool IsEquip, StatBonus Bonus); //장비 착용 여부 확인 후, 최대 Hp와 최대 Mp 및 현재 Hp, Mp 보너스 적용 함수.
 
 };

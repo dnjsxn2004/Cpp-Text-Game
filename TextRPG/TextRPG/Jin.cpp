@@ -25,9 +25,9 @@ int Jin::GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonu
     //통합된 보너스를 내 기본 스탯과 합산
     int finalStr = Str + totalBonus.str;
     int finalDex = Dex + totalBonus.dex;
-
+    int finalAtt = Attack + totalBonus.att;
     //최종 스탯을 공식에 대입
-    int Damage = Attack + (finalStr * 0.5) + (finalDex * 0.5);
+    int Damage = finalAtt + (finalStr * 0.5) + (finalDex * 0.5);
 
     return Damage;
 }
@@ -41,9 +41,9 @@ int Jin::GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonu
     //통합된 보너스를 내 기본 스탯과 합산
     int finalIntel = Intel + totalBonus.intel;
     int finalLuk = Luk + totalBonus.luk;
-
+    int finalAtt = finalAtt + totalBonus.att;
     //최종 스탯을 공식에 대입
-    int Damage = Attack + (finalIntel * 0.8) + (finalLuk * 0.8);
+    int Damage = finalAtt + (finalIntel * 0.8) + (finalLuk * 0.8);
 
     return Damage;
 }
