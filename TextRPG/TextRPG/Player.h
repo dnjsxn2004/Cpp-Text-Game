@@ -1,37 +1,6 @@
 #pragma once
 #include <string>
-
-struct StatBonus // 장비와 포션을 통해 얻는 보너스를 넣기 위한 구조체
-{
-    int hp = 0;
-    int mp = 0;
-    int str = 0;
-    int att = 0;
-    int def = 0;
-    int dex = 0;
-    int intel = 0;
-    int luk = 0;
-
-    StatBonus operator+(const StatBonus& other) const // 장비 보너스와 포션 보너스를 합쳐서 계산하기 위한 코드
-    {
-        StatBonus result;
-        result.hp = hp + other.hp;
-        result.mp = mp + other.mp;
-        result.str = str + other.str;
-        result.att = att + other.att;
-        result.def = def + other.def;
-        result.dex = dex + other.dex;
-        result.intel = intel + other.intel;
-        result.luk = luk + other.luk;
-        return result;
-    }
-
-    // 편하게 값을 넣기 위한 생성자 추가
-    StatBonus(int _hp = 0, int _mp = 0, int _str = 0, int _att = 0, int _def = 0, int _dex = 0, int _intel = 0, int _luk = 0)
-        : hp(_hp), mp(_mp), str(_str), att(_att), def(_def), dex(_dex), intel(_intel), luk(_luk) {
-    }
-};
-
+#include "StatBonus.h"
 
 class Player
 {

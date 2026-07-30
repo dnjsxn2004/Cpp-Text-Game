@@ -56,9 +56,9 @@ int Jin::GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonu
     //통합된 보너스를 내 기본 스탯과 합산
     int finalStr = Str + totalBonus.str;
     int finalDex = Dex + totalBonus.dex;
-
+    int finalDef = Defense + totalBonus.def;
     //최종 스탯을 공식에 대입
-    int FinalDefense = Defense + (finalStr * 0.5) + (finalDex * 0.5);
+    int FinalDefense = finalDef + (finalStr * 0.5) + (finalDex * 0.5);
 
     return FinalDefense;
 }
