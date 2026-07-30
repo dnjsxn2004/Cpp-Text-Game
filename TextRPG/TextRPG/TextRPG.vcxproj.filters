@@ -122,5 +122,8 @@
     <ClInclude Include="Ryu.h">
       <Filter>헤더 파일\Player</Filter>
     </ClInclude>
+    <ClInclude Include="StatBonus.h">
+      <Filter>헤더 파일\Player</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
