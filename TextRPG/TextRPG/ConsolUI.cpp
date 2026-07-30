@@ -6,8 +6,13 @@
 #include <windows.h> // Windows API 헤더 추가
 #include <cstdlib> // system("cls") 사용
 #include <stdlib.h>
+#include <vector>
 
 #include "ConsolUI.h"
+#include "Inventory.h"
+#include "Item.h"
+#include "GameContext.h"
+#include "InputManager.h"
 
 using namespace std;
 
@@ -58,11 +63,114 @@ void ConsoleUI::PrintMainMenu()
 	PrintLine();
 	PrintTitle("메인 메뉴");
 	PrintLine();
-	cout << "1. 일반 전투" << endl;
-	cout << "2. 상점" << endl;
-	cout << "3. 메인 스토리" << endl;
+
+    PrintMessage("1. 일반 전투");
+    PrintMessage("2. 메인 스토리");
+    PrintMessage("3. 인벤토리");
+    PrintMessage("4. 상점");
+    PrintMessage("0. 게임 종료");
+
 	PrintLine();
 }
+
+
+
+string ConsoleUI::ItemTypeToString(ItemType type)
+{
+    switch (type)
+    {
+    case ItemType::Equipment:
+        return "장비";
+
+    case ItemType::Consumable:
+        return "소비";
+
+    default:
+        return "알 수 없음";
+    }
+}
+
+void ConsoleUI::PrintInventoryMenu()
+{
+    PrintLine();
+    PrintTitle("인벤토리 확인");
+    PrintLine();
+
+    PrintMessage("1. 내가 가진 전체 아이템 보기");
+    PrintMessage("2. 장비 아이템");
+    PrintMessage("3. 소비 아이템");
+    PrintMessage("4. 퀘스트 아이템");
+    PrintMessage("0. 뒤로가기");
+
+    PrintLine();
+};
+
+void ConsoleUI::PrintItem(const Item& item)
+{
+    PrintLine();
+    cout << "이름: " << item.GetName() << endl;
+    cout << "타입: " << ItemTypeToString(item.GetType()) << endl;
+    cout << "효과량: " << item.GetEffectAmount() << endl;
+    PrintLine();
+}
+
+void ConsoleUI::PrintAllItems(const Inventory& inventory)
+{
+    const vector<Item>& items = inventory.GetItems();
+
+    // TODO: items가 비어 있는지 확인하는 조건문
+
+    // TODO: 전체 아이템 목록 제목 출력
+
+    for (const Item& item : items)
+    {
+        // TODO: PrintItem 함수 호출
+    }
+}
+
+void ConsoleUI::PrintItemsByType(const Inventory& inventory, ItemType type)
+{
+    vector<Item> filteredItems = inventory.GetItemsByType(type);
+
+    // TODO: filteredItems가 비어 있는지 확인하는 조건문
+
+    // TODO: 타입별 아이템 목록 제목 출력
+
+    for (const Item& item : filteredItems)
+    {
+        // TODO: PrintItem 함수 호출
+    }
+}
+
+void ConsoleUI::ShowInventory(const Inventory& inventory)
+{
+    while (true)
+    {
+        PrintInventoryMenu();
+
+        int choice = InputManager::InputInRange(0, 3);
+
+        switch (choice)
+        {
+        case 1:
+            PrintAllItems(inventory);
+            break;
+
+        case 2:
+            PrintItemsByType(inventory, ItemType::Equipment);
+            break;
+
+        case 3:
+            PrintItemsByType(inventory, ItemType::Consumable);
+            break;
+
+        case 0:
+            return;
+        }
+    }
+}
+
+
 
 void ConsoleUI::PrintJobSelectMenu()
 {
