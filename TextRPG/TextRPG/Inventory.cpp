@@ -179,3 +179,27 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 
 	return true;
 }
+
+//무기 해제
+bool Inventory::UnequipWeapon(GameContext& context) {
+	//장착된 무기가 없음
+	if (equippedWeaponIndex == -1) {
+		return false;
+	}
+
+	item[equippedWeaponIndex].SetEquipped(false);
+	equippedWeaponIndex = -1;
+
+	Player& player = context.GetPlayer();
+
+	StatBonus totalBonus;
+
+	// 방어구가 남아 있다면 방어구 보너스만 적용
+	if (equippedArmorIndex != -1) {
+		totalBonus = items[equippedArmorIndex].GetStatBonus();
+	}
+
+	player.ApplyEquipBonus(true, totalBonus);
+
+	return true;
+}
