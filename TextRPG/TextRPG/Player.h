@@ -28,10 +28,10 @@ protected:
 
 public:
 
-    Player();          // ±âº» »ý¼ºÀÚ
-    virtual ~Player(); // °¡»ó ¼Ò¸êÀÚ
+    Player();          // ê¸°ë³¸ ìƒì„±ìž
+    virtual ~Player(); // ê°€ìƒ ì†Œë©¸ìž
 
-    // Getter ¼±¾ð
+    // Getter ì„ ì–¸
     std::string GetName() const;
     int GetHp() const;
     int GetMaxHp() const;
@@ -50,7 +50,7 @@ public:
     int GetIntel() const;
     int GetLuk() const;
 
-    // Setter ¼±¾ð
+    // Setter ì„ ì–¸
     void SetName(const std::string& newName);
     void SetHp(int newHp);
     void SetMaxHp(int newMaxHp);
@@ -72,19 +72,19 @@ public:
     void SetLuk(int value);
 
 
-    //LevelUp °ü·Ã
-    bool IsLevelUpCheck(int NewExp); // Á¶°Ç ¸¸Á· ½Ã, ·¹º§ ¾÷ Àû¿ë ÇÔ¼ö
-    void GainExp(int Exp); // °æÇèÄ¡ È¹µæ ÇÔ¼ö
+    //LevelUp ê´€ë ¨
+    bool IsLevelUpCheck(int NewExp); // ì¡°ê±´ ë§Œì¡± ì‹œ, ë ˆë²¨ ì—… ì ìš© í•¨ìˆ˜
+    void GainExp(int Exp); // ê²½í—˜ì¹˜ íšë“ í•¨ìˆ˜
 
-    //½ÇÀû¿ë µ¥¹ÌÁö °ü·Ã ÇÔ¼ö
-    virtual int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // ÆòÅ¸ (Str°ú Dex±â¹Ý º¸³Ê½º Àû¿ë)
-    virtual int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // ½ºÅ³ (Intel°ú Luk±â¹Ý º¸³Ê½º Àû¿ë) 
-    virtual int GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonus); // ½ÇÀû¿ë ¹æ¾î·Â
+    //ì‹¤ì ìš© ë°ë¯¸ì§€ ê´€ë ¨ í•¨ìˆ˜
+    virtual int GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // í‰íƒ€ (Strê³¼ Dexê¸°ë°˜ ë³´ë„ˆìŠ¤ ì ìš©)
+    virtual int GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus); // ìŠ¤í‚¬ (Intelê³¼ Lukê¸°ë°˜ ë³´ë„ˆìŠ¤ ì ìš©) 
+    virtual int GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonus); // ì‹¤ì ìš© ë°©ì–´ë ¥
 
-    //Àåºñ º¸³Ê½º Àû¿ë / Æ÷¼Ç º¸³Ê½º Àû¿ë ¿©ºÎ
-    void ApplyEquipBonus(bool EquipCheck, StatBonus Bonus); //Àåºñ Âø¿ë È®ÀÎ(boolÀ» ÅëÇØ Ã¼Å© / Âø¿ëÇÏÁö ¾ÊÀ» ½Ã º¸³Ê½º¸¦ 0À¸·Î ÃÊ±âÈ­) ÈÄ, Àåºñ º¸³Ê½º¸¦ ¼¼Æ®ÇÏ´Â ÇÔ¼ö
-    void DrinkPotion(StatBonus AppliedBonus); //Æ÷¼ÇÀ» ¸¶¼ÌÀ» ¶§, Áö¼Ó ½Ã°£°ú º¸³Ê½º¸¦ Àû¿ëÇÏ´Â ÇÔ¼ö.
-    void UpdatePotionTurn();  //Æ÷¼Ç Áö¼Ó È®ÀÎ(count > 0 ÀÏ½Ã / Áö¼Ó ½Ã°£ÀÌ 0 ÀÌÇÏÀÏ ½Ã º¸³Ê½º¸¦ 0À¸·Î ÃÊ±âÈ­) ÇÔ¼ö.
-    void ApplyEquipHpMpBonus(bool IsEquip, StatBonus Bonus); //Àåºñ Âø¿ë ¿©ºÎ È®ÀÎ ÈÄ, ÃÖ´ë Hp¿Í ÃÖ´ë Mp ¹× ÇöÀç Hp, Mp º¸³Ê½º Àû¿ë ÇÔ¼ö.
+    //ìž¥ë¹„ ë³´ë„ˆìŠ¤ ì ìš© / í¬ì…˜ ë³´ë„ˆìŠ¤ ì ìš© ì—¬ë¶€
+    void ApplyEquipBonus(bool EquipCheck, StatBonus Bonus); //ìž¥ë¹„ ì°©ìš© í™•ì¸(boolì„ í†µí•´ ì²´í¬ / ì°©ìš©í•˜ì§€ ì•Šì„ ì‹œ ë³´ë„ˆìŠ¤ë¥¼ 0ìœ¼ë¡œ ì´ˆê¸°í™”) í›„, ìž¥ë¹„ ë³´ë„ˆìŠ¤ë¥¼ ì„¸íŠ¸í•˜ëŠ” í•¨ìˆ˜
+    void DrinkPotion(StatBonus AppliedBonus); //í¬ì…˜ì„ ë§ˆì…¨ì„ ë•Œ, ì§€ì† ì‹œê°„ê³¼ ë³´ë„ˆìŠ¤ë¥¼ ì ìš©í•˜ëŠ” í•¨ìˆ˜.
+    void UpdatePotionTurn();  //í¬ì…˜ ì§€ì† í™•ì¸(count > 0 ì¼ì‹œ / ì§€ì† ì‹œê°„ì´ 0 ì´í•˜ì¼ ì‹œ ë³´ë„ˆìŠ¤ë¥¼ 0ìœ¼ë¡œ ì´ˆê¸°í™”) í•¨ìˆ˜.
+    void ApplyEquipHpMpBonus(bool IsEquip, StatBonus Bonus); //ìž¥ë¹„ ì°©ìš© ì—¬ë¶€ í™•ì¸ í›„, ìµœëŒ€ Hpì™€ ìµœëŒ€ Mp ë° í˜„ìž¬ Hp, Mp ë³´ë„ˆìŠ¤ ì ìš© í•¨ìˆ˜.
 
 };

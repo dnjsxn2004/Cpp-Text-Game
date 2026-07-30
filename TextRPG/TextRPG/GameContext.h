@@ -63,6 +63,7 @@ public:
 
     Inventory& GetInventory();
 
+    Item& GetItem();
 private:
 
     // [���� / ���� ���� ����] ��� ����
@@ -82,6 +83,7 @@ private:
     Player player;
     Monster monster;
     Inventory inventory;
+    Item item;
 };
 
 // GameContext ���� ����

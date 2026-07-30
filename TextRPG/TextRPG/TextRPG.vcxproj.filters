@@ -84,6 +84,12 @@
     <ClCompile Include="Ryu.cpp">
       <Filter>소스 파일\Player</Filter>
     </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemFactory.cpp">
+      <Filter>소스 파일\Inventory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolUI.h">
@@ -111,6 +117,10 @@
       <Filter>헤더 파일\Inventory</Filter>
     </ClInclude>
     <ClInclude Include="Player.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemFactory.h">
+      <Filter>헤더 파일\Inventory</Filter>
       <Filter>헤더 파일\Player</Filter>
     </ClInclude>
     <ClInclude Include="Jin.h">
