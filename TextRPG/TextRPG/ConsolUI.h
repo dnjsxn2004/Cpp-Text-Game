@@ -78,5 +78,9 @@ public:
     // ¿¹: ConsoleUI::PrintStartScreen();
     static void PrintStartScreen();
 
+    static void PrintJinImage();
+    static void PrintKangImage();
+    static void PrintRyuImage();
+
     
 };

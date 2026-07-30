@@ -2,7 +2,7 @@
 
 Ryu::Ryu()
 {
-    name = "류노스케";
+    name = "ryu";
     Hp = 150;
     MaxHp = 150;
     Mp = 300;

@@ -55,13 +55,15 @@ void ConsoleUI::PrintSuccess(const std::string& message)
 
 void ConsoleUI::PrintMainMenu()
 {
-	PrintLine();
-	PrintTitle("메인 메뉴");
-	PrintLine();
-	cout << "1. 일반 전투" << endl;
-	cout << "2. 상점" << endl;
-	cout << "3. 메인 스토리" << endl;
-	PrintLine();
+    PrintLine();
+    PrintTitle("메인 메뉴");
+    PrintLine();
+    cout << "1. 일반 전투" << endl;
+    cout << "2. 상점" << endl;
+    cout << "3. 스토리 진행" << endl;
+    cout << "4. 인벤토리" << endl;
+    cout << "0. 게임 종료" << endl;
+    PrintLine();
 }
 
 void ConsoleUI::PrintJobSelectMenu()

@@ -25,6 +25,8 @@ public:
 	int ProcessTurn();             // 한턴을 진행하는 멤버함수
 	int PlayerTurn();              // 플레이어 행동처리하는 멤버함수
 	int MonsterTurn();             // 몬스터 행동처리하는 멤버함수
+
+	bool StartBattle(GameContext& context);
 	
 
 
@@ -38,6 +40,7 @@ private:
 	bool IsBattleOver;        //전투종료여부
 	bool IsPlayerDefending;   // 플레이어가 현재 방어 상태인지 확인
 	bool IsMonsterStunned;    // 몬스터스턴상태 여부
+
 
 };
 

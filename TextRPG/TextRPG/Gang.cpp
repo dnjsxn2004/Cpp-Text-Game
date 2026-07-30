@@ -2,7 +2,7 @@
 
 Gang::Gang()
 {
-    name = "강사라";
+    name = "gang";
     Hp = 180;
     MaxHp = 180;
     Mp = 200;

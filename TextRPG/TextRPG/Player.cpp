@@ -283,3 +283,37 @@ void Player::ApplyEquipHpMpBonus(bool IsEquip, StatBonus Bonus)
         }
     }
 }
+
+int Player::GetMeleeDamage(const StatBonus& equipBonus, const StatBonus& potionBonus)
+{
+    StatBonus totalBonus = equipBonus + potionBonus;
+
+    int finalDamage = Attack
+        + totalBonus.att
+        + (Str + totalBonus.str) * 2
+        + (Dex + totalBonus.dex);
+
+    return finalDamage;
+}
+
+int Player::GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonus)
+{
+    StatBonus totalBonus = equipBonus + potionBonus;
+
+    int finalDamage = Attack
+        + totalBonus.att
+        + (Intel + totalBonus.intel) * 2
+        + (Luk + totalBonus.luk);
+
+    return finalDamage;
+}
+
+int Player::GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonus)
+{
+    StatBonus totalBonus = equipBonus + potionBonus;
+
+    int finalDefense = Defense
+        + totalBonus.def;
+
+    return finalDefense;
+}

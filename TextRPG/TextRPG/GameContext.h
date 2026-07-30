@@ -1,9 +1,3 @@
-#pragma once
-
-#include "Player.h"
-#include "Monster.h"
-#include "Inventory.h"
-
 // GameContext
 // 
 // ����:
@@ -20,69 +14,58 @@
 // 5. ���� �����ؾ� �ϸ� GameContext&�� ����մϴ�.
 // 6. ���� ������ const GameContext&�� ����մϴ�.
 
+#pragma once
+
+#include "Player.h"
+#include "Monster.h"
+#include "Inventory.h"
+
 class GameContext
 {
 public:
-    GameContext()
-        : isRunning(true),
-        isGameOver(false),
-        player(),
-        monster(),
-        inventory()
-    {
-    }
+    GameContext();
+    ~GameContext();
 
+    // Player*를 직접 들고 있으므로 복사 금지
+    GameContext(const GameContext&) = delete;
+    GameContext& operator=(const GameContext&) = delete;
 
-    // [���� / ���� ���� ����] ��� �Լ�
-
+public:
     bool IsGameRunning() const;
     void SetGameRunning(bool isRunning);
 
     bool IsGameOver() const;
     void SetGameOver(bool isGameOver);
 
-    // [Player] ���� �Լ�
-    
-    // �÷��̾� ��ü�� �����´�
-    // HP, ���ݷ�, ���, �̸�, ���� ���� Player Ŭ�������� ����
-
+    // 일반 게임 로직용: 플레이어가 반드시 있다고 가정
     Player& GetPlayer();
+    const Player& GetPlayer() const;
 
-    // [Monster] ���� �Լ�
-    
-    // ���� ��ü�� �����´�
-    // ���� HP, ���ݷ�, ���� ��� ���� Monster Ŭ�������� ����
+    // nullptr 체크가 필요한 곳에서 사용
+    Player* GetPlayerPtr();
+    const Player* GetPlayerPtr() const;
+
+    // 캐릭터 선택/교체용
+    void SetPlayer(Player* newPlayer);
+    bool HasPlayer() const;
 
     Monster& GetMonster();
-
-    // [Inventory] ���� �Լ�
- 
-    // �κ��丮 ��ü�� �����´�.
-    // ���� ����, ������ ���� ���� Inventory Ŭ�������� ����
-
+    const Monster& GetMonster() const;
+    void SetMonster(const Monster& monster);
 
     Inventory& GetInventory();
+    const Inventory& GetInventory() const;
 
 private:
-
-    // [���� / ���� ���� ����] ��� ����
- 
-
     bool isRunning;
     bool isGameOver;
 
-
-    // [���� ��ü] ��� ����
-
-    // ���� ��ü���� �����ϴ� ���� ������ ��ü
-    // �� �ý����� �� ��ü���� ���� ���� ������ �ʰ�,
-    // GameContext�� Get �Լ��� ����
-
-
-    Player player;
+    Player* player;
     Monster monster;
     Inventory inventory;
 };
+
+
 
 // GameContext ���� ����
 

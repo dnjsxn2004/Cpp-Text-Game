@@ -7,6 +7,17 @@
 // 생성자 초기화
 Monster::Monster(string Name, int Hp, int Attack, int Defense, int ExpReward, int GoldReward)
     : Name(Name), Hp(Hp), MaxHp(Hp), Attack(Attack), Defense(Defense), ExpReward(ExpReward), GoldReward(GoldReward) {}
+// 게임 컨텍스트 처리용 기본 생성자 추가
+Monster::Monster()
+    : Name("default monster"),
+    Hp(50),
+    MaxHp(50),
+    Attack(10),
+    Defense(3),
+    ExpReward(10),
+    GoldReward(10)
+{
+}
 
 // 데미지 처리 함수 (방어력 계산 포함)
 int Monster::TakeDamage(int Damage) {
@@ -26,7 +37,7 @@ bool Monster::IsDead() const {
 // 몬스터 정보 출력
 void Monster::PrintInfo() const {
     cout << "[" << Name << "] HP: " << Hp << " | ATK: " << Attack
-        << " | DEF: " << Defense << " | 보상: " << ExpReward << "EXP, " << GoldReward << "G\n";
+        << " | DEF: " << Defense << " | reward: " << ExpReward << "EXP, " << GoldReward << "G\n";
 }
 
 // =========================================================================
@@ -57,19 +68,19 @@ Monster SpawnRandomMonster(GameContext& context)
 
     if (MonsterType == 0) {
         // [짭새] 체력이 높고 방어력이 낮음, 골드를 적게 줌
-        Name = "짭새";
+        Name = "monster1";
         FinalHp = (int)(BaseHp * 1.2);   FinalAtk = BaseAtk;
         FinalDef = (int)(BaseDef * 0.5); FinalExp = BaseExp;       FinalGold = (int)(BaseGold * 0.5);
     }
     else if (MonsterType == 1) {
         // [짜바리] 표준적인 스탯, 골드를 많이 줌
-        Name = "짜바리";
+        Name = "monster2";
         FinalHp = BaseHp;                FinalAtk = BaseAtk;
         FinalDef = BaseDef;              FinalExp = BaseExp;       FinalGold = (int)(BaseGold * 1.5);
     }
     else {
         // [칼잽이] 체력이 낮지만 공격력/방어력이 매우 높음, 경험치를 많이 줌
-        Name = "칼잽이";
+        Name = "monster3";
         FinalHp = (int)(BaseHp * 0.8);   FinalAtk = (int)(BaseAtk * 1.3);
         FinalDef = (int)(BaseDef * 1.2); FinalExp = (int)(BaseExp * 1.5); FinalGold = BaseGold;
     }

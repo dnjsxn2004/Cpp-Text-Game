@@ -2,7 +2,7 @@
 
 Jin::Jin()
 {
-    name = "진태식";
+    name = "jin";
     Hp = 300;
     MaxHp = 300;
     Mp = 100;
@@ -41,7 +41,7 @@ int Jin::GetSkillDamage(const StatBonus& equipBonus, const StatBonus& potionBonu
     //통합된 보너스를 내 기본 스탯과 합산
     int finalIntel = Intel + totalBonus.intel;
     int finalLuk = Luk + totalBonus.luk;
-    int finalAtt = finalAtt + totalBonus.att;
+    int finalAtt = Attack + totalBonus.att;
     //최종 스탯을 공식에 대입
     int Damage = finalAtt + (finalIntel * 0.8) + (finalLuk * 0.8);
 

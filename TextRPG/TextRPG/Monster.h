@@ -20,6 +20,7 @@ private:
 
 public:
     // 생성자
+    Monster();
     Monster(string Name, int Hp, int Attack, int Defense, int ExpReward, int GoldReward);
 
     // Getter 메서드 (전투 시스템에서 팀원이 가져다 쓸 함수들)

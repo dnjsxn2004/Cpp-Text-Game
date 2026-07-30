@@ -1,8 +1,27 @@
 #include "GameManager.h"
-#include <iostream>
-#include "ConsolUI.h"
 
-// 게임 시작
+#include <iostream>
+#include <limits>
+
+#include "ConsolUI.h"
+#include "Jin.h"
+#include "Ryu.h"
+
+using namespace std;
+
+GameManager::GameManager()
+    : phaseEnum(Phase::InitialStage),
+    initialStateEnum(InitialState::Act1Cutscene),
+    mainMenuStateEnum(MainMenuState::MainMenu),
+    isBossDefeated(false),
+    storyLevel(0)
+{
+}
+
+GameManager::~GameManager()
+{
+}
+
 void GameManager::Run()
 {
     Initialize();
@@ -12,11 +31,11 @@ void GameManager::Run()
         switch (phaseEnum)
         {
         case Phase::InitialStage:
-            UpdateInit();
+            UpdateInitialStage();
             break;
 
         case Phase::MainLoop:
-            UpdateMainMenu();
+            UpdateMainLoop();
             break;
 
         case Phase::Ending:
@@ -27,6 +46,7 @@ void GameManager::Run()
             break;
 
         default:
+            phaseEnum = Phase::GameOver;
             break;
         }
     }
@@ -34,92 +54,66 @@ void GameManager::Run()
     ExitGame();
 }
 
-// 초기값 세팅
 void GameManager::Initialize()
 {
+    context.SetGameRunning(true);
+    context.SetGameOver(false);
+
     phaseEnum = Phase::InitialStage;
-    initialStateEnum = InitialState::CheckSavesSlot;
+    initialStateEnum = InitialState::Act1Cutscene;
     mainMenuStateEnum = MainMenuState::MainMenu;
-    battleStateEnum = BattleState::Start;
 
-    hasSave = false;
-    loadSuccess = false;
-    isWin = false;
-    playerLevelUp = false;
+    isBossDefeated = false;
     storyLevel = 0;
-
-    playerHp = 100;
-    enemyHp = 50;
 }
 
-// 게임 종료 처리
 void GameManager::ExitGame()
 {
-    // TODO:
-    // - 게임 종료 전 저장이 필요하면 저장 처리
-    // - 종료 메시지 출력
-    std::cout << "게임을 종료합니다.\n";
+    ConsoleUI::ClearScreen();
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Game Exit");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Game will be closed.");
+    ConsoleUI::PrintLine();
 }
 
-// 시작 단계 처리
-void GameManager::UpdateInit()
+void GameManager::UpdateInitialStage()
 {
     switch (initialStateEnum)
     {
-    case InitialState::CheckSavesSlot:
-    {
-        hasSave = CheckSaveSlot();
-
-        if (hasSave)
-        {
-            initialStateEnum = InitialState::SelectSave;
-        }
-        else
-        {
-            initialStateEnum = InitialState::CharacterSelect;
-        }
+    case InitialState::Act1Cutscene:
+        RunAct1Cutscene();
+        initialStateEnum = InitialState::Act2Cutscene;
         break;
-    }
 
-    case InitialState::SelectSave:
-    {
-        ShowSaveMenu();
-        loadSuccess = LoadSelectedSave();
-
-        if (loadSuccess)
-        {
-            phaseEnum = Phase::MainLoop;
-            mainMenuStateEnum = MainMenuState::MainMenu;
-        }
-        else
-        {
-            initialStateEnum = InitialState::CharacterSelect;
-        }
+    case InitialState::Act2Cutscene:
+        RunAct2Cutscene();
+        initialStateEnum = InitialState::Act3Cutscene;
         break;
-    }
+
+    case InitialState::Act3Cutscene:
+        RunAct3Cutscene();
+        initialStateEnum = InitialState::CharacterSelect;
+        break;
 
     case InitialState::CharacterSelect:
-    {
         ShowCharacterSelect();
-        initialStateEnum = InitialState::PrologueTutorial;
+        initialStateEnum = InitialState::Act4Start;
         break;
-    }
 
-    case InitialState::PrologueTutorial:
-    {
-        RunPrologueTutorial();
+    case InitialState::Act4Start:
+        RunAct4StartCutscene();
         phaseEnum = Phase::MainLoop;
         mainMenuStateEnum = MainMenuState::MainMenu;
         break;
-    }
 
     default:
+        phaseEnum = Phase::GameOver;
         break;
     }
 }
 
-// 메인 루프 처리
-void GameManager::UpdateMainMenu()
+void GameManager::UpdateMainLoop()
 {
     switch (mainMenuStateEnum)
     {
@@ -135,20 +129,12 @@ void GameManager::UpdateMainMenu()
         HandleShop();
         break;
 
-    case MainMenuState::Story:
-        HandleStory();
-        break;
-
-    case MainMenuState::Reward:
-        HandleReward();
-        break;
-
-    case MainMenuState::LevelUp:
-        HandleLevelUp();
-        break;
-
     case MainMenuState::Inventory:
         HandleInventory();
+        break;
+
+    case MainMenuState::Story:
+        HandleStory();
         break;
 
     case MainMenuState::BossBattle:
@@ -160,33 +146,121 @@ void GameManager::UpdateMainMenu()
         break;
 
     default:
+        mainMenuStateEnum = MainMenuState::MainMenu;
         break;
     }
 }
 
-// 메인 메뉴 화면
-void GameManager::HandleMainMenu()
+void GameManager::UpdateEnding()
 {
-    std::cout << "\n=== 메인 메뉴 ===\n";
-    std::cout << "1. 일반 전투\n";
-    std::cout << "2. 상점\n";
-    std::cout << "3. 스토리\n";
-    std::cout << "4. 인벤토리\n";
-    std::cout << "0. 게임 종료\n";
+    RunEndingCutscene();
+    phaseEnum = Phase::GameOver;
+}
 
-    if (playerLevelUp)
+void GameManager::RunAct1Cutscene()
+{
+    ConsoleUI::ClearScreen();
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Act 1");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Act 1 cutscene.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+}
+
+void GameManager::RunAct2Cutscene()
+{
+    ConsoleUI::ClearScreen();
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Act 2");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Act 2 cutscene.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+}
+
+void GameManager::RunAct3Cutscene()
+{
+    ConsoleUI::ClearScreen();
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Act 3");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Act 3 cutscene.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+}
+
+void GameManager::ShowCharacterSelect()
+{
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Character Select");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("1. Ryu");
+    ConsoleUI::PrintMessage("2. Jin");
+    ConsoleUI::PrintLine();
+
+    int choice = inputManager.InputInMassegeToRange(
+        "Select character: ",
+        1,
+        2
+    );
+
+    switch (choice)
     {
-        mainMenuStateEnum = MainMenuState::LevelUp;
-        return;
+    case 1:
+        context.SetPlayer(new Ryu());
+        ConsoleUI::PrintMessage("Ryu selected.");
+        break;
+
+    case 2:
+        context.SetPlayer(new Jin());
+        ConsoleUI::PrintMessage("Jin selected.");
+        break;
+
+    default:
+        context.SetPlayer(new Ryu());
+        ConsoleUI::PrintMessage("Default character Ryu selected.");
+        break;
     }
 
-    int choice = inputManager.InputInMassegeToRange("번호를 입력해주세요: ", 0, 4);
+    ConsoleUI::PrintLine();
+    WaitForEnter();
+}
+
+void GameManager::RunAct4StartCutscene()
+{
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Act 4");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Act 4 starts.");
+    ConsoleUI::PrintMessage("Move to main menu.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+}
+
+void GameManager::HandleMainMenu()
+{
+    ConsoleUI::ClearScreen();
+    ConsoleUI::PrintMainMenu();
+
+    int choice = inputManager.InputInMassegeToRange(
+        "Input number: ",
+        0,
+        4
+    );
 
     switch (choice)
     {
     case 1:
         mainMenuStateEnum = MainMenuState::NormalBattle;
-        battleStateEnum = BattleState::Start;
         break;
 
     case 2:
@@ -206,206 +280,107 @@ void GameManager::HandleMainMenu()
         break;
 
     default:
-        break;
-    }
-}
-
-// 일반 전투 처리
-void GameManager::HandleNormalBattle()
-{
-    switch (battleStateEnum)
-    {
-    case BattleState::Start:
-        StartBattle();
-        break;
-
-    case BattleState::PlayerTurn:
-        UpdateBattle();
-        break;
-
-    case BattleState::EnemyTurn:
-    {
-        battleStateEnum = BattleState::CheckResult;
-        break;
-    }
-
-    case BattleState::CheckResult:
-    {
-        if (enemyHp <= 0)
-        {
-            battleStateEnum = BattleState::Victory;
-        }
-        else if (playerHp <= 0)
-        {
-            battleStateEnum = BattleState::Defeat;
-        }
-        else
-        {
-            battleStateEnum = BattleState::PlayerTurn;
-        }
-        break;
-    }
-
-    case BattleState::Victory:
-        EndBattle();
-        isWin = true;
-        mainMenuStateEnum = MainMenuState::Reward;
-        break;
-
-    case BattleState::Defeat:
-        EndBattle();
-        isWin = false;
-        phaseEnum = Phase::GameOver;
-        break;
-
-    default:
-        break;
-    }
-}
-
-// 전투 시작
-void GameManager::StartBattle()
-{
-    battleStateEnum = BattleState::PlayerTurn;
-}
-
-// 플레이어 턴 진행
-void GameManager::UpdateBattle()
-{
-    std::cout << "\n=== 플레이어 턴 ===\n";
-    std::cout << "1. 물리 공격\n";
-    std::cout << "2. 스킬 공격\n";
-    std::cout << "0. 도망/취소(임시)\n";
-
-    int battleChoice = inputManager.InputInMassegeToRange("번호를 입력해주세요: ", 0, 2);
-
-    switch (battleChoice)
-    {
-    case 1:
-        battleStateEnum = BattleState::CheckResult;
-        break;
-
-    case 2:
-        battleStateEnum = BattleState::CheckResult;
-        break;
-
-    case 0:
-        std::cout << "전투를 종료하고 메인 메뉴로 돌아갑니다. (임시)\n";
         mainMenuStateEnum = MainMenuState::MainMenu;
         break;
-
-    default:
-        break;
     }
 }
 
-// 전투 종료 처리
-void GameManager::EndBattle()
+void GameManager::HandleNormalBattle()
 {
-    std::cout << "전투 종료\n";
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Normal Battle");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Temporary normal battle.");
+    ConsoleUI::PrintMessage("You win.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+
+    mainMenuStateEnum = MainMenuState::MainMenu;
 }
 
 void GameManager::HandleShop()
 {
-    std::cout << "\n=== 상점 ===\n";
-    std::cout << "상점 기능 구현 예정\n";
-    mainMenuStateEnum = MainMenuState::MainMenu;
-}
+    ConsoleUI::ClearScreen();
 
-void GameManager::HandleStory()
-{
-    std::cout << "\n=== 스토리 ===\n";
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Shop");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Shop is not connected yet.");
+    ConsoleUI::PrintLine();
 
-    switch (storyLevel)
-    {
-    case 0:
-        storyLevel = 1;
-        break;
+    WaitForEnter();
 
-    case 1:
-        storyLevel = 2;
-        break;
-
-    default:
-        break;
-    }
-
-    mainMenuStateEnum = MainMenuState::MainMenu;
-}
-
-void GameManager::HandleReward()
-{
-    std::cout << "\n=== 보상 화면 ===\n";
-
-    if (isWin)
-    {
-        std::cout << "전투 승리 보상 지급\n";
-        playerLevelUp = true;
-    }
-
-    mainMenuStateEnum = MainMenuState::MainMenu;
-}
-
-void GameManager::HandleLevelUp()
-{
-    playerLevelUp = false;
     mainMenuStateEnum = MainMenuState::MainMenu;
 }
 
 void GameManager::HandleInventory()
 {
-    std::cout << "\n=== 인벤토리 ===\n";
-    std::cout << "인벤토리 기능 구현 예정\n";
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Inventory");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Inventory is not connected yet.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+
     mainMenuStateEnum = MainMenuState::MainMenu;
+}
+
+void GameManager::HandleStory()
+{
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Story");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Move to boss battle.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
+
+    mainMenuStateEnum = MainMenuState::BossBattle;
 }
 
 void GameManager::HandleBossBattle()
 {
-    mainMenuStateEnum = MainMenuState::MainMenu;
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Boss Battle");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Temporary boss battle.");
+    ConsoleUI::PrintMessage("Boss defeated.");
+    ConsoleUI::PrintLine();
+
+    isBossDefeated = true;
+
+    WaitForEnter();
+
+    phaseEnum = Phase::Ending;
 }
 
-// 엔딩 처리
-void GameManager::UpdateEnding()
+void GameManager::RunEndingCutscene()
 {
-    phaseEnum = Phase::GameOver;
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintTitle("Ending");
+    ConsoleUI::PrintLine();
+    ConsoleUI::PrintMessage("Ending cutscene.");
+    ConsoleUI::PrintLine();
+
+    WaitForEnter();
 }
 
-// 보조 함수
-bool GameManager::CheckSaveSlot()
+void GameManager::WaitForEnter()
 {
-    return false;
-}
+    cout << "Press Enter to continue...";
 
-void GameManager::ShowSaveMenu()
-{
-}
-
-bool GameManager::LoadSelectedSave()
-{
-    int choice = inputManager.InputInMassegeToRange("번호를 입력해주세요: ", 1, 3);
-
-    switch (choice)
-    {
-    case 1:
-        std::cout << "슬롯 1 로드\n";
-        return true;
-
-    case 2:
-        std::cout << "슬롯 2 로드\n";
-        return true;
-
-    case 3:
-        return false;
-
-    default:
-        return false;
-    }
-}
-
-void GameManager::ShowCharacterSelect()
-{
-}
-
-void GameManager::RunPrologueTutorial()
-{
+    cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+    cin.get();
 }
