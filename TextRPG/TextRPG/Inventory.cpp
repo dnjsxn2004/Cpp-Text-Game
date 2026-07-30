@@ -223,7 +223,7 @@ bool Inventory::UnequipWeapon(GameContext& context) {
 	items[equippedWeaponIndex].SetEquipped(false);
 	equippedWeaponIndex = -1;
 
-	stateBonus totalBonus;
+	StatBonus totalBonus;
 
 	// 방어구가 남아 있다면 방어구 보너스만 적용
 	if (equippedArmorIndex != -1) {
