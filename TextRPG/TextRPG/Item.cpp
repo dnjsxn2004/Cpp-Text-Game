@@ -1,8 +1,8 @@
 #include "Item.h"
 
 //Item »ý¼ºÀÚ
-Item::Item(const std::string& name, ItemType type, EquipmentType equipmentType, int hpRecovery, int mpRecovery, int attackBonus, int defenceBonus, int quantity)
-	:name(name), type(type), equipmentType(equipmentType), hpRecovery(hpRecovery), mpRecovery(mpRecovery), attackBonus(attackBonus), defenceBonus(defenceBonus), quantity(quantity) equipped(false){
+Item::Item(const std::string& name, ItemType type, EquipmentType equipmentType, const StatBonus& statBonus, int quantity)
+	:name(name), type(type), equipmentType(equipmentType), quantity(quantity),statBonus(statBonus), equipped(false){
 
 }
 
@@ -26,26 +26,14 @@ void Item::SetQuantity(int quantity) {
 	quantity = newQuantity;
 }
 
-int Item::GetHpRecovery() const {
-	return hpRecovery;
-}
-
-int Item::GetMpRecovery() const {
-	return mpRecovery;
-}
-
-int Item::GetAttackBonus() const {
-	return attackBonus;
-}
-
-int Item::GetDefenceBonus() const {
-	return defenceBonus;
-}
-
 bool Item::IsEquipped() const {
 	return equipped;
 }
 
 void Item::SetEquipped(bool equipped) {
 	this->equipped = equipped;
+}
+
+const StatBonus& Item::GetStatBonus() const {
+	return statBonus;
 }

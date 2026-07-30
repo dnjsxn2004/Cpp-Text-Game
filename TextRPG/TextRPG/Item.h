@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include "Player.h"
+#include "StatBonus.h"
 
 //아이템타입 클래스
 enum class ItemType {
@@ -29,18 +30,11 @@ private:
 
 //아이템 생성자
 public:
-	Item(const std::string& name, ItemType type, EquipmentType equipmentType = EquipmentType::None,
-		int hpRecovery = 0, int mpRecovery = 0, int attackBonus = 0, int defenceBonus = 0, int quantity = 1);
+	Item(const std::string& name, ItemType type, EquipmentType equipmentType = EquipmentType::None,const StatBonus& statBonus = StatBonus(), int quantity = 1);
 
 	std::string GetName() const;
 	ItemType GetType() const;
 	EquipmentType getEquipmentType() const;
-
-	int GetHpRecovery() const;
-	int GetMpRecovery() const;
-
-	int GetAttackBonus() const;
-	int GetDefenceBonus() const;
 
 	//아이템 수량 반환
 	int GetQuantity() const;
@@ -50,5 +44,7 @@ public:
 
 	bool IsEquipped() const;
 	void SetEquipped(bool equipped);
+
+	const StatBonus& GetStatBonus() const;
 };
 
