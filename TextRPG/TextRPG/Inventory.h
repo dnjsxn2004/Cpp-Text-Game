@@ -44,4 +44,5 @@ public:
 	int GetEquippedWeaponIndex() const;
 	int GetEquippedArmorIndex() const;
 
+	bool RemoveItem(int index, int quantity = 1);
 };

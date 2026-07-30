@@ -281,3 +281,45 @@ int Inventory::GetEquippedWeaponIndex() const {
 int Inventory::GetEquippedArmorIndex() const {
 	return equippedArmorIndex;
 }
+
+bool Inventory::RemoveItem(int index, int quantity) {
+
+	//잘못된 인덱스 검사
+	if (index < 0 || index >= static_cast<int>(items.size())) {
+		return false;
+	}
+
+	//잘못된 삭제 수량 검사
+	if (quantity <= 0) {
+		return false;
+	}
+
+	Item& item = items[index];
+
+	//정착 중인 아이템은 삭제 불가
+	if (item.IsEquipped()) {
+		return false;
+	}
+
+	//가지고 있는 수량보다 많이 삭제하려는 경우
+	if (quantity > item.GetQuantity()) {
+		return false;
+	}
+
+	item.SetQuantity(item.GetQuantity() - quantity);
+
+	//수량이 0이면 벡터에서 완전히 삭제
+	if (item.GetQuantity() <= 0) {
+		items.erase(items.begin() + index);
+
+		//삭제 위치 뒤에 있는 장비 인덱스 조정
+		if (equippedWeaponIndex > index) {
+			equippedWeaponIndex--;
+		}
+
+		if (equippedArmorIndex > index) {
+			equippedArmorIndex--;
+		}
+	}
+	return true;
+}
