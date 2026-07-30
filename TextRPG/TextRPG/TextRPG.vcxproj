@@ -132,6 +132,9 @@
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
+    <ClCompile Include="InputManager.h" />
+    <ClCompile Include="Item.cpp" />
+    <ClCompile Include="ItemFactory.cpp" />
     <ClCompile Include="Jin.cpp" />
     <ClCompile Include="Gang.cpp" />
     <ClCompile Include="Monster.cpp" />
@@ -151,7 +154,9 @@
     <ClInclude Include="Monster.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="ItemFactory.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="StatBonus.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
