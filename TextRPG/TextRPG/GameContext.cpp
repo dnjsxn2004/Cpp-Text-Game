@@ -1,6 +1,6 @@
 #include "GameContext.h"
 
-bool GameContext::IsGameRunning()
+bool GameContext::IsGameRunning() const
 {
     return isRunning;
 }
@@ -10,7 +10,7 @@ void GameContext::SetGameRunning(bool isRunning)
     this->isRunning = isRunning;
 }
 
-bool GameContext::IsGameOver()
+bool GameContext::IsGameOver() const
 {
     return isGameOver;
 }

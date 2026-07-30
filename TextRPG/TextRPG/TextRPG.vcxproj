@@ -127,21 +127,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Battle.cpp" />
     <ClCompile Include="ConsolUI.cpp" />
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="InputManager.h" />
+    <ClCompile Include="Jin.cpp" />
+    <ClCompile Include="Gang.cpp" />
+    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="Ryu.cpp" />
     <ClCompile Include="TextRPG.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Battle.h" />
     <ClInclude Include="ConsolUI.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="InputManager.h" />
+    <ClInclude Include="Jin.h" />
+    <ClInclude Include="Gang.h" />
+    <ClInclude Include="Ryu.h" />
+    <ClInclude Include="Monster.h" />
     <ClInclude Include="Inventory.h" />
     <ClInclude Include="Item.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="StatBonus.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,11 +1,15 @@
 ﻿#include "GameManager.h"
-#include "ConsolUI.h"
+#include "Monster.h"
+#include <ctime>
+#include <cstdlib>
 
 int main()
 {
-	ConsoleUI::PrintJinImage();
+    srand(static_cast<unsigned int>(time(nullptr)));
     GameManager gameManager;
     gameManager.Run();
+
+    
 
     return 0;
 }
