@@ -102,6 +102,11 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 	Item& newItem = items[index];
 
 	//장비 아이템이 아니면 장착할 수 없음
+	if (newItem.GetType() != ItemType::Equipment) {
+		return false;
+	}
+	
+	//이미 장착한 아이템이면 다시 장착하지 않음
 	if (newItem.IsEquipped()) {
 		return false;
 	}

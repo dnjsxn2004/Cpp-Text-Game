@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include "Player.h"
 
 //아이템타입 클래스
 enum class ItemType {
@@ -17,22 +18,14 @@ enum class EquipmentType {
 class Item {
 private:
 	std::string name; //이름
-
 	ItemType type; //타입
-
 	EquipmentType equipmentType; //장비 유형
 
-	int hpRecovery;//hp회복
-	
-	int mpRecovery;//mp회복
-
-	int attackBonus;//공격 보너스
-
-	int defenceBonus;//방어 보너스
-
-	int quantity; // 아이템 수량
-
+    int quantity; // 아이템 수량
 	bool equipped; // 장비
+
+	//장비가 제공하는 능력치
+	StatBonus statBonus;
 
 //아이템 생성자
 public:
