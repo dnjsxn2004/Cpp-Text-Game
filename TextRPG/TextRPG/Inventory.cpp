@@ -119,7 +119,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 		return false;
 	}
 
-	EquipmentType equipmentType = selectedItem.GetEquipmentType();
+	EquipmentType equipmentType = newItem.GetEquipmentType();
 
 	//무기 장착
 	if (equipmentType == EquipmentType::Weapon) {
@@ -128,7 +128,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 			items[equippedWeaponIndex].SetEquipped(false);
 		}
 		equippedWeaponIndex = index;
-		selectedItem.SetEquipped(true);
+		newItem.SetEquipped(true);
 	}
 	//방어구 장착
 	else if (equipmentType == EquipmentType::Armor) {
@@ -138,7 +138,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 		}
 
 		equippedArmorIndex = index;
-		selecetItem.SetEquipped(true);
+		newItem.SetEquipped(true);
 	}
 	else {
 		return false;
@@ -176,7 +176,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 
 	//Player가 기존 장비 보너스를 새 보너스로 교체
 	player.ApplyEquipBonus(true, totalBonus);
-
+	player.ApplyEquipHpMpBonus(true, totalBonus);
 	return true;
 }
 
@@ -187,7 +187,7 @@ bool Inventory::UnequipWeapon(GameContext& context) {
 		return false;
 	}
 
-	item[equippedWeaponIndex].SetEquipped(false);
+	items[equippedWeaponIndex].SetEquipped(false);
 	equippedWeaponIndex = -1;
 
 	Player& player = context.GetPlayer();
@@ -200,7 +200,7 @@ bool Inventory::UnequipWeapon(GameContext& context) {
 	}
 
 	player.ApplyEquipBonus(true, totalBonus);
-
+	player.ApplyEquipHpMpBonus(true, totalBonus);
 	return true;
 }
 
@@ -211,7 +211,7 @@ bool Inventory::UnequipArmor(GameContext& context) {
 		return false;
 	}
 
-	item[equippedArmorIndex].SetEquipped(false);
+	items[equippedArmorIndex].SetEquipped(false);
 	equippedArmorIndex = -1;
 
 	Player& player = context.GetPlayer();
@@ -224,15 +224,15 @@ bool Inventory::UnequipArmor(GameContext& context) {
 	}
 
 	player.ApplyEquipBonus(true, totalBonus);
-
+	player.ApplyEquipHpMpBonus(true, totalBonus);
 	return true;
 }
 
 //장착 인덱스 Getter
-int Inventory::GetquippedWeaponIndex() const {
-	return GetquippedWeaponIndex;
+int Inventory::GetEquippedWeaponIndex() const {
+	return equippedWeaponIndex;
 }
 
-int Inventory::GetquippedArmorIndex() const {
-	return GetquippedArmorIndex;
+int Inventory::GetEquippedArmorIndex() const {
+	return equippedArmorIndex;
 }

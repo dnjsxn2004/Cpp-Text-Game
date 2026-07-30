@@ -25,8 +25,8 @@ Item ItemFactory::CreateAlcohol(int quantity) {
 		ItemType::Consumable,
 		EquipmentType::None,
 		StatBonus(
-			10,// hp
-			0, // mp
+			0,// hp
+			10, // mp
 			0, // str
 			0, // att
 			0, // def
@@ -44,11 +44,11 @@ Item ItemFactory::CreateDrug(int quantity) {
 		ItemType::Consumable,
 		EquipmentType::None,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
-			0, // att
-			0, // def
+			10, // att
+		   -10, // def
 			0, // dex
 			0, // intel
 			0 // luk 
@@ -63,8 +63,8 @@ Item ItemFactory::CreateWhiskey(int quantity) {
 		ItemType::Consumable,
 		EquipmentType::None,
 		StatBonus(
-			10,// hp
-			0, // mp
+			0,// hp
+			20, // mp
 			0, // str
 			0, // att
 			0, // def
@@ -85,8 +85,8 @@ Item ItemFactory::CreateSyringe(int quantity) {
 			10,// hp
 			0, // mp
 			0, // str
-			0, // att
-			0, // def
+			15, // att
+		   -15, // def
 			0, // dex
 			0, // intel
 			0 // luk 
@@ -101,7 +101,7 @@ Item ItemFactory::CreateCannabis(int quantity) {
 		ItemType::Consumable,
 		EquipmentType::None,
 		StatBonus(
-			10,// hp
+			20,// hp
 			0, // mp
 			0, // str
 			0, // att
@@ -121,10 +121,10 @@ Item ItemFactory::CreateKnife() {
 		ItemType::Equipment,
 		EquipmentType::Weapon,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
-			0, // att
+			20, // att
 			0, // def
 			0, // dex
 			0, // intel
@@ -140,10 +140,10 @@ Item ItemFactory::CreateBat() {
 		ItemType::Equipment,
 		EquipmentType::Weapon,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
-			0, // att
+			15, // att
 			0, // def
 			0, // dex
 			0, // intel
@@ -159,10 +159,10 @@ Item ItemFactory::CreateKnuckle() {
 		ItemType::Equipment,
 		EquipmentType::Weapon,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
-			0, // att
+			10, // att
 			0, // def
 			0, // dex
 			0, // intel
@@ -178,10 +178,10 @@ Item ItemFactory::CreateKatana() {
 		ItemType::Equipment,
 		EquipmentType::Weapon,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
-			0, // att
+			30, // att
 			0, // def
 			0, // dex
 			0, // intel
@@ -198,11 +198,11 @@ Item ItemFactory::CreateThomBrowne() {
 		ItemType::Equipment,
 		EquipmentType::Armor,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
 			0, // att
-			0, // def
+			20, // def
 			0, // dex
 			0, // intel
 			0 // luk 
@@ -217,11 +217,11 @@ Item ItemFactory::CreateGucci() {
 		ItemType::Equipment,
 		EquipmentType::Armor,
 		StatBonus(
-			10,// hp
+			0,// hp
 			0, // mp
 			0, // str
 			0, // att
-			0, // def
+			20, // def
 			0, // dex
 			0, // intel
 			0 // luk 
