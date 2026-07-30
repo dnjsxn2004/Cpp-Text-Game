@@ -203,3 +203,36 @@ bool Inventory::UnequipWeapon(GameContext& context) {
 
 	return true;
 }
+
+//방어구 해제
+bool Inventory::UnequipArmor(GameContext& context) {
+	//장착된 방어구가 없음
+	if (equippedArmorIndex == -1) {
+		return false;
+	}
+
+	item[equippedArmorIndex].SetEquipped(false);
+	equippedArmorIndex = -1;
+
+	Player& player = context.GetPlayer();
+
+	StatBonus totalBonus;
+
+	// 무기가 남아 있다면 무기 보너스만 적용
+	if (equippedWeaponIndex != -1) {
+		totalBonus = items[equippedWeaponIndex].GetStatBonus();
+	}
+
+	player.ApplyEquipBonus(true, totalBonus);
+
+	return true;
+}
+
+//장착 인덱스 Getter
+int Inventory::GetquippedWeaponIndex() const {
+	return GetquippedWeaponIndex;
+}
+
+int Inventory::GetquippedArmorIndex() const {
+	return GetquippedArmorIndex;
+}
