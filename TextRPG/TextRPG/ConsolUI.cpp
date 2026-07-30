@@ -58,11 +58,30 @@ void ConsoleUI::PrintMainMenu()
 	PrintLine();
 	PrintTitle("메인 메뉴");
 	PrintLine();
-	cout << "1. 일반 전투" << endl;
-	cout << "2. 상점" << endl;
-	cout << "3. 메인 스토리" << endl;
+
+    PrintMessage("1. 일반 전투");
+    PrintMessage("2. 메인 스토리");
+    PrintMessage("3. 인벤토리");
+    PrintMessage("4. 상점");
+    PrintMessage("0. 게임 종료");
+
 	PrintLine();
 }
+
+void ConsoleUI::PrintInventoryMenu()
+{
+    PrintLine();
+    PrintTitle("인벤토리 확인");
+    PrintLine();
+
+    PrintMessage("1. 내가 가진 전체 아이템 보기");
+    PrintMessage("2. 장비 아이템");
+    PrintMessage("3. 소비 아이템");
+    PrintMessage("4. 퀘스트 아이템");
+    PrintMessage("0. 뒤로가기");
+
+    PrintLine();
+};
 
 void ConsoleUI::PrintJobSelectMenu()
 {

@@ -26,6 +26,11 @@
 #include <iostream>
 #include <string>
 #include <windows.h> // Windows API 헤더 추가
+#include <vector>
+
+#include "Inventory.h"
+#include "Item.h"
+#include "GameContext.h"
 
 class ConsoleUI
 {
@@ -53,9 +58,13 @@ public:
     // 예: ConsoleUI::PrintSuccess("아이템 구매에 성공했습니다.");
     static void PrintSuccess(const std::string& message);
 
-    // 메인 메뉴 함수
+    // 메인 메뉴 출력 함수
     // 항목: 전투 / 상점 / 인벤토리 / 포션 제작 / 훈련장 / 상태 보기 / 게임 종료
     static void PrintMainMenu();
+
+    // 인벤토리 메뉴 출력 함수
+    // 항목: 내가 가진 전체 아이템 보기 / 장비 아이템 / 소비 아이템 / 퀘스트 아이템 / 뒤로가기
+    static void PrintInventoryMenu();
 
     // 직업 선택 메뉴 함수
     // 항목: 전사 / 궁수 / 마법사 / 도적
@@ -158,4 +167,6 @@ public:
 
     // Cut 6: 진태식이 패배하고 위기에 빠지는 애니메이션 출력 함수
     static void PlayCutScene6Animation();
+
+
 };
