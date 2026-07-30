@@ -1,18 +1,29 @@
 #include "Inventory.h"
 #include "GameContext.h"
 
+Inventory::Inventory()
+	: equippedWeaponIndex(-1),
+	  equippedArmorIndex(-1) {
+
+}
+
+
 //인벤토리에 아이템을 추가
 void Inventory::AddItem(const Item& item) {
 	
-	//같은 이름의 아이템이 있는지 확인
-	for (Item& inventoryItem : items) {
-		if (inventoryItem.GetName() == item.GetName()) {
-			
-			//같은 아이템이면 수량만 증가
-			inventoryItem.SetQuantity(
-				inventoryItem.GetQuantity() + item.GetQuantity()
-			);
-			return;
+	// 소비 아이템만 수량 합치기
+	if (item.GetType() == ItemType::Consumable) {
+
+		//같은 이름의 아이템이 있는지 확인
+		for (Item& inventoryItem : items) {
+			if (inventoryItem.GetType() == ItemType::Consumable && inventoryItem.GetName() == item.GetName()) {
+
+				//같은 아이템이면 수량만 증가
+				inventoryItem.SetQuantity(
+					inventoryItem.GetQuantity() + item.GetQuantity()
+				);
+				return;
+			}
 		}
 	}
 	//같은 아이템이 없으면 새로 추가
@@ -63,7 +74,8 @@ bool Inventory::UseItem(int index, GameContext& context)
 	const StatBonus& bonus = item.GetStatBonus();
 
 	// HP와 MP 효과가 모두 없으면 사용할 수 없음
-	if (bonus.hp == 0 && bonus.mp == 0)
+	if (bonus.hp == 0 && bonus.mp == 0 && bonus.str ==0 && bonus.att ==0 &&
+		bonus.def == 0 && bonus.dex == 0 &&  bonus.intel == 0 && bonus.luk ==0)
 	{
 		return false;
 	}
@@ -97,12 +109,6 @@ bool Inventory::UseItem(int index, GameContext& context)
 	return true;
 }
 
-Inventory::Inventory()
-	: equippedWeaponIndex(-1),
-	  equippedArmorIndex(-1) {
-
-}
-
 //장비 장착 함수
 bool Inventory::EquipItem(int index, GameContext& context) {
 
@@ -120,31 +126,49 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 	}
 
 	EquipmentType equipmentType = newItem.GetEquipmentType();
+	Player& player = context.GetPlayer();
 
 	//무기 장착
 	if (equipmentType == EquipmentType::Weapon) {
 		//기존 무기가 있으면 장착 상태 해제
 		if (equippedWeaponIndex != -1) {
+			const StatBonus oldBonus = items[equippedWeaponIndex].GetStatBonus();
+			
+			player.ApplyEquipHpMpBonus(false, oldBonus);
 			items[equippedWeaponIndex].SetEquipped(false);
 		}
 		equippedWeaponIndex = index;
 		newItem.SetEquipped(true);
+
+		//새 무기의 HP/MP 보너스 적용
+		player.ApplyEquipHpMpBonus(
+			true,
+			newItem.GetStatBonus()
+		);
 	}
+
 	//방어구 장착
 	else if (equipmentType == EquipmentType::Armor) {
 		//기존 방어구가 있으면 장착 상태 해제
 		if (equippedArmorIndex != -1) {
+			const StatBonus oldBonus = items[equippedArmorIndex].GetStatBonus();
+
+			player.ApplyEquipHpMpBonus(false, oldBonus);
 			items[equippedArmorIndex].SetEquipped(false);
 		}
-
 		equippedArmorIndex = index;
 		newItem.SetEquipped(true);
+
+		//새 방어구의 HP/MP 보너스 적용
+		player.ApplyEquipHpMpBonus(
+			true,
+			newItem.GetStatBonus()
+		);
 	}
+
 	else {
 		return false;
 	}
-
-	Player& player = context.GetPlayer();
 
 	//정착 중인 장비 전체 보너스 계산
 	StatBonus totalBonus;
@@ -176,7 +200,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 
 	//Player가 기존 장비 보너스를 새 보너스로 교체
 	player.ApplyEquipBonus(true, totalBonus);
-	player.ApplyEquipHpMpBonus(true, totalBonus);
+
 	return true;
 }
 
@@ -187,20 +211,31 @@ bool Inventory::UnequipWeapon(GameContext& context) {
 		return false;
 	}
 
+	Player& player = context.GetPlayer();
+
+	//해제할 무기의 보너스를 먼저 저장
+	const StatBonus removedBonus = items[equippedWeaponIndex].GetStatBonus();
+
+	//무기의 HP/MP 보너스 제거
+	player.ApplyEquipHpMpBonus(false, removedBonus);
+
+	//장착 상태 해제
 	items[equippedWeaponIndex].SetEquipped(false);
 	equippedWeaponIndex = -1;
 
-	Player& player = context.GetPlayer();
-
-	StatBonus totalBonus;
+	stateBonus totalBonus;
 
 	// 방어구가 남아 있다면 방어구 보너스만 적용
 	if (equippedArmorIndex != -1) {
 		totalBonus = items[equippedArmorIndex].GetStatBonus();
+
+		player.ApplyEquipBonus(true, totalBonus);
+	}
+	else {
+		//남은 장비가 없음
+		player.ApplyEquipBonus(false, StatBonus());
 	}
 
-	player.ApplyEquipBonus(true, totalBonus);
-	player.ApplyEquipHpMpBonus(true, totalBonus);
 	return true;
 }
 
@@ -211,20 +246,30 @@ bool Inventory::UnequipArmor(GameContext& context) {
 		return false;
 	}
 
+	Player& player = context.GetPlayer();
+
+	//해제할 방어구의 보너스를 먼저 저장
+	const StatBonus removedBonus = items[equippedArmorIndex].GetStatBonus();
+
+	//방어구의 HP/MP 보너스 제거
+	player.ApplyEquipHpMpBonus(false, removedBonus);
+
+	//장착 상태 해제
 	items[equippedArmorIndex].SetEquipped(false);
 	equippedArmorIndex = -1;
-
-	Player& player = context.GetPlayer();
 
 	StatBonus totalBonus;
 
 	// 무기가 남아 있다면 무기 보너스만 적용
 	if (equippedWeaponIndex != -1) {
 		totalBonus = items[equippedWeaponIndex].GetStatBonus();
-	}
 
-	player.ApplyEquipBonus(true, totalBonus);
-	player.ApplyEquipHpMpBonus(true, totalBonus);
+		player.ApplyEquipBonus(true, totalBonus);
+	}
+	else {
+		// 남은 장비가 없음
+		player.ApplyEquipBonus(false, StatBonus());
+	}
 	return true;
 }
 
