@@ -281,3 +281,141 @@ int Inventory::GetEquippedWeaponIndex() const {
 int Inventory::GetEquippedArmorIndex() const {
 	return equippedArmorIndex;
 }
+
+bool Inventory::RemoveItem(int index, int quantity) {
+
+	//잘못된 인덱스 검사
+	if (index < 0 || index >= static_cast<int>(items.size())) {
+		return false;
+	}
+
+	//잘못된 삭제 수량 검사
+	if (quantity <= 0) {
+		return false;
+	}
+
+	Item& item = items[index];
+
+	//정착 중인 아이템은 삭제 불가
+	if (item.IsEquipped()) {
+		return false;
+	}
+
+	//가지고 있는 수량보다 많이 삭제하려는 경우
+	if (quantity > item.GetQuantity()) {
+		return false;
+	}
+
+	item.SetQuantity(item.GetQuantity() - quantity);
+
+	//수량이 0이면 벡터에서 완전히 삭제
+	if (item.GetQuantity() <= 0) {
+		items.erase(items.begin() + index);
+
+		//삭제 위치 뒤에 있는 장비 인덱스 조정
+		if (equippedWeaponIndex > index) {
+			equippedWeaponIndex--;
+		}
+
+		if (equippedArmorIndex > index) {
+			equippedArmorIndex--;
+		}
+	}
+	return true;
+}
+
+bool Inventory::BuyItem(const Item& item, int quantity, GameContext& context) {
+
+	//구매 수량 검사
+	if (quantity <= 0) {
+		return false;
+	}
+
+	//퀘스트 아이템은 구매 불가
+	if (item.GetType() == ItemType::Quest) {
+		return false;
+	}
+
+	Player& player = context.GetPlayer();
+
+	int totalPrice = item.GetPrice() * quantity;
+
+	//돈이 부족한지 검사
+	if (player.GetGold() < totalPrice) {
+		return false;
+	}
+
+	//돈 차감
+	player.SetGold(player.GetGold() - totalPrice);
+
+	//구매한 아이템 생성
+	Item purchasedItem(item.GetName(), item.GetType(), item.GetEquipmentType(), item.GetStatBonus(), quantity, item.GetPrice());
+
+	//인벤토리에 추가
+	AddItem(purchasedItem);
+
+	return true;
+}
+
+//장착한 무기 아이템 반환 함수
+std::string Inventory::GetEquippedWeaponName() const
+{
+	if (equippedWeaponIndex == -1)
+	{
+		return "";
+	}
+
+	return items[equippedWeaponIndex].GetName();
+}
+
+//장착한 방어구 아이템 반환 함수
+std::string Inventory::GetEquippedArmorName() const
+{
+	if (equippedArmorIndex == -1)
+	{
+		return "";
+	}
+
+	return items[equippedArmorIndex].GetName();
+}
+
+//장착하지 않은 아이템 반환
+std::vector<Item> Inventory::GetUnequippedItems() const {
+	std::vector<Item> result;
+
+	for (const Item& item : items) {
+		//장착 중인 아닌 아이템만 일반 인벤토리에 추가
+		if (!item.IsEquipped()) {
+			result.push_back(item);
+		}
+	}
+	return result;
+}
+
+//현재 장착 중인 아이템만 반환
+std::vector<Item> Inventory::GetEquippedItems() const {
+	std::vector<Item> result;
+
+	for (const Item& item : items) {
+		//장착 중인 아이템만 장착 인벤토리에 추가
+		if (item.IsEquipped()) {
+			result.push_back(item);
+		}
+	}
+	return result;
+}
+
+//장착하지 않은 장비들의 실제 인벤토리 위치를 모아 놓는 목록
+std::vector<int> Inventory::GetUnequippedEquipmentIndies() const {
+	std::vector<int> result;
+
+	for (int i = 0;
+		i < static_cast<int>(items.size()); i++) {
+		const Item& item = items[i];
+
+		if (item.GetType() == ItemType::Equipment && !item.IsEquipped()) {
+			result.push_back(i);
+		}
+	}
+	return result;
+}

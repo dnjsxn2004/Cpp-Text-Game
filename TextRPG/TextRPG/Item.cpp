@@ -1,8 +1,8 @@
 #include "Item.h"
 
 //Item 생성자
-Item::Item(const std::string& name, ItemType type, EquipmentType equipmentType, const StatBonus& statBonus, int quantity)
-	:name(name), type(type), equipmentType(equipmentType), quantity(quantity),statBonus(statBonus), equipped(false){
+Item::Item(const std::string& name, ItemType type, EquipmentType equipmentType, const StatBonus& statBonus, int quantity, int price)
+	:name(name), type(type), equipmentType(equipmentType), quantity(quantity),statBonus(statBonus), equipped(false), price(price){
 
 }
 
@@ -24,6 +24,9 @@ int Item::GetQuantity() const {
 //아이템 수량 변경
 void Item::SetQuantity(int quantity) {
 	this->quantity = quantity;
+}
+int Item::GetPrice() const {
+	return price;
 }
 
 bool Item::IsEquipped() const {

@@ -15,7 +15,8 @@ Item ItemFactory::CreateCigarette(int quantity) {
 			0, // intel
 			0 // luk 
 		),
-		quantity
+		quantity,
+		20
 	);
 }
 
@@ -34,7 +35,8 @@ Item ItemFactory::CreateAlcohol(int quantity) {
 			0, // intel
 			0 // luk 
 		),
-		quantity
+		quantity,
+		15
 	);
 }
 
@@ -53,7 +55,8 @@ Item ItemFactory::CreateDrug(int quantity) {
 			0, // intel
 			0 // luk 
 		),
-		quantity
+		quantity,
+		40
 	);
 }
 
@@ -72,7 +75,8 @@ Item ItemFactory::CreateWhiskey(int quantity) {
 			0, // intel
 			0 // luk 
 		),
-		quantity
+		quantity,
+		35
 	);
 }
 
@@ -83,7 +87,7 @@ Item ItemFactory::CreateSyringe(int quantity) {
 		EquipmentType::None,
 		StatBonus(
 			10,// hp
-			0, // mp
+			10, // mp
 			0, // str
 			15, // att
 		   -15, // def
@@ -91,7 +95,8 @@ Item ItemFactory::CreateSyringe(int quantity) {
 			0, // intel
 			0 // luk 
 		),
-		quantity
+		quantity,
+		100
 	);
 }
 
@@ -110,7 +115,8 @@ Item ItemFactory::CreateCannabis(int quantity) {
 			0, // intel
 			0 // luk 
 		),
-		quantity
+		quantity,
+		40
 	);
 }
 
@@ -130,7 +136,8 @@ Item ItemFactory::CreateKnife() {
 			0, // intel
 			0 // luk 
 		),
-		1
+		1,
+		300
 	);
 }
 
@@ -149,7 +156,8 @@ Item ItemFactory::CreateBat() {
 			0, // intel
 			0 // luk 
 		),
-		1
+		1,
+		250
 	);
 }
 
@@ -168,7 +176,8 @@ Item ItemFactory::CreateKnuckle() {
 			0, // intel
 			0 // luk 
 		),
-		1
+		1,
+		200
 	);
 }
 
@@ -181,13 +190,14 @@ Item ItemFactory::CreateKatana() {
 			0,// hp
 			0, // mp
 			0, // str
-			30, // att
+			40, // att
 			0, // def
 			0, // dex
 			0, // intel
 			0 // luk 
 		),
-		1
+		1,
+		500
 	);
 }
 
@@ -207,7 +217,8 @@ Item ItemFactory::CreateThomBrowne() {
 			0, // intel
 			0 // luk 
 		),
-		1
+		1,
+		300
 	);
 }
 
@@ -226,7 +237,8 @@ Item ItemFactory::CreateGucci() {
 			0, // intel
 			0 // luk 
 		),
-		1
+		1,
+		300
 	);
 }
 
@@ -237,6 +249,7 @@ Item ItemFactory::CreateQuestKey() {
 		ItemType::Quest,
 		EquipmentType::None,
 		StatBonus(),
-		1
+		1,
+		0
 	);
 }

@@ -23,13 +23,14 @@ private:
 
     int quantity; // 아이템 수량
 	bool equipped; // 장비
+	int price; // 가격
 
 	//장비가 제공하는 능력치
 	StatBonus statBonus;
 
 //아이템 생성자
 public:
-	Item(const std::string& name, ItemType type, EquipmentType equipmentType = EquipmentType::None,const StatBonus& statBonus = StatBonus(), int quantity = 1);
+	Item(const std::string& name, ItemType type, EquipmentType equipmentType = EquipmentType::None,const StatBonus& statBonus = StatBonus(), int quantity = 1, int price = 0);
 
 	std::string GetName() const;
 	ItemType GetType() const;
@@ -40,6 +41,8 @@ public:
 
 	//아이템 수량 변경
 	void SetQuantity(int quantity);
+
+	int GetPrice() const;
 
 	bool IsEquipped() const;
 	void SetEquipped(bool equipped);
