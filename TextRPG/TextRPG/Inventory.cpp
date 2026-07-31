@@ -388,8 +388,8 @@ std::vector<Item> Inventory::GetUnequippedItems() const {
 		if (!item.IsEquipped()) {
 			result.push_back(item);
 		}
-		return result;
 	}
+	return result;
 }
 
 //현재 장착 중인 아이템만 반환
@@ -401,8 +401,8 @@ std::vector<Item> Inventory::GetEquippedItems() const {
 		if (item.IsEquipped()) {
 			result.push_back(item);
 		}
-		return result;
 	}
+	return result;
 }
 
 //장착하지 않은 장비들의 실제 인벤토리 위치를 모아 놓는 목록
