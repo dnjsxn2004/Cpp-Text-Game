@@ -356,3 +356,25 @@ bool Inventory::BuyItem(const Item& item, int quantity, GameContext& context) {
 
 	return true;
 }
+
+//장착한 무기 아이템 반환 함수
+std::string Inventory::GetEquippedWeaponName() const
+{
+	if (equippedWeaponIndex == -1)
+	{
+		return "";
+	}
+
+	return items[equippedWeaponIndex].GetName();
+}
+
+//장착한 방어구 아이템 반환 함수
+std::string Inventory::GetEquippedArmorName() const
+{
+	if (equippedArmorIndex == -1)
+	{
+		return "";
+	}
+
+	return items[equippedArmorIndex].GetName();
+}

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 #include "Item.h"
 
 class GameContext;
@@ -22,7 +23,7 @@ public:
 
 	//인벤토리에 아이템 추가
 	void AddItem(const Item& item);
-	
+
 	//인벤토리에 저장된 전체 아이템 목록을 반환
 	const std::vector<Item>& GetItems() const;
 
@@ -47,4 +48,8 @@ public:
 	bool RemoveItem(int index, int quantity = 1);
 
 	bool BuyItem(const Item& item, int quantity, GameContext& context);
+
+	std::string GetEquippedWeaponName() const;
+	std::string GetEquippedArmorName() const;
+
 };
