@@ -63,35 +63,43 @@ public:
     static void PrintMainMenu();
 
     // 현재 플레이어의 상태를 콘솔에 출력하는 함수
-    // 게임 진행 중 메뉴에서 언제든 호출하여 캐릭터 정보를 확인할 때 사용
-    // 레벨, 경험치, HP, MP, 공격력, 방어력
+    // 게임 진행 중 맨 아래 캐릭터 정보를 확인할 때 사용
+    // 레벨, 경험치, HP, MP
     static void PrintPlayerStatusEveryTime(GameContext& context);
 
     // 세부 상태창 출력 함수
-    //캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
+    // 캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
     // 내가 장착하고 있는 장비 아이템
     // 몬스터 처치수
-    static void PrintStatus(GameContext& context, StatBonus& equipBonus, StatBonus& potionBonus);
+    static void PrintStatus(GameContext& context, Battle& battle, StatBonus& equipBonus, StatBonus& potionBonus);
+
 
 
     // 아이템 타입을 출력 가능한 문자열로 변환
-    static string ItemTypeToString(ItemType type);
+    static string ItemTypeToString(Item& item);
+
+    // 아이템 목록을 번호와 함께 출력하는 함수
+    // EX) 1. 아이템
+    static void PrintItemListWithIndex(const vector<Item>& items);
 
     // 인벤토리 메뉴 출력 함수
     // 항목: 내가 가진 전체 아이템 보기 / 장비 아이템 / 소비 아이템 / 퀘스트 아이템 / 뒤로가기
     static void PrintInventoryMenu();
 
     // 아이템 1개의 정보를 화면에 출력
-    static void PrintItem(const Item& item);
+    static void PrintItem(Item& item);
 
     // 인벤토리에 저장된 모든 아이템 목록을 출력
-    static void PrintAllItems(const Inventory& inventory);
+    static void PrintAllItems(GameContext& context);
 
-    // 지정한 타입의 아이템 목록만 출력
-    static void PrintItemsByType(const Inventory& inventory, ItemType type);
+    // 인벤토리에서 장비 타입 아이템만 조회하여 출력
+    static void PrintEquipmentItems(GameContext& context);
+
+    // 인벤토리에서 소비 타입 아이템만 조회하여 출력
+    static void PrintConsumableItems(GameContext& context);
 
     // 인벤토리 메뉴를 실행하고 사용자 선택에 따라 아이템 목록을 출력
-    static void ShowInventory(const Inventory& inventory);
+    static void ShowInventory(GameContext& context);
 
 
 
