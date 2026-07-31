@@ -30,6 +30,15 @@ public:
 	//특정 타입의 아이템 목록을 반환
 	std::vector<Item> GetItemsByType(ItemType type) const;
 
+	// 일반 인벤토리용
+	std::vector<Item> GetUnequippedItems() const;
+
+	// 장착 인벤토리용
+	std::vector<Item> GetEquippedItems() const;
+
+	//정착 선택에 사용할 원본 인덱스
+	std::vector<int> GetUnequippedEquipmentIndies() const;
+
 	//소비아이템 사용
 	bool UseItem(int index, GameContext& context);
 
