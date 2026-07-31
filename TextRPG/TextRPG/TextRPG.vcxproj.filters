@@ -99,6 +99,9 @@
     <ClCompile Include="Item.cpp">
       <Filter>소스 파일\Inventory</Filter>
     </ClCompile>
+    <ClCompile Include="Shop.cpp">
+      <Filter>소스 파일\Inventory</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConsolUI.h">
@@ -143,6 +146,9 @@
     </ClInclude>
     <ClInclude Include="StatBonus.h">
       <Filter>헤더 파일\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Shop.h">
+      <Filter>헤더 파일\Inventory</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -44,6 +44,11 @@ bool Shop::BuyItem(int productIndex, int quantity, GameContext& context) {
 
 	const Item& product = products[productIndex];
 
+	//퀘스트 아이템은 구매할 수 없음
+	if (product.GetType() == ItemType::Quest) {
+		return false;
+	}
+
 	//장비는 한 번에 1개만 구매
 	if (product.GetType() == ItemType::Equipment && quantity != 1) {
 		return false;
@@ -62,6 +67,9 @@ bool Shop::BuyItem(int productIndex, int quantity, GameContext& context) {
 	Item purchasedItem = product;
 	purchasedItem.SetQuantity(quantity);
 	purchasedItem.SetEquipped(false);
+
+	//구매후 현재 소지금
+	player.SetGold(player.GetGold() - totalPrice);
 
 	//플레이어 인벤토리에 추가
 	context.GetInventory().AddItem(purchasedItem);
