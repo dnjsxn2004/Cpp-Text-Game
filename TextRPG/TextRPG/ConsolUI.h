@@ -65,8 +65,13 @@ public:
     // 현재 플레이어의 상태를 콘솔에 출력하는 함수
     // 게임 진행 중 메뉴에서 언제든 호출하여 캐릭터 정보를 확인할 때 사용
     // 레벨, 경험치, HP, MP, 공격력, 방어력
-    static void PrintPlayerStatusEveryTime(GameContext& context, StatBonus& equipBonus, StatBonus& potionBonus);
+    static void PrintPlayerStatusEveryTime(GameContext& context);
 
+    // 세부 상태창 출력 함수
+    //캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
+    // 내가 장착하고 있는 장비 아이템
+    // 몬스터 처치수
+    static void PrintStatus(GameContext& context, StatBonus& equipBonus, StatBonus& potionBonus);
 
 
     // 아이템 타입을 출력 가능한 문자열로 변환
