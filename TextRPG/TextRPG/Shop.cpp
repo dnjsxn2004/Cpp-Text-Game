@@ -34,31 +34,28 @@ const std::vector<Item>& Shop::GetProducts() const {
 	return products;
 }
 
+//아이템 하나가 선택한 상점 카테고리에 속하는지 확인
+bool Shop::IsMatchingCategory(const Item& item, ShopCategory category) const {
+	switch (category) {
+	case ShopCategory::Consumable:
+		return item.GetType() == ItemType::Consumable;
+
+	case ShopCategory::Weapon:
+		return item.GetType() == ItemType::Equipment && item.GetEquipmentType() == EquipmentType::Weapon;
+
+	case ShopCategory::Armor:
+		return item.GetType() == ItemType::Equipment && item.GetEquipmentType() == EquipmentType::Armor;
+	}
+
+	return false;
+}
+
+//함수를 이용해서 카테고리에 맞는 상품들만 모아서 반환
 std::vector<Item> Shop::GetProductsByCategory(ShopCategory category) const {
 	std::vector<Item>result;
 
 	for (const Item& item : products) {
-		
-		bool isMatched = false;
-
-		switch (category) {
-		case ShopCategory::Consumable:
-			isMatched =
-				item.GetType() == ItemType::Consumable;
-			    break;
-
-		case ShopCategory::Weapon:
-			isMatched =
-				item.GetType() == ItemType::Equipment && item.GetEquipmentType() == EquipmentType::Weapon;
-				break;
-
-		case ShopCategory::Armor:
-			isMatched =
-				item.GetType() == ItemType::Equipment && item.GetEquipmentType() == EquipmentType::Armor;
-			    break;
-		}
-
-		if (isMatched) {
+		if (IsMatchingCategory(item, category)) {
 			result.push_back(item);
 		}
 	}
@@ -135,7 +132,7 @@ bool Shop::BuyItemByCategory(ShopCategory category, int categoryIndex, int quant
 		if (!IsMatchingCategory(product, category)) {
 			continue;
 		}
-
+		   
 		//선택한 번호가 같으면 상품 구매
 		if (currentCategoryIndex == categoryIndex) {
 

@@ -378,3 +378,44 @@ std::string Inventory::GetEquippedArmorName() const
 
 	return items[equippedArmorIndex].GetName();
 }
+
+//장착하지 않은 아이템 반환
+std::vector<Item> Inventory::GetUnequippedItems() const {
+	std::vector<Item> result;
+
+	for (const Item& item : items) {
+		//장착 중인 아닌 아이템만 일반 인벤토리에 추가
+		if (!item.IsEquipped()) {
+			result.push_back(item);
+		}
+		return result;
+	}
+}
+
+//현재 장착 중인 아이템만 반환
+std::vector<Item> Inventory::GetEquippedItems() const {
+	std::vector<Item> result;
+
+	for (const Item& item : items) {
+		//장착 중인 아이템만 장착 인벤토리에 추가
+		if (item.IsEquipped()) {
+			result.push_back(item);
+		}
+		return result;
+	}
+}
+
+//장착하지 않은 장비들의 실제 인벤토리 위치를 모아 놓는 목록
+std::vector<int> Inventory::GetUnequippedEquipmentIndies() const {
+	std::vector<int> result;
+
+	for (int i = 0;
+		i < static_cast<int>(items.size()); i++) {
+		const Item& item = items[i];
+
+		if (item.GetType() == ItemType::Equipment && !item.IsEquipped()) {
+			result.push_back(i);
+		}
+	}
+	return result;
+}
