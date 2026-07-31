@@ -99,6 +99,7 @@
     <ClCompile Include="Item.cpp">
       <Filter>소스 파일\Inventory</Filter>
     </ClCompile>
+ feature/KAN-56-Inventory시스템구현
     <ClCompile Include="Shop.cpp">
       <Filter>소스 파일\Inventory</Filter>
     </ClCompile>
@@ -128,9 +129,6 @@
     <ClInclude Include="Item.h">
       <Filter>헤더 파일\Inventory</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="ItemFactory.h">
       <Filter>헤더 파일\Inventory</Filter>
       <Filter>헤더 파일\Player</Filter>
@@ -147,8 +145,12 @@
     <ClInclude Include="StatBonus.h">
       <Filter>헤더 파일\Player</Filter>
     </ClInclude>
+
     <ClInclude Include="Shop.h">
       <Filter>헤더 파일\Inventory</Filter>
+      </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>헤더 파일\Player</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

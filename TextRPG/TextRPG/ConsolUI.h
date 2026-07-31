@@ -26,6 +26,11 @@
 #include <iostream>
 #include <string>
 #include <windows.h> // Windows API 헤더 추가
+#include <vector>
+
+#include "Inventory.h"
+#include "Item.h"
+#include "GameContext.h"
 
 class ConsoleUI
 {
@@ -53,12 +58,53 @@ public:
     // 예: ConsoleUI::PrintSuccess("아이템 구매에 성공했습니다.");
     static void PrintSuccess(const std::string& message);
 
-    // 메인 메뉴 함수
+    // 메인 메뉴 출력 함수
     // 항목: 전투 / 상점 / 인벤토리 / 포션 제작 / 훈련장 / 상태 보기 / 게임 종료
     static void PrintMainMenu();
 
+    // 현재 플레이어의 상태를 콘솔에 출력하는 함수
+    // 게임 진행 중 맨 아래 캐릭터 정보를 확인할 때 사용
+    // 레벨, 경험치, HP, MP
+    static void PrintPlayerStatusEveryTime(GameContext& context);
+
+    // 세부 상태창 출력 함수
+    // 캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
+    // 내가 장착하고 있는 장비 아이템
+    // 몬스터 처치수
+    static void PrintStatus(GameContext& context, Battle& battle, StatBonus& equipBonus, StatBonus& potionBonus);
+
+
+
+    // 아이템 타입을 출력 가능한 문자열로 변환
+    static string ItemTypeToString(Item& item);
+
+    // 아이템 목록을 번호와 함께 출력하는 함수
+    // EX) 1. 아이템
+    static void PrintItemListWithIndex(const vector<Item>& items);
+
+    // 인벤토리 메뉴 출력 함수
+    // 항목: 내가 가진 전체 아이템 보기 / 장비 아이템 / 소비 아이템 / 퀘스트 아이템 / 뒤로가기
+    static void PrintInventoryMenu();
+
+    // 아이템 1개의 정보를 화면에 출력
+    static void PrintItem(Item& item);
+
+    // 인벤토리에 저장된 모든 아이템 목록을 출력
+    static void PrintAllItems(GameContext& context);
+
+    // 인벤토리에서 장비 타입 아이템만 조회하여 출력
+    static void PrintEquipmentItems(GameContext& context);
+
+    // 인벤토리에서 소비 타입 아이템만 조회하여 출력
+    static void PrintConsumableItems(GameContext& context);
+
+    // 인벤토리 메뉴를 실행하고 사용자 선택에 따라 아이템 목록을 출력
+    static void ShowInventory(GameContext& context);
+
+
+
     // 직업 선택 메뉴 함수
-    // 항목: 전사 / 궁수 / 마법사 / 도적
+    // 항목: 진태식 / 류
     static void PrintJobSelectMenu();
 
     // 게임종료 메세지 출력 함수
@@ -158,4 +204,17 @@ public:
 
     // Cut 6: 진태식이 패배하고 위기에 빠지는 애니메이션 출력 함수
     static void PlayCutScene6Animation();
+
+    // 주사위 눈금별 아스키 이미지 출력 함수 선언
+    static void PrintDice1();  // 주사위 눈금 1 출력
+    static void PrintDice2();  // 주사위 눈금 2 출력
+    static void PrintDice3();  // 주사위 눈금 3 출력
+    static void PrintDice4();  // 주사위 눈금 4 출력
+    static void PrintDice5();  // 주사위 눈금 5 출력
+    static void PrintDice6();  // 주사위 눈금 6 출력
+
+    // 주사위 애니메이션 공통 실행 함수
+    static void PrintDiceAnimationBySpeed(int delayMilliseconds);
+
+    
 };
