@@ -8,6 +8,12 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "Jin.h"
+#include "Ryu.h"
+#include "Gang.h"
+#include "StatBonus.h"
+#include "GameContext.h"
+#include "Player.h"
 #include "ConsolUI.h"
 #include "Inventory.h"
 #include "Item.h"
@@ -72,6 +78,20 @@ void ConsoleUI::PrintMainMenu()
 
 	PrintLine();
 }
+
+void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context, StatBonus& equipBonus, StatBonus& potionBonus)
+{
+    Player& player = context.GetPlayer();
+    cout << "레벨 : " << player.GetLevel() <<
+        "  경험치 : " << player.GetExp() << " / " << player.GetMaxExp() <<
+        "  HP : " << player.GetHp() << " / " << player.GetMaxHp() <<
+        "  MP : " << player.GetMp() << " / " << player.GetMaxMp() <<
+        "  공격력 : " << player.GetMeleeDamage(equipBonus, potionBonus) <<
+        "  방어력 : " << player.GetTrueDefense(equipBonus, potionBonus) <<
+        endl;
+}
+
+
 
 
 // 아이템, 인벤토리
@@ -1875,7 +1895,7 @@ void ConsoleUI::PrintDiceAnimationBySpeed(int delayMilliseconds)
         ConsoleUI::PrintDiceAnimationBySpeed(700);
 
         // 빠른 주사위 애니메이션 실행
-        ConsoleUI::PrintDiceAnimationBySpeed(150);
+        ConsoleUI::PrintDiceAnimationBySpeed(100);
 
         return 0;
     }
