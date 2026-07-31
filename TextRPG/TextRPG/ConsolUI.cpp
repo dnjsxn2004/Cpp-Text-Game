@@ -8,9 +8,16 @@
 #include <stdlib.h>
 #include <vector>
 
+#include "Jin.h"
+#include "Ryu.h"
+#include "Gang.h"
+#include "StatBonus.h"
+#include "GameContext.h"
+#include "Player.h"
 #include "ConsolUI.h"
 #include "Inventory.h"
 #include "Item.h"
+#include "Battle.h"
 #include "GameContext.h"
 #include "InputManager.h"
 
@@ -64,14 +71,74 @@ void ConsoleUI::PrintMainMenu()
 	PrintTitle("메인 메뉴");
 	PrintLine();
 
+    cout << endl;
     PrintMessage("1. 일반 전투");
     PrintMessage("2. 메인 스토리");
-    PrintMessage("3. 인벤토리");
-    PrintMessage("4. 상점");
+    PrintMessage("3. 상태창");
+    PrintMessage("4. 인벤토리");
+    PrintMessage("5. 상점");
     PrintMessage("0. 게임 종료");
+    cout << endl;
 
 	PrintLine();
 }
+
+void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context)
+{
+    Player& player = context.GetPlayer();
+    cout << "레벨 : " << player.GetLevel() << " ( " << player.GetExp() << " / " << player.GetMaxExp() << " ) " <<
+        "  HP : " << player.GetHp() << " / " << player.GetMaxHp() <<
+        "  MP : " << player.GetMp() << " / " << player.GetMaxMp() <<
+        endl;
+}
+
+void ConsoleUI::PrintStatus(GameContext& context, StatBonus& equipBonus, StatBonus& potionBonus)
+{
+    Player& player = context.GetPlayer();
+    Inventory& inventory = context.GetInventory();
+    Item& item = context.GetItem();
+    Battle& battle = context.GetBattle();
+    string weaponName = context.GetInventory().GetEquippedWeaponName();
+    string armorName = context.GetInventory().GetEquippedArmorName();
+
+
+    PrintLine();
+    PrintTitle("플레이어 상태");
+    PrintLine();
+
+    cout << endl;
+    cout << player.GetName() << endl;
+    PrintLine();
+    cout << "골드 : " << player.GetGold() << endl;
+    cout << "레벨 : " << player.GetLevel() << endl;
+    cout << "경험치 : " << player.GetExp() << " / " << player.GetMaxExp() << endl;
+    cout << "HP : " << player.GetHp() << " / " << player.GetMaxHp() << endl;
+    cout << "MP : " << player.GetMp() << " / " << player.GetMaxMp() << endl;
+    cout << "공격력 : " << player.GetMeleeDamage(equipBonus, potionBonus) << endl;
+    cout << "방어력 : " << player.GetTrueDefense(equipBonus, potionBonus) << endl;
+    PrintLine();
+
+    cout << endl;
+    PrintMessage("내가 장착하고 있는 장비 아이템");
+    PrintLine();
+
+    cout << "장착 중인 무기: " << weaponName << endl;
+    cout << "장착 중인 방어구: " << armorName << endl;
+    PrintLine();
+
+    cout << endl;
+    PrintMessage("전투 기록");
+    PrintLine();
+
+    cout << "전투에서 이긴 횟수 : "<< MonsterKillCount(context) << endl;
+
+    //캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
+    // 내가 장착하고 있는 (장비) 아이템
+    // 몬스터 처치 수
+
+    PrintLine();
+}
+
 
 
 // 아이템, 인벤토리
@@ -178,8 +245,7 @@ void ConsoleUI::PrintJobSelectMenu()
 	PrintTitle("캐릭터 선택");
 	PrintLine();
 	cout << "1. 진태식 유도" << endl;
-	cout << "2. 강사라 태권도" << endl;
-	cout << "3. 류노스케 가라데" << endl;
+	cout << "2. 류노스케 가라데" << endl;
 	PrintLine();
 }
 
@@ -1875,7 +1941,7 @@ void ConsoleUI::PrintDiceAnimationBySpeed(int delayMilliseconds)
         ConsoleUI::PrintDiceAnimationBySpeed(700);
 
         // 빠른 주사위 애니메이션 실행
-        ConsoleUI::PrintDiceAnimationBySpeed(150);
+        ConsoleUI::PrintDiceAnimationBySpeed(100);
 
         return 0;
     }
