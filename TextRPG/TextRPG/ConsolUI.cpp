@@ -65,6 +65,9 @@ void ConsoleUI::PrintSuccess(const std::string& message)
 	cout  << message << endl;
 }
 
+
+
+// 메인 메뉴
 void ConsoleUI::PrintMainMenu()
 {
 	PrintLine();
@@ -83,6 +86,9 @@ void ConsoleUI::PrintMainMenu()
 	PrintLine();
 }
 
+
+
+// 상태창
 void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context)
 {
     Player& player = context.GetPlayer();
@@ -92,12 +98,12 @@ void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context)
         endl;
 }
 
-void ConsoleUI::PrintStatus(GameContext& context, StatBonus& equipBonus, StatBonus& potionBonus)
+void ConsoleUI::PrintStatus(GameContext& context, Battle& battle, StatBonus& equipBonus, StatBonus& potionBonus)
 {
     Player& player = context.GetPlayer();
     Inventory& inventory = context.GetInventory();
     Item& item = context.GetItem();
-    Battle& battle = context.GetBattle();
+    
     string weaponName = context.GetInventory().GetEquippedWeaponName();
     string armorName = context.GetInventory().GetEquippedArmorName();
 
@@ -130,7 +136,7 @@ void ConsoleUI::PrintStatus(GameContext& context, StatBonus& equipBonus, StatBon
     PrintMessage("전투 기록");
     PrintLine();
 
-    cout << "전투에서 이긴 횟수 : "<< MonsterKillCount(context) << endl;
+    cout << "전투에서 이긴 횟수 : "<< Battle::GetMonsterKillCount(context) << endl;
 
     //캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
     // 내가 장착하고 있는 (장비) 아이템
@@ -142,9 +148,9 @@ void ConsoleUI::PrintStatus(GameContext& context, StatBonus& equipBonus, StatBon
 
 
 // 아이템, 인벤토리
-string ConsoleUI::ItemTypeToString(ItemType type)
+string ConsoleUI::ItemTypeToString(Item& item)
 {
-    switch (type)
+    switch (item.GetType())
     {
     case ItemType::Equipment:
         return "장비";
@@ -154,6 +160,15 @@ string ConsoleUI::ItemTypeToString(ItemType type)
 
     default:
         return "알 수 없음";
+    // 무기랑 방어구 장비 타입
+    }
+}
+
+void ConsoleUI::PrintItemListWithIndex(const vector<Item>& items)
+{
+    for (int i = 0; i < items.size(); i++)
+    {
+        cout << i + 1 << ". " << items[i].GetName() << endl;
     }
 }
 
@@ -166,50 +181,80 @@ void ConsoleUI::PrintInventoryMenu()
     PrintMessage("1. 내가 가진 전체 아이템 보기");
     PrintMessage("2. 장비 아이템");
     PrintMessage("3. 소비 아이템");
-    PrintMessage("4. 퀘스트 아이템");
+    //PrintMessage("4. 퀘스트 아이템");
     PrintMessage("0. 뒤로가기");
 
     PrintLine();
 };
 
-void ConsoleUI::PrintItem(const Item& item)
+void ConsoleUI::PrintItem(Item& item)
 {
     PrintLine();
-    cout << "이름: " << item.GetName() << endl;
-    cout << "타입: " << ItemTypeToString(item.GetType()) << endl;
-    cout << "효과량: " << item.GetEffectAmount() << endl;
+    cout << "이름 : " << item.GetName() << endl;
+    cout << "가격 : " << item.GetPrice() << endl;
+    cout << "타입 : " << ItemTypeToString(item) << endl;
     PrintLine();
 }
 
-void ConsoleUI::PrintAllItems(const Inventory& inventory)
+void ConsoleUI::PrintAllItems(GameContext& context)
 {
+    Inventory& inventory = context.GetInventory();
     const vector<Item>& items = inventory.GetItems();
 
-    // TODO: items가 비어 있는지 확인하는 조건문
-
-    // TODO: 전체 아이템 목록 제목 출력
-
-    for (const Item& item : items)
+    if (items.empty())
     {
-        // TODO: PrintItem 함수 호출
+        PrintMessage("인벤토리가 비어 있습니다.");
+        return;
     }
+
+    PrintLine();
+    PrintTitle("내가 가진 전체 아이템");
+    PrintLine();
+
+    PrintItemListWithIndex(items);
+
+    PrintLine();
 }
 
-void ConsoleUI::PrintItemsByType(const Inventory& inventory, ItemType type)
+void ConsoleUI::PrintEquipmentItems(GameContext& context)
 {
-    vector<Item> filteredItems = inventory.GetItemsByType(type);
+    Inventory& inventory = context.GetInventory();
+    vector<Item> equipmentItems = inventory.GetItemsByType(ItemType::Equipment);
 
-    // TODO: filteredItems가 비어 있는지 확인하는 조건문
-
-    // TODO: 타입별 아이템 목록 제목 출력
-
-    for (const Item& item : filteredItems)
+    if (equipmentItems.empty())
     {
-        // TODO: PrintItem 함수 호출
+        PrintMessage("장비 아이템이 없습니다.");
+        return;
     }
+
+
+    PrintLine();
+    PrintTitle("장비 아이템 목록");
+    PrintLine();
+
+    PrintItemListWithIndex(equipmentItems);
+
 }
 
-void ConsoleUI::ShowInventory(const Inventory& inventory)
+void ConsoleUI::PrintConsumableItems(GameContext& context)
+{
+    Inventory& inventory = context.GetInventory();
+    vector<Item> consumableItems = inventory.GetItemsByType(ItemType::Consumable);
+
+    if (consumableItems.empty())
+    {
+        PrintMessage("소비 아이템이 없습니다.");
+        return;
+    }
+
+    PrintLine();
+    PrintTitle("소비 아이템 목록");
+    PrintLine();
+
+    PrintItemListWithIndex(consumableItems);
+}
+
+void ConsoleUI::ShowInventory(GameContext& context)
 {
     while (true)
     {
@@ -220,15 +265,15 @@ void ConsoleUI::ShowInventory(const Inventory& inventory)
         switch (choice)
         {
         case 1:
-            PrintAllItems(inventory);
+            PrintAllItems(context);
             break;
 
         case 2:
-            PrintItemsByType(inventory, ItemType::Equipment);
+            PrintEquipmentItems(context);
             break;
 
         case 3:
-            PrintItemsByType(inventory, ItemType::Consumable);
+            PrintConsumableItems(context);
             break;
 
         case 0:
