@@ -186,5 +186,14 @@ public:
     // Cut 6: 진태식이 패배하고 위기에 빠지는 애니메이션 출력 함수
     static void PlayCutScene6Animation();
 
+    // 주사위 눈금별 아스키 이미지 출력 함수 선언
+    static void PrintDice1();  // 주사위 눈금 1 출력
+    static void PrintDice2();  // 주사위 눈금 2 출력
+    static void PrintDice3();  // 주사위 눈금 3 출력
+    static void PrintDice4();  // 주사위 눈금 4 출력
+    static void PrintDice5();  // 주사위 눈금 5 출력
+    static void PrintDice6();  // 주사위 눈금 6 출력
 
+    // 주사위 애니메이션 공통 실행 함수
+    static void PrintDiceAnimationBySpeed(int delayMilliseconds);
 };
