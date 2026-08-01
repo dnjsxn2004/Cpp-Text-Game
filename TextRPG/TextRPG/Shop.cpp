@@ -113,6 +113,7 @@ bool Shop::BuyItem(int productIndex, int quantity, GameContext& context) {
 	return true;
 }
 
+//구매 함수
 bool Shop::BuyItemByCategory(ShopCategory category, int categoryIndex, int quantity, GameContext& context) {
 	//인덱스 확인
 	if (categoryIndex < 0) {
@@ -144,4 +145,71 @@ bool Shop::BuyItemByCategory(ShopCategory category, int categoryIndex, int quant
 	}
 
 	return false;
+}
+
+//판매 가격 계산(구매 가격의 60%)
+int Shop::GetSellPrice(const Item& item) const {
+	return item.GetPrice() * 60 / 100;
+}
+
+//판매 함수
+bool Shop::SellItem(int inventoryIndex, int quantity, GameContext& context) {
+	Inventory& inventory = context.GetInventory();
+
+	const std::vector<Item>& items = inventory.GetItems();
+
+	//잘못된 인덱스
+	if (inventoryIndex < 0 || inventoryIndex >= static_cast<int>(items.size())) {
+		ConsoleUI::PrintMessage("잘못된 아이템입니다.");
+		return false;
+	}
+
+	//잘못된 수량
+	if (quantity <= 0) {
+		ConsoleUI::PrintMessage("잘못된 수량입니다.");
+		return false;
+	}
+
+	const Item& item = items[inventoryIndex];
+
+	//퀘스트 아이템 판매 불가
+	if (item.GetType() == ItemType::Quest) {
+		ConsoleUI::PrintMessage("퀘스트 아이템은 판매할 수 없습니다.");
+		return false;
+	}
+
+	//장착 중인 장비는 판매 불가
+	if (item.IsEquipped()) {
+		ConsoleUI::PrintMessage("장착 중인 장비는 판매할 수 없습니다.");
+		return false;
+	}
+
+	//수량 부족
+	if (quantity > item.GetQuantity()) {
+		ConsoleUI::PrintMessage("수량이 부족합니다.");
+		return false;
+	}
+
+	//장비는 1개만 판매 가능
+	if (item.GetType() == ItemType::Equipment && quantity != 1) {
+		ConsoleUI::PrintMessage("장비는 한 개씩만 판매 가능합니다.");
+		return false;
+	}
+
+	//판매 금액 계산
+	int sellGold = GetSellPrice(item) * quantity;
+
+	//인벤토리에서 삭제
+	if (!inventory.RemoveItem(inventoryIndex, quantity)) {
+		return false;
+	}
+
+	//골드 지급
+	Player& player = context.GetPlayer();
+
+	player.SetGold(player.GetGold() + sellGold);
+
+	ConsoleUI::PrintMessage("판매가 완료되었습니다.");
+
+	return true;
 }

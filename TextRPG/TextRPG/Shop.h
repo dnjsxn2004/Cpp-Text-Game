@@ -37,4 +37,10 @@ public:
 
 	//카테고리 안의 상품 번호로 구매
 	bool BuyItemByCategory(ShopCategory category, int categoryInedex, int quantity, GameContext& context);
+
+	//아이템 한 개의 판매 가격 반환
+	int GetSellPrice(const Item& item) const;
+
+	//인벤토리의 실제 인덱스를 사용해 아이템 판매
+	bool SellItem(int inventoryIndex, int quantity, GameContext& context);
 };
