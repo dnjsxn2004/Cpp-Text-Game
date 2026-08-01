@@ -56,9 +56,10 @@ public:
 
 	bool RemoveItem(int index, int quantity = 1);
 
-	bool BuyItem(const Item& item, int quantity, GameContext& context);
-
 	std::string GetEquippedWeaponName() const;
 	std::string GetEquippedArmorName() const;
+
+	//판매 목록용 실제 인덱스 함수
+	std::vector<int> GetSellableItemIndices() const;
 
 };
