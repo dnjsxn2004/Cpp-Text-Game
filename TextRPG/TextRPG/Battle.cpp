@@ -4,8 +4,6 @@
 #include "ConsolUI.h"
 #include "InputManager.h"
 #include "StatBonus.h"
-#include <algorithm>
-#include <random>
 #include <iostream>
 
 // 확률생성
@@ -31,8 +29,8 @@ int Battle::RollDice()
 
 	// 1~6 범위의 정수 생성
 	std::uniform_int_distribution<int> dice(1, 6);
-
-	int DiceValue = dice(gen);
+	int DiceValue;
+	DiceValue = dice(gen);
 	return DiceValue;   // 1~6 범위의 주사위 값을 반환
 }
 
@@ -136,6 +134,7 @@ int Battle::PlayerDiceSkillDamage(GameContext& context1, GameContext& context2, 
 
 	int DiceNumber = RollDice();
 	int Damage = 0;
+	SetLastDiceValue(DiceNumber);
 
 	IsDamageChoice = false;
 
@@ -188,9 +187,9 @@ int Battle::PlayerDiceDamage(GameContext& context1, GameContext& context2, const
 }
 
 // 도망의 성공여부 값을 반환합니다.
-bool Battle::PlayerRunaway(GameContext& context)
+bool Battle::PlayerRunaway()
 {
-	if (RollDice() > 3)
+	if (CheckChance() > 50)
 	{
 		return true;
 	}
@@ -200,14 +199,15 @@ bool Battle::PlayerRunaway(GameContext& context)
 	}
 }
 
-// 플레이어 턴을 카운트합니다.
+// 플레이어 턴을 카운트합니다. 
 int Battle::PlayerTurnCount()
 {
-	return 1;
+	SetTrunCount(GetTrunCount()+1);             //멤버변수 턴카운트를 더하는 함수입니다.
+	return 1;                                  
 }
 
 // 처치한 몬스터 킬을 카운트합니다.
-int Battle::GetMonsterKillCount(GameContext& context)
+int Battle::GetMonsterKillCount()
 {
 	MonsterkillCount += 1;
 	return MonsterkillCount;
@@ -268,7 +268,7 @@ bool Battle::CheckBattleResult(GameContext& context1, GameContext& context2)    
 	if (monster.GetHp()<=0 )
 	{
 		BattleReward(context1,context2);
-		GetMonsterKillCount(context2);
+		GetMonsterKillCount();
 		return true;
 	}
 	else if(player.GetHp()<=0)
@@ -285,3 +285,11 @@ void Battle::BattleReward(GameContext& context1, GameContext& context2)
 	player.SetExp(player.GetExp() + monster.GetExpReward());
 	player.SetGold(player.GetGold() + monster.GetGoldReward());
 }
+
+int Battle::GetLastDiceValue() { return LastDiceValue; }
+
+void Battle::SetLastDiceValue(int DiceValue) { this->LastDiceValue = DiceValue; }
+
+int Battle::GetTrunCount() { return TrunCount; }
+
+void Battle::SetTrunCount(int Count) {this->TrunCount = Count; }

@@ -1,6 +1,14 @@
 #ifndef BATTLE_H_
 #define BATTLE_H_
 #include <iostream>
+#include "GameContext.h"
+#include "Player.h"
+#include "ConsolUI.h"
+#include "InputManager.h"
+#include "StatBonus.h"
+#include <algorithm>
+#include <random>
+#include <iostream>
 
 class GameContext;
 class Player;
@@ -77,13 +85,13 @@ public:
 	int PlayerDiceDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
 	// 도망의 성공여부 값을 반환합니다.
-	bool PlayerRunaway(GameContext& context);
+	bool PlayerRunaway();
 
 	// 플레이어 턴을 카운트합니다.
 	int PlayerTurnCount();
 
 	// 처치한 몬스터 킬을 카운트합니다.
-	int GetMonsterKillCount(GameContext& context);
+	int GetMonsterKillCount();
 
 	// 일반몬스터의 일반데미지값을 반환.
 	int NormalMonsterMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
@@ -99,8 +107,17 @@ public:
 
 	// 배틀 승리시 보상
 	void BattleReward(GameContext& context1, GameContext& context2);
+
+	int GetLastDiceValue();
+
+	void SetLastDiceValue(int DiceValue);
+
+	int GetTrunCount();
+
+	void SetTrunCount(int Count);
+
 private:
-	int TrunCount;  // 현재 턴 번호
+	int TrunCount = 0;  // 현재 턴 번호
 	int LastDiceValue;  // 가장 최근에 나온 주사위 값
 	int MonsterkillCount = 0; // 몬스터 킬카운트
 
