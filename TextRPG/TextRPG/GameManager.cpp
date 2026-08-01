@@ -204,17 +204,14 @@ void GameManager::ShowCharacterSelect()
     ConsoleUI::PrintMessage("2. Jin");
     ConsoleUI::PrintLine();
 
-    int choice = inputManager.InputInMassegeToRange(
-        "Select character: ",
-        1,
-        2
-    );
+    int choice = inputManager.InputInMassegeToRange("Select character: ",1,2);
 
     switch (choice)
     {
     case 1:
         context.SetPlayer(new Ryu());
         ConsoleUI::PrintMessage("Ryu selected.");
+        ConsoleUI::PrintKangImage();
         break;
 
     case 2:
