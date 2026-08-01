@@ -4,8 +4,6 @@
 #include "ConsolUI.h"
 #include "InputManager.h"
 #include "StatBonus.h"
-#include <algorithm>
-#include <random>
 #include <iostream>
 
 // 확률생성
@@ -16,10 +14,10 @@ int Battle::CheckChance()
 	std::mt19937 gen(rd());
 
 	// 1~100 범위의 정수 생성
-	std::uniform_int_distribution<int> Chance(1, 100);
+	std::uniform_int_distribution<int> Number(1, 100);
 
-	int CheckChance= Chance(gen);
-	return CheckChance;   // 1~6 범위의 주사위 값을 반환
+	int Chance= Number(gen);
+	return Chance;   // 1~100 범위의 다양한 확률공식에 사용될 값을 반환
 }
 
 // 현재 설정된 주사위 종류에 따라 주사위를 굴립니다.
@@ -31,8 +29,8 @@ int Battle::RollDice()
 
 	// 1~6 범위의 정수 생성
 	std::uniform_int_distribution<int> dice(1, 6);
-
-	int DiceValue = dice(gen);
+	int DiceValue;
+	DiceValue = dice(gen);
 	return DiceValue;   // 1~6 범위의 주사위 값을 반환
 }
 
@@ -83,32 +81,33 @@ int Battle::RollExtremeDice()
 }
 
 // 주사위를 굴리고 나온 값에 따라 일반데미지의 값을 반환합니다.
-int Battle::PlayerDiceMeleeDamage(GameContext& context, const StatBonus& equipBonus, const StatBonus& potionBonus)
+int Battle::PlayerDiceMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus)
 {
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
+
 	int DiceNumber = RollDice();
+	int Damage = 0;
+
 	IsDamageChoice = true;
+
 	switch (DiceNumber)
 	{
 	case 1:
 		return 0;
-		break;
 	case 2:
-		return (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense()) / 2;
+		Damage = (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense()) / 2;
 		break;
 	case 3:
-		return (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense());
-		break;
 	case 4:
-		return (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense());
+		Damage = (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense());
 		break;
 	case 5:
-		return (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense()) * 2;
+		Damage = (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense()) * 2;
 		break;
 	case 6:
 		CheckChance();
-		if (CheckChance() >= 4)
+		if (CheckChance() > 50)
 		{
 			IsMonsterStunned = true;
 			ConsoleUI::PrintMessage("상대가 스턴에 걸렸습니다.");
@@ -117,38 +116,45 @@ int Battle::PlayerDiceMeleeDamage(GameContext& context, const StatBonus& equipBo
 		{
 			IsMonsterStunned = false;
 		}
-		return (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense()) * 2;
+		Damage = (player.GetMeleeDamage( equipBonus, potionBonus) - monster.GetDefense()) * 2;
 		break;
 	}
+	if (Damage <= 0)
+	{
+		Damage = 1;
+	}
+	return Damage;
 }
 
 // 주사위를 굴리고 나온 값에 따라 스킬데미지의 값을 반환합니다.
-int Battle::PlayerDiceSkillDamage(GameContext& context, const StatBonus& equipBonus, const StatBonus& potionBonus)
+int Battle::PlayerDiceSkillDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus)
 {
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
+
 	int DiceNumber = RollDice();
+	int Damage = 0;
+	SetLastDiceValue(DiceNumber);
+
 	IsDamageChoice = false;
+
 	switch (DiceNumber)
 	{
 	case 1:
 		return 0;
-		break;
 	case 2:
-		return (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense()) / 2;
+		 Damage = (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense()) / 2;
 		break;
 	case 3:
-		return (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense());
-		break;
 	case 4:
-		return (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense());
+		Damage = (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense());
 		break;
 	case 5:
-		return (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense()) * 2;
+		Damage = (player.GetSkillDamage( equipBonus, potionBonus) - monster.GetDefense()) * 2;
 		break;
 	case 6:
-		CheckChance();
-		if (CheckChance() >= 4)
+		int Chance = CheckChance();
+		if (Chance > 50)
 		{
 			IsMonsterStunned = true;
 			ConsoleUI::PrintMessage("상대가 스턴에 걸렸습니다.");
@@ -157,28 +163,33 @@ int Battle::PlayerDiceSkillDamage(GameContext& context, const StatBonus& equipBo
 		{
 			IsMonsterStunned = false;
 		}
-		return (player.GetSkillDamage( equipBonus,  potionBonus) - monster.GetDefense()) * 2;
+		Damage = (player.GetSkillDamage( equipBonus,  potionBonus) - monster.GetDefense()) * 2;
 		break;
 	}
+	if (Damage <= 0)
+	{
+		Damage = 1;
+	}
+	return Damage;
 }
 
 // ISDamageChoice 값에 따라 일반or스킬공격값 반환.
-int Battle::PlayerDiceDamage(GameContext& context, const StatBonus& equipBonus, const StatBonus& potionBonus)
+int Battle::PlayerDiceDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus)
 {
 	if (IsDamageChoice)
 	{
-		return PlayerDiceMeleeDamage(context, equipBonus,  potionBonus);
+		return PlayerDiceMeleeDamage(context1, context2, equipBonus, potionBonus);
 	}
 	else
 	{
-		return PlayerDiceSkillDamage( context,  equipBonus, potionBonus);
+		return PlayerDiceSkillDamage(context1, context2, equipBonus, potionBonus);
 	}
 }
 
 // 도망의 성공여부 값을 반환합니다.
-bool Battle::PlayerRunaway(GameContext& context)
+bool Battle::PlayerRunaway()
 {
-	if (RollDice() > 3)
+	if (CheckChance() > 50)
 	{
 		return true;
 	}
@@ -188,69 +199,76 @@ bool Battle::PlayerRunaway(GameContext& context)
 	}
 }
 
-// 플레이어 턴을 카운트합니다.
+// 플레이어 턴을 카운트합니다. 
 int Battle::PlayerTurnCount()
 {
-	return 1;
+	SetTrunCount(GetTrunCount()+1);             //멤버변수 턴카운트를 더하는 함수입니다.
+	return 1;                                  
 }
 
 // 처치한 몬스터 킬을 카운트합니다.
-int Battle::GetMonsterKillCount(GameContext& context)
+int Battle::GetMonsterKillCount()
 {
 	MonsterkillCount += 1;
 	return MonsterkillCount;
 }
 
 // 일반몬스터의 일반데미지 값을 반환합니다.
-int Battle::NormalMonsterMeleeDamage(GameContext& context)
+int Battle::NormalMonsterMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus)
 {
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
-	return (monster.GetAttack() - player.GetDefense());
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
+	if ((monster.GetAttack() - player.GetTrueDefense(equipBonus, potionBonus)) > 0)
+	{
+		return (monster.GetAttack() - player.GetTrueDefense(equipBonus, potionBonus));
+	}
+	else
+	{
+		return 1;
+	}
 }
 
-//보스몬스터의 일반데미지 값을 반환합니다.
-int Battle::BossMonsterMeleeDamage(GameContext& context)
+//중간보스몬스터의 일반데미지와 스킬데미지 값을 반환합니다. 
+int Battle::MiddleBossMonsterDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus)
 {
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
-	return (monster.GetAttack() - player.GetDefense());
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
+	if ((monster.CalculateAttackDamage() - player.GetTrueDefense(equipBonus, potionBonus)) > 0)
+	{
+		return (monster.CalculateAttackDamage() - player.GetTrueDefense(equipBonus, potionBonus));
+	}
+	else
+	{
+		return 1;
+	}
 }
 
-//보스몬스터의 스킬데미지 값을 반환합니다.
-int Battle::BossMonsterSkillDamage(GameContext& context)
+
+//최종보스몬스터의 일반데미지와 스킬데미지 값을 반환합니다.           //moster.cpp 메세지 출력 필요
+int Battle::FinalBossMonsterDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus)
 {
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
-	return (monster.GetAttack() - player.GetDefense());
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
+	if ((monster.CalculateAttackDamage() - player.GetTrueDefense(equipBonus, potionBonus)) > 0)
+	{
+		return (monster.CalculateAttackDamage() - player.GetTrueDefense(equipBonus, potionBonus));
+	}
+	else
+	{
+		return 1;
+	}
 }
 
-//보스몬스터의 일반데미지 값을 반환합니다.
-int Battle::BossMonsterMeleeDamage(GameContext& context)
+// 승패 판정에 대한 값을 반환합니다.
+bool Battle::CheckBattleResult(GameContext& context1, GameContext& context2)     //승패여부 true: 승 false:패
 {
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
-	return (monster.GetAttack() - player.GetDefense());
-}
-
-//보스몬스터의 스킬데미지 값을 반환합니다.
-int Battle::BossMonsterSkillDamage(GameContext& context)
-{
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
-	return (monster.GetAttack() - player.GetDefense());
-}
-
-// 승패 판정에 대한 값을 반환
-bool Battle::CheckBattleResult(GameContext& context)     //승패여부 true: 승 false:패
-{
-	Player& player = context.GetPlayer();
-	Monster& monster = context.GetMonster();
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
 	
 	if (monster.GetHp()<=0 )
 	{
-
-		GetMonsterKillCount(context);
+		BattleReward(context1,context2);
+		GetMonsterKillCount();
 		return true;
 	}
 	else if(player.GetHp()<=0)
@@ -259,4 +277,19 @@ bool Battle::CheckBattleResult(GameContext& context)     //승패여부 true: 승 fal
 	}
 }
 
-// 
+// 배틀 승리시 보상
+void Battle::BattleReward(GameContext& context1, GameContext& context2)
+{
+	Player& player = context1.GetPlayer();
+	Monster& monster = context2.GetMonster();
+	player.SetExp(player.GetExp() + monster.GetExpReward());
+	player.SetGold(player.GetGold() + monster.GetGoldReward());
+}
+
+int Battle::GetLastDiceValue() { return LastDiceValue; }
+
+void Battle::SetLastDiceValue(int DiceValue) { this->LastDiceValue = DiceValue; }
+
+int Battle::GetTrunCount() { return TrunCount; }
+
+void Battle::SetTrunCount(int Count) {this->TrunCount = Count; }

@@ -1,6 +1,14 @@
 #ifndef BATTLE_H_
 #define BATTLE_H_
 #include <iostream>
+#include "GameContext.h"
+#include "Player.h"
+#include "ConsolUI.h"
+#include "InputManager.h"
+#include "StatBonus.h"
+#include <algorithm>
+#include <random>
+#include <iostream>
 
 class GameContext;
 class Player;
@@ -68,60 +76,57 @@ public:
 	int RollExtremeDice();
 
 	// 주사위를 굴리고 나온 값에 따라 일반데미지의 값을 반환합니다.
-	int PlayerDiceMeleeDamage(GameContext& context, const StatBonus& equipBonus, const StatBonus& potionBonus);
+	int PlayerDiceMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
 	// 주사위를 굴리고 나온 값에 따라 스킬데미지의 값을 반환합니다.
-	int PlayerDiceSkillDamage(GameContext& context, const StatBonus& equipBonus, const StatBonus& potionBonus);
+	int PlayerDiceSkillDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
 	// ISDamageChoice 값에 따라 일반or스킬공격값 반환.
-	int PlayerDiceDamage(GameContext& context, const StatBonus& equipBonus, const StatBonus& potionBonus);
+	int PlayerDiceDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
 	// 도망의 성공여부 값을 반환합니다.
-	bool PlayerRunaway(GameContext& context);
+	bool PlayerRunaway();
 
 	// 플레이어 턴을 카운트합니다.
 	int PlayerTurnCount();
 
-	// 일반몬스터의 일반데미지값을 반환.
-	int NormalMonsterMeleeDamage(GameContext& context);
-
 	// 처치한 몬스터 킬을 카운트합니다.
-	int GetMonsterKillCount(GameContext& context);
+	int GetMonsterKillCount();
 
-	// 도망의 성공여부 값을 반환합니다.
-	bool PlayerRunaway(GameContext& context);
+	// 일반몬스터의 일반데미지값을 반환.
+	int NormalMonsterMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 몬스터의 일반데미지값을 반환.
-	int MonsterMeleeDamage();
+	//중간보스몬스터의 일반데미지와 스킬데미지 값을 반환합니다. 
+	int MiddleBossMonsterDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	//보스몬스터의 일반데미지 값을 반환합니다.
-	int BossMonsterMeleeDamage(GameContext& context);
-
-	//보스몬스터의 스킬데미지 값을 반환합니다.
-	int BossMonsterSkillDamage(GameContext& context);
+	//최종보스몬스터의 일반데미지와 스킬데미지 값을 반환합니다.
+	int FinalBossMonsterDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
 	//승패 판정에 대한 값을 반환
-	bool CheckBattleResult(GameContext& context);
+	bool CheckBattleResult(GameContext& context1, GameContext& context2);
 
-	//승리에 대한 값을 반환
-	bool Victory();
+	// 배틀 승리시 보상
+	void BattleReward(GameContext& context1, GameContext& context2);
 
-	//패배에 대한 값을 반환
-	bool Defeat();
+	int GetLastDiceValue();
+
+	void SetLastDiceValue(int DiceValue);
+
+	int GetTrunCount();
+
+	void SetTrunCount(int Count);
+
 private:
-	// 새로운 전투를 시작할 수 있도록 내부 상태를 초기화합니다.
-	void InitializeBattle();
-	int TrunCount;  // 현재 턴 번호
+	int TrunCount = 0;  // 현재 턴 번호
 	int LastDiceValue;  // 가장 최근에 나온 주사위 값
-	int MonsterkillCount = 0;
+	int MonsterkillCount = 0; // 몬스터 킬카운트
 
 	bool IsPlayerDefending;   // 플레이어 방어 상태
 	bool IsMonsterStunned;    // 몬스터 스턴 상태
 	bool IsBattleResult;     // 승패여부 true: 승 false:패
+	bool IsDamageChoice; // 일반공격 or 스킬공격을 결정해줌
 
 	DiceType CurrentDiceType;   // 현재 사용하는 주사위 종류
-
-	bool IsDamageChoice; // 일반공격 or 스킬공격을 결정해줌
 
 };
 
