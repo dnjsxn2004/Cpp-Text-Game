@@ -28,6 +28,8 @@
 #include <windows.h> // Windows API 헤더 추가
 #include <vector>
 
+#include "Battle.h"
+#include "Monster.h"
 #include "Inventory.h"
 #include "Item.h"
 #include "GameContext.h"
@@ -58,9 +60,16 @@ public:
     // 예: ConsoleUI::PrintSuccess("아이템 구매에 성공했습니다.");
     static void PrintSuccess(const std::string& message);
 
+
+
     // 메인 메뉴 출력 함수
     // 항목: 전투 / 상점 / 인벤토리 / 포션 제작 / 훈련장 / 상태 보기 / 게임 종료
     static void PrintMainMenu();
+
+	// 메인 메뉴를 실행하고 사용자 선택에 따라 각 메뉴로 이동하는 함수
+    static void SwitchMainMenu();
+
+
 
     // 현재 플레이어의 상태를 콘솔에 출력하는 함수
     // 게임 진행 중 맨 아래 캐릭터 정보를 확인할 때 사용
@@ -75,7 +84,7 @@ public:
 
 
 
-    // 아이템 타입을 출력 가능한 문자열로 변환
+    // 아이템 타입을 출력 가능한 문자열로 변환 함수
     static string ItemTypeToString(Item& item);
 
     // 아이템 목록을 번호와 함께 출력하는 함수
@@ -86,20 +95,39 @@ public:
     // 항목: 내가 가진 전체 아이템 보기 / 장비 아이템 / 소비 아이템 / 퀘스트 아이템 / 뒤로가기
     static void PrintInventoryMenu();
 
-    // 아이템 1개의 정보를 화면에 출력
+    // 아이템 1개의 정보를 화면에 출력 함수
     static void PrintItem(Item& item);
 
-    // 인벤토리에 저장된 모든 아이템 목록을 출력
+	// 아이템 이름만 출력하는 함수
+    static void PrintItemName(Item& item);
+
+    // 인벤토리에 저장된 모든 아이템 목록을 출력 함수
     static void PrintAllItems(GameContext& context);
 
-    // 인벤토리에서 장비 타입 아이템만 조회하여 출력
+    // 인벤토리에서 장비 타입 아이템만 조회하여 출력 함수
     static void PrintEquipmentItems(GameContext& context);
 
-    // 인벤토리에서 소비 타입 아이템만 조회하여 출력
+    // 인벤토리에서 소비 타입 아이템만 조회하여 출력 함수
     static void PrintConsumableItems(GameContext& context);
 
-    // 인벤토리 메뉴를 실행하고 사용자 선택에 따라 아이템 목록을 출력
-    static void ShowInventory(GameContext& context);
+    // 인벤토리 메뉴를 실행하고 사용자 선택에 따라 아이템 목록을 출력 함수
+    static void SwitchInventory(GameContext& context);
+
+
+
+	// 상점 메뉴 출력 함수
+    static void PrintShopMenu();
+
+	// 상점 메뉴를 실행하고 사용자 선택에 따라 아이템 구매, 판매, 뒤로가기 기능을 수행하는 함수
+	static void SwitchShopMenu();
+
+    // 상점에 판매 중인 아이템 목록을 출력하는 함수
+    static void PrintShopItems(const vector<Item>& shopItems);
+
+    // 아이템 구매 성공 메시지를 출력하는 함수
+    static void PrintPurchaseSuccess(const Item& item);
+
+	// 아이템 구매 실패 메시지를 출력문은 Shop.h 에서 처리
 
 
 
@@ -107,8 +135,51 @@ public:
     // 항목: 진태식 / 류
     static void PrintJobSelectMenu();
 
+
+
+    // 플레이어 정보 출력, 몬스터 정보 출력, 전투 메뉴 출력 함수
+    static void PrintNormalBattleMenu(const GameContext& context);
+
+    // 플레이어 정보 출력
+    static void PrintBattlePlayerInfo(GameContext& context);
+
+    // 몬스터 정보 출력
+    static void PrintBattleMonsterInfo(GameContext& context);
+
+    // 전투 중 플레이어가 선택할 수 있는 행동 메뉴를 출력합니다.
+    static void PrintBattleActionMenu();
+
+	// 전투 승리 보상 출력 함수
+    static void BattleReward(GameContext& context);
+
+
+	// 일반 주사위를 굴린 결과 메세지 출력 함수. (주사위 결과: 1~6)
+    void PrintNormalDiceResult(int diceValue) const;
+
+    // 플레이어의 일반 공격 결과 메세지 출력 함수
+    void PrintPlayerMeleeAttackResult(const std::string& playerName, const std::string& monsterName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const;
+
+    // 플레이어의 스킬 공격 결과를 메시지로 출력합니다.
+    void PrintPlayerSkillAttackResult(const std::string& playerName, const std::string& monsterName, const std::string& skillName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const;
+
+    // 플레이어가 도주를 시도한 결과를 출력합니다.
+    static void PrintPlayerRunawayResult();
+
+    // 현재 플레이어 턴 번호를 출력합니다.
+    static void PrintPlayerTurnCount();
+
+    // 전투 결과를 확인하고 승리 또는 패배 메시지를 출력합니다.
+    static void PrintBattleResult(GameContext& player, GameContext& monster, Battle& battle);
+
+
+
+
+
     // 게임종료 메세지 출력 함수
     static void PrintGameOver();
+
+
+
 
     //PrintStartScreen() 함수 안에서 사용
     // 콘솔 화면 전체를 공백으로 덮어서 지우고,
@@ -118,6 +189,10 @@ public:
     //PrintStartScreen() 함수 안에서 사용
     // 콘솔 커서를 원하는 좌표(x, y)로 이동시키는 함수
     static void MoveCursor(int x, int y);
+
+
+
+
 
     // 시작 화면 출력 함수
     // 게임 로고, 타이틀, 시작 안내 문구 출력
@@ -204,6 +279,108 @@ public:
 
     // Cut 6: 진태식이 패배하고 위기에 빠지는 애니메이션 출력 함수
     static void PlayCutScene6Animation();
+
+
+
+    // New Cut Scene 1: 주사위 게임_ 진(승) 류(패)
+	static void ShowNewCutScene1();
+
+	// New Cut Scene 2: 류 - 야쿠자
+	static void ShowNewCutScene2();
+
+	// New Cut Scene 3: 진 - 경찰
+	static void ShowNewCutScene3();
+
+	// New Cut Scene 4: 강사라 - 의대
+	static void ShowNewCutScene4();
+
+	// New Cut Scene 5: 류 - 후계자
+	static void ShowNewCutScene5();
+
+	// New Cut Scene 6: 진 경찰 - 언더커버 (마약 전담반)
+	static void ShowNewCutScene6();
+
+	// New Cut Scene 7: 조직원끼리 항쟁 컷신
+	static void ShowNewCutScene7();
+
+	// New Cut Scene 8: 강사라 진태식 류노스케 조우
+	static void ShowNewCutScene8();
+
+	// New Cut Scene 9: 류/진 상호 경계 컷신
+	static void ShowNewCutScene9();
+
+	// New Cut Scene 10: 강사라 제지
+	static void ShowNewCutScene10();
+
+	// New Cut Scene 11: 뒷짐을 지고 있는 아버지->류에게 압박
+    static void ShowNewCutScene11();
+
+    // New Cut Scene 12: 카지노에서 습격
+    static void ShowNewCutScene12();
+
+    // New Cut Scene 13: 진태식 중상 -> 진료소 이동
+    static void ShowNewCutScene13();
+
+    // New Cut Scene 14: 류 진료소 습격 / 문 박
+    static void ShowNewCutScene14();
+
+    // New Cut Scene 15: 태식 쓰러진 컷신
+    static void ShowNewCutScene15();
+
+    // New Cut Scene 16: 강사라 제지
+    static void ShowNewCutScene16();
+
+    // New Cut Scene 17: 류가 칼찌
+    static void ShowNewCutScene17();
+
+    // New Cut Scene 18: 강사라 사망
+    static void ShowNewCutScene18();
+
+    // New Cut Scene 19: 류 -> 승리 시 태식 사망
+    static void ShowNewCutScene19();
+
+    // New Cut Scene 20: 류 승리 의자에 앉아있는 고독한 느낌의 컷신
+    static void ShowNewCutScene20();
+
+    // New Cut Scene 21: 진이 서있고 류 무릎꿇은 컷신 
+    static void ShowNewCutScene21();
+
+    // New Cut Scene 22: 아래에서 바라보는 슬픈 표정의 류 컷신
+    static void ShowNewCutScene22();
+
+    // New Cut Scene 23: 통창으로 달려가는 류 컷신
+    static void ShowNewCutScene23();
+
+    // New Cut Scene 24: 류가 건물에서 떨어지는 컷신
+    static void ShowNewCutScene24();
+
+    // NewCutScene 이미지 출력 함수
+    static void PrintNewCutScene1Image();
+    static void PrintNewCutScene2Image();
+    static void PrintNewCutScene3Image();
+    static void PrintNewCutScene4Image();
+    static void PrintNewCutScene5Image();
+    static void PrintNewCutScene6Image();
+    static void PrintNewCutScene7Image();
+    static void PrintNewCutScene8Image();
+    static void PrintNewCutScene9Image();
+	static void PrintNewCutScene10Image();
+	static void PrintNewCutScene11Image();
+    static void PrintNewCutScene12Image();
+    static void PrintNewCutScene13Image();
+    static void PrintNewCutScene14Image();
+    static void PrintNewCutScene15Image();
+    static void PrintNewCutScene16Image();
+    static void PrintNewCutScene17Image();
+    static void PrintNewCutScene18Image();
+    static void PrintNewCutScene19Image();
+    static void PrintNewCutScene20Image();
+    static void PrintNewCutScene21Image();
+    static void PrintNewCutScene22Image();
+    static void PrintNewCutScene23Image();
+    static void PrintNewCutScene24Image();
+   
+
 
     // 주사위 눈금별 아스키 이미지 출력 함수 선언
     static void PrintDice1();  // 주사위 눈금 1 출력

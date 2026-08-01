@@ -1,6 +1,14 @@
 #ifndef BATTLE_H_
 #define BATTLE_H_
 #include <iostream>
+#include "GameContext.h"
+#include "Player.h"
+#include "ConsolUI.h"
+#include "InputManager.h"
+#include "StatBonus.h"
+#include <algorithm>
+#include <random>
+#include <iostream>
 
 class GameContext;
 class Player;
@@ -48,81 +56,77 @@ struct AttackResult
 class Battle
 {
 public:
-	Battle();
+	Battle(GameContext& context) {};
+	// 확률생성
+	int CheckChance();
 
-	// 전투를 시작하고 종료 결과를 반환합니다.
-	//
-	// 반환값:
-	// BattleResult::Victory - 플레이어 승리
-	// BattleResult::Defeat  - 플레이어 패배
-	// BattleResult::Escape  - 도망 성공
-	StartBattle(GameContext& context);
+	// 현재 설정된 주사위 종류에 따라 주사위를 굴립니다.
+	int RollDice();
 
-	// 전투에서 사용할 주사위 종류를 설정합니다.
-	void SetDiceType(DiceType diceType);
+	// 1부터 6까지의 일반 주사위 값을 반환합니다.
+	int RollNormalDice();
 
-	// 현재 설정된 주사위 종류를 반환합니다.
-	DiceType GetdiceType() const;
+	// 1부터 6까지의 일반 주사위 값을 반환하고 그 값에 +1을 더합니다 (6이 나올 경우 더하지 않습니다.)
+	int RollLuckyDice();
 
-	// 현재 전투 결과를 반환합니다.
-	GetBattleResult() const;
+	// 1부터 6까지의 일반 주사위 값을 2번 반환하고 그 중 큰 값을 반환합니다.
+	int RollDoubleDice();
 
-private:
-	// 새로운 전투를 시작할 수 있도록 내부 상태를 초기화합니다.
-	void InitializeBattle();
+	// 1과 6만 나오는 주사위입니다.
+	int RollExtremeDice();
 
-	// 플레이어 턴과 몬스터 턴으로 구성한 한 턴을 처리합니다.
-	//
-	// 전투가 끝나지 않았다면 BattleResult::None을 반환합니다.
-	ProcessTurn(GameContext& context);
+	// 주사위를 굴리고 나온 값에 따라 일반데미지의 값을 반환합니다.
+	int PlayerDiceMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 플레이어에게 행동을 입력받아 선택된 행동을 반환합니다.
-	//
-	// 실제 공격이나 방어 처리는 이 함수에서 하지 않고,
-	// 선택 결과만 반환하여 입력과 전투 처리를 분리합니다.
-	SelectPlayerAction();
+	// 주사위를 굴리고 나온 값에 따라 스킬데미지의 값을 반환합니다.
+	int PlayerDiceSkillDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 플레이어 공격을 처리하고 공격 결과를 반환합니다.
-	AttackResult ProcessPlayerAttack(GameContext& context);
+	// ISDamageChoice 값에 따라 일반or스킬공격값 반환.
+	int PlayerDiceDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 플레이어를 방어 상태로 변경합니다.
-	void ProcessPlayerDefense();
+	// 도망의 성공여부 값을 반환합니다.
+	bool PlayerRunaway();
 
-	// 몬스터 턴을 처리하고 플레이어가 받은 피해량을 반환합니다.
-	//
-	// 몬스터가 스턴 상태라면 0을 반환합니다.
-	int ProcessMonsterTurn(GameContext& context);
+	// 플레이어 턴을 카운트합니다.
+	int PlayerTurnCount();
 
-	// 플레이어의 공격 결과를 계산합니다.
-	AttackResult CalculatePlayerAttack(GameContext& context);
+	// 처치한 몬스터 킬을 카운트합니다.
+	int GetMonsterKillCount();
 
-	// 몬스터가 플레이어에게 줄 최종 피해량을 계산합니다.
-	int CalculateMonsterDamage(GameContext& context);
+	// 일반몬스터의 일반데미지값을 반환.
+	int NormalMonsterMeleeDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 몬스터에게 피해를 적용하고 남은 HP를 반환합니다.
-	int ApplyDamageToMonster(GameContext& context, int Damage);
+	//중간보스몬스터의 일반데미지와 스킬데미지 값을 반환합니다. 
+	int MiddleBossMonsterDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 플레이어에게 피해를 적용하고 남은 HP를 반환합니다.
-	int ApplyDamageToPlayer(GameContext& context, int Damage);
+	//최종보스몬스터의 일반데미지와 스킬데미지 값을 반환합니다.
+	int FinalBossMonsterDamage(GameContext& context1, GameContext& context2, const StatBonus& equipBonus, const StatBonus& potionBonus);
 
-	// 도망 성공 여부를 반환합니다.
-	bool IsEscapeSuccessful();
+	//승패 판정에 대한 값을 반환
+	bool CheckBattleResult(GameContext& context1, GameContext& context2);
 
-	// 플레이어가 쓰려졌는지 반환합니다.
-	bool IsPlayerDefeated(GameContext& context) const;
+	// 배틀 승리시 보상
+	void BattleReward(GameContext& context1, GameContext& context2);
 
-	// 몬스터가 쓰려졌는지 반환합니다.
-	bool IsMonsterDefeated(GameContext& context) const;
+	int GetLastDiceValue();
+
+	void SetLastDiceValue(int DiceValue);
+
+	int GetTrunCount();
+
+	void SetTrunCount(int Count);
 
 private:
-	int TrunCount;  // 현재 턴 번호
+	int TrunCount = 0;  // 현재 턴 번호
 	int LastDiceValue;  // 가장 최근에 나온 주사위 값
+	int MonsterkillCount = 0; // 몬스터 킬카운트
 
 	bool IsPlayerDefending;   // 플레이어 방어 상태
 	bool IsMonsterStunned;    // 몬스터 스턴 상태
+	bool IsBattleResult;     // 승패여부 true: 승 false:패
+	bool IsDamageChoice; // 일반공격 or 스킬공격을 결정해줌
 
 	DiceType CurrentDiceType;   // 현재 사용하는 주사위 종류
-	BattleResult BattleResult;   // 현재 전투 결과
 
 };
 
