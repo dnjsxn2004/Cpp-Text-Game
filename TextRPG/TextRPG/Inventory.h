@@ -59,4 +59,7 @@ public:
 	std::string GetEquippedWeaponName() const;
 	std::string GetEquippedArmorName() const;
 
+	//판매 목록용 실제 인덱스 함수
+	std::vector<int> GetSellableItemIndices() const;
+
 };

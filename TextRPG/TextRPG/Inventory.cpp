@@ -386,3 +386,17 @@ std::vector<int> Inventory::GetUnequippedEquipmentIndies() const {
 	}
 	return result;
 }
+
+//판매 목록용 실제 인덱스 함수
+std::vector<int> Inventory::GetSellableItemIndices() const {
+	std::vector<int> result;
+
+	for (int i = 0; i < static_cast<int>(items.size()); i++) {
+		const Item& item = items[i];
+
+		if (item.GetType() != ItemType::Quest && !item.IsEquipped()) {
+			result.push_back(i);
+		}
+	}
+	return result;
+}
