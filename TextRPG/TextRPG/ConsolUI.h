@@ -49,6 +49,9 @@ public:
     // 오류떠서 추가 플레이서 스테이터스 & 버전
     static void PrintPlayerStatus(Player& player);
 
+    // 타이틀 큰솔 창 너비에 맞게 구분선을 출력하는 함수
+    static void PrintTitleLine();
+
     // 구분선 출력 함수
     static void PrintLine();
 
@@ -289,7 +292,8 @@ public:
     // 콘솔 커서를 원하는 좌표(x, y)로 이동시키는 함수
     static void MoveCursor(int x, int y);
 
-
+    // 입력 버퍼에 남아 있는 키 입력을 모두 제거하는 함수
+    static void ClearInputBuffer();
 
 
 
