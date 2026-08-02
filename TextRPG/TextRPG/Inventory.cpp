@@ -1,4 +1,4 @@
-#include "Inventory.h"
+ï»¿#include "Inventory.h"
 #include "GameContext.h"
 
 Inventory::Inventory()
@@ -8,17 +8,17 @@ Inventory::Inventory()
 }
 
 
-//ÀÎº¥Åä¸®¿¡ ¾ÆÀÌÅÛÀ» Ãß°¡
+//ì¸ë²¤í† ë¦¬ì— ì•„ì´í…œì„ ì¶”ê°€
 void Inventory::AddItem(const Item& item) {
 	
-	// ¼Òºñ ¾ÆÀÌÅÛ¸¸ ¼ö·® ÇÕÄ¡±â
+	// ì†Œë¹„ ì•„ì´í…œë§Œ ìˆ˜ëŸ‰ í•©ì¹˜ê¸°
 	if (item.GetType() == ItemType::Consumable) {
 
-		//°°Àº ÀÌ¸§ÀÇ ¾ÆÀÌÅÛÀÌ ÀÖ´ÂÁö È®ÀÎ
+		//ê°™ì€ ì´ë¦„ì˜ ì•„ì´í…œì´ ìˆëŠ”ì§€ í™•ì¸
 		for (Item& inventoryItem : items) {
 			if (inventoryItem.GetType() == ItemType::Consumable && inventoryItem.GetName() == item.GetName()) {
 
-				//°°Àº ¾ÆÀÌÅÛÀÌ¸é ¼ö·®¸¸ Áõ°¡
+				//ê°™ì€ ì•„ì´í…œì´ë©´ ìˆ˜ëŸ‰ë§Œ ì¦ê°€
 				inventoryItem.SetQuantity(
 					inventoryItem.GetQuantity() + item.GetQuantity()
 				);
@@ -26,16 +26,16 @@ void Inventory::AddItem(const Item& item) {
 			}
 		}
 	}
-	//°°Àº ¾ÆÀÌÅÛÀÌ ¾øÀ¸¸é »õ·Î Ãß°¡
+	//ê°™ì€ ì•„ì´í…œì´ ì—†ìœ¼ë©´ ìƒˆë¡œ ì¶”ê°€
 	items.push_back(item);
 }
 
-//ÀÎº¥Åä¸®¿¡ ÀúÀåµÈ ¸ğµç ¾ÆÀÌÅÛ ¸ñ·ÏÀ» ¹İÈ¯
+//ì¸ë²¤í† ë¦¬ì— ì €ì¥ëœ ëª¨ë“  ì•„ì´í…œ ëª©ë¡ì„ ë°˜í™˜
 const std::vector<Item>& Inventory::GetItems() const {
 	return items;
 }
 
-//ÁöÁ¤ÇÑ Å¸ÀÔÀÇ ¾ÆÀÌÅÛ¸¸ ¹İÈ¯
+//ì§€ì •í•œ íƒ€ì…ì˜ ì•„ì´í…œë§Œ ë°˜í™˜
 std::vector<Item> Inventory::GetItemsByType(ItemType type) const {
 
 	std::vector<Item> result;
@@ -50,7 +50,7 @@ std::vector<Item> Inventory::GetItemsByType(ItemType type) const {
 
 bool Inventory::UseItem(int index, GameContext& context)
 {
-	// Àß¸øµÈ ¹øÈ£¸¦ ¼±ÅÃÇß´ÂÁö °Ë»ç
+	// ì˜ëª»ëœ ë²ˆí˜¸ë¥¼ ì„ íƒí–ˆëŠ”ì§€ ê²€ì‚¬
 	if (index < 0 ||
 		index >= static_cast<int>(items.size()))
 	{
@@ -59,13 +59,13 @@ bool Inventory::UseItem(int index, GameContext& context)
 
 	Item& item = items[index];
 
-	// ¼Òºñ ¾ÆÀÌÅÛÀÎÁö °Ë»ç
+	// ì†Œë¹„ ì•„ì´í…œì¸ì§€ ê²€ì‚¬
 	if (item.GetType() != ItemType::Consumable)
 	{
 		return false;
 	}
 
-	// ¼ö·®ÀÌ ÀÖ´ÂÁö °Ë»ç
+	// ìˆ˜ëŸ‰ì´ ìˆëŠ”ì§€ ê²€ì‚¬
 	if (item.GetQuantity() <= 0)
 	{
 		return false;
@@ -73,28 +73,28 @@ bool Inventory::UseItem(int index, GameContext& context)
 
 	const StatBonus& bonus = item.GetStatBonus();
 
-	// HP¿Í MP È¿°ú°¡ ¸ğµÎ ¾øÀ¸¸é »ç¿ëÇÒ ¼ö ¾øÀ½
+	// HPì™€ MP íš¨ê³¼ê°€ ëª¨ë‘ ì—†ìœ¼ë©´ ì‚¬ìš©í•  ìˆ˜ ì—†ìŒ
 	if (bonus.hp == 0 && bonus.mp == 0 && bonus.str ==0 && bonus.att ==0 &&
 		bonus.def == 0 && bonus.dex == 0 &&  bonus.intel == 0 && bonus.luk ==0)
 	{
 		return false;
 	}
 
-	// GameContext¿¡¼­ Player °¡Á®¿À±â
+	// GameContextì—ì„œ Player ê°€ì ¸ì˜¤ê¸°
 	Player& player = context.GetPlayer();
 
-	// ½ÇÁ¦ HP/MP È¿°ú´Â Player¿¡¼­ Àû¿ë
+	// ì‹¤ì œ HP/MP íš¨ê³¼ëŠ” Playerì—ì„œ ì ìš©
 	player.DrinkPotion(item.GetStatBonus());
 
-	// ¼ö·® 1 °¨¼Ò
+	// ìˆ˜ëŸ‰ 1 ê°ì†Œ
 	item.SetQuantity(item.GetQuantity() - 1);
 
-	// ¼ö·®ÀÌ 0ÀÌ µÇ¸é ÀÎº¥Åä¸®¿¡¼­ »èÁ¦
+	// ìˆ˜ëŸ‰ì´ 0ì´ ë˜ë©´ ì¸ë²¤í† ë¦¬ì—ì„œ ì‚­ì œ
 	if (item.GetQuantity() <= 0)
 	{
 		items.erase(items.begin() + index);
 
-		// »èÁ¦µÈ À§Ä¡º¸´Ù µÚ¿¡ ÀÖ´Â Àåºñ ÀÎµ¦½º Á¶Á¤
+		// ì‚­ì œëœ ìœ„ì¹˜ë³´ë‹¤ ë’¤ì— ìˆëŠ” ì¥ë¹„ ì¸ë±ìŠ¤ ì¡°ì •
 		if (equippedWeaponIndex > index)
 		{
 			equippedWeaponIndex--;
@@ -109,18 +109,18 @@ bool Inventory::UseItem(int index, GameContext& context)
 	return true;
 }
 
-//Àåºñ ÀåÂø ÇÔ¼ö
+//ì¥ë¹„ ì¥ì°© í•¨ìˆ˜
 bool Inventory::EquipItem(int index, GameContext& context) {
 
-	//Àß¸øµÈ ÀÎµ¦½ºÀÎÁö È®ÀÎ
+	//ì˜ëª»ëœ ì¸ë±ìŠ¤ì¸ì§€ í™•ì¸
 	if (index < 0 || index >= static_cast<int>(items.size())) {
 		return false;
 	}
 
-	//ÀÎµ¦½º·Î ¾ÆÀÌÅÛ Á¢±Ù
+	//ì¸ë±ìŠ¤ë¡œ ì•„ì´í…œ ì ‘ê·¼
 	Item& newItem = items[index];
 
-	//Àåºñ ¾ÆÀÌÅÛÀÌ ¾Æ´Ï¸é ÀåÂøÇÒ ¼ö ¾øÀ½
+	//ì¥ë¹„ ì•„ì´í…œì´ ì•„ë‹ˆë©´ ì¥ì°©í•  ìˆ˜ ì—†ìŒ
 	if (newItem.GetType() != ItemType::Equipment) {
 		return false;
 	}
@@ -128,9 +128,9 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 	EquipmentType equipmentType = newItem.GetEquipmentType();
 	Player& player = context.GetPlayer();
 
-	//¹«±â ÀåÂø
+	//ë¬´ê¸° ì¥ì°©
 	if (equipmentType == EquipmentType::Weapon) {
-		//±âÁ¸ ¹«±â°¡ ÀÖÀ¸¸é ÀåÂø »óÅÂ ÇØÁ¦
+		//ê¸°ì¡´ ë¬´ê¸°ê°€ ìˆìœ¼ë©´ ì¥ì°© ìƒíƒœ í•´ì œ
 		if (equippedWeaponIndex != -1) {
 			const StatBonus oldBonus = items[equippedWeaponIndex].GetStatBonus();
 			
@@ -140,16 +140,16 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 		equippedWeaponIndex = index;
 		newItem.SetEquipped(true);
 
-		//»õ ¹«±âÀÇ HP/MP º¸³Ê½º Àû¿ë
+		//ìƒˆ ë¬´ê¸°ì˜ HP/MP ë³´ë„ˆìŠ¤ ì ìš©
 		player.ApplyEquipHpMpBonus(
 			true,
 			newItem.GetStatBonus()
 		);
 	}
 
-	//¹æ¾î±¸ ÀåÂø
+	//ë°©ì–´êµ¬ ì¥ì°©
 	else if (equipmentType == EquipmentType::Armor) {
-		//±âÁ¸ ¹æ¾î±¸°¡ ÀÖÀ¸¸é ÀåÂø »óÅÂ ÇØÁ¦
+		//ê¸°ì¡´ ë°©ì–´êµ¬ê°€ ìˆìœ¼ë©´ ì¥ì°© ìƒíƒœ í•´ì œ
 		if (equippedArmorIndex != -1) {
 			const StatBonus oldBonus = items[equippedArmorIndex].GetStatBonus();
 
@@ -159,7 +159,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 		equippedArmorIndex = index;
 		newItem.SetEquipped(true);
 
-		//»õ ¹æ¾î±¸ÀÇ HP/MP º¸³Ê½º Àû¿ë
+		//ìƒˆ ë°©ì–´êµ¬ì˜ HP/MP ë³´ë„ˆìŠ¤ ì ìš©
 		player.ApplyEquipHpMpBonus(
 			true,
 			newItem.GetStatBonus()
@@ -170,7 +170,7 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 		return false;
 	}
 
-	//Á¤Âø ÁßÀÎ Àåºñ ÀüÃ¼ º¸³Ê½º °è»ê
+	//ì •ì°© ì¤‘ì¸ ì¥ë¹„ ì „ì²´ ë³´ë„ˆìŠ¤ ê³„ì‚°
 	StatBonus totalBonus;
 
 	if (equippedWeaponIndex != -1) {
@@ -198,82 +198,82 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 		totalBonus.luk += armorBonus.luk;
 	}
 
-	//Player°¡ ±âÁ¸ Àåºñ º¸³Ê½º¸¦ »õ º¸³Ê½º·Î ±³Ã¼
+	//Playerê°€ ê¸°ì¡´ ì¥ë¹„ ë³´ë„ˆìŠ¤ë¥¼ ìƒˆ ë³´ë„ˆìŠ¤ë¡œ êµì²´
 	player.ApplyEquipBonus(true, totalBonus);
 
 	return true;
 }
 
-//¹«±â ÇØÁ¦
+//ë¬´ê¸° í•´ì œ
 bool Inventory::UnequipWeapon(GameContext& context) {
-	//ÀåÂøµÈ ¹«±â°¡ ¾øÀ½
+	//ì¥ì°©ëœ ë¬´ê¸°ê°€ ì—†ìŒ
 	if (equippedWeaponIndex == -1) {
 		return false;
 	}
 
 	Player& player = context.GetPlayer();
 
-	//ÇØÁ¦ÇÒ ¹«±âÀÇ º¸³Ê½º¸¦ ¸ÕÀú ÀúÀå
+	//í•´ì œí•  ë¬´ê¸°ì˜ ë³´ë„ˆìŠ¤ë¥¼ ë¨¼ì € ì €ì¥
 	const StatBonus removedBonus = items[equippedWeaponIndex].GetStatBonus();
 
-	//¹«±âÀÇ HP/MP º¸³Ê½º Á¦°Å
+	//ë¬´ê¸°ì˜ HP/MP ë³´ë„ˆìŠ¤ ì œê±°
 	player.ApplyEquipHpMpBonus(false, removedBonus);
 
-	//ÀåÂø »óÅÂ ÇØÁ¦
+	//ì¥ì°© ìƒíƒœ í•´ì œ
 	items[equippedWeaponIndex].SetEquipped(false);
 	equippedWeaponIndex = -1;
 
 	StatBonus totalBonus;
 
-	// ¹æ¾î±¸°¡ ³²¾Æ ÀÖ´Ù¸é ¹æ¾î±¸ º¸³Ê½º¸¸ Àû¿ë
+	// ë°©ì–´êµ¬ê°€ ë‚¨ì•„ ìˆë‹¤ë©´ ë°©ì–´êµ¬ ë³´ë„ˆìŠ¤ë§Œ ì ìš©
 	if (equippedArmorIndex != -1) {
 		totalBonus = items[equippedArmorIndex].GetStatBonus();
 
 		player.ApplyEquipBonus(true, totalBonus);
 	}
 	else {
-		//³²Àº Àåºñ°¡ ¾øÀ½
+		//ë‚¨ì€ ì¥ë¹„ê°€ ì—†ìŒ
 		player.ApplyEquipBonus(false, StatBonus());
 	}
 
 	return true;
 }
 
-//¹æ¾î±¸ ÇØÁ¦
+//ë°©ì–´êµ¬ í•´ì œ
 bool Inventory::UnequipArmor(GameContext& context) {
-	//ÀåÂøµÈ ¹æ¾î±¸°¡ ¾øÀ½
+	//ì¥ì°©ëœ ë°©ì–´êµ¬ê°€ ì—†ìŒ
 	if (equippedArmorIndex == -1) {
 		return false;
 	}
 
 	Player& player = context.GetPlayer();
 
-	//ÇØÁ¦ÇÒ ¹æ¾î±¸ÀÇ º¸³Ê½º¸¦ ¸ÕÀú ÀúÀå
+	//í•´ì œí•  ë°©ì–´êµ¬ì˜ ë³´ë„ˆìŠ¤ë¥¼ ë¨¼ì € ì €ì¥
 	const StatBonus removedBonus = items[equippedArmorIndex].GetStatBonus();
 
-	//¹æ¾î±¸ÀÇ HP/MP º¸³Ê½º Á¦°Å
+	//ë°©ì–´êµ¬ì˜ HP/MP ë³´ë„ˆìŠ¤ ì œê±°
 	player.ApplyEquipHpMpBonus(false, removedBonus);
 
-	//ÀåÂø »óÅÂ ÇØÁ¦
+	//ì¥ì°© ìƒíƒœ í•´ì œ
 	items[equippedArmorIndex].SetEquipped(false);
 	equippedArmorIndex = -1;
 
 	StatBonus totalBonus;
 
-	// ¹«±â°¡ ³²¾Æ ÀÖ´Ù¸é ¹«±â º¸³Ê½º¸¸ Àû¿ë
+	// ë¬´ê¸°ê°€ ë‚¨ì•„ ìˆë‹¤ë©´ ë¬´ê¸° ë³´ë„ˆìŠ¤ë§Œ ì ìš©
 	if (equippedWeaponIndex != -1) {
 		totalBonus = items[equippedWeaponIndex].GetStatBonus();
 
 		player.ApplyEquipBonus(true, totalBonus);
 	}
 	else {
-		// ³²Àº Àåºñ°¡ ¾øÀ½
+		// ë‚¨ì€ ì¥ë¹„ê°€ ì—†ìŒ
 		player.ApplyEquipBonus(false, StatBonus());
 	}
 	return true;
 }
 
-//ÀåÂø ÀÎµ¦½º Getter
+//ì¥ì°© ì¸ë±ìŠ¤ Getter
 int Inventory::GetEquippedWeaponIndex() const {
 	return equippedWeaponIndex;
 }
@@ -284,35 +284,35 @@ int Inventory::GetEquippedArmorIndex() const {
 
 bool Inventory::RemoveItem(int index, int quantity) {
 
-	//Àß¸øµÈ ÀÎµ¦½º °Ë»ç
+	//ì˜ëª»ëœ ì¸ë±ìŠ¤ ê²€ì‚¬
 	if (index < 0 || index >= static_cast<int>(items.size())) {
 		return false;
 	}
 
-	//Àß¸øµÈ »èÁ¦ ¼ö·® °Ë»ç
+	//ì˜ëª»ëœ ì‚­ì œ ìˆ˜ëŸ‰ ê²€ì‚¬
 	if (quantity <= 0) {
 		return false;
 	}
 
 	Item& item = items[index];
 
-	//Á¤Âø ÁßÀÎ ¾ÆÀÌÅÛÀº »èÁ¦ ºÒ°¡
+	//ì •ì°© ì¤‘ì¸ ì•„ì´í…œì€ ì‚­ì œ ë¶ˆê°€
 	if (item.IsEquipped()) {
 		return false;
 	}
 
-	//°¡Áö°í ÀÖ´Â ¼ö·®º¸´Ù ¸¹ÀÌ »èÁ¦ÇÏ·Á´Â °æ¿ì
+	//ê°€ì§€ê³  ìˆëŠ” ìˆ˜ëŸ‰ë³´ë‹¤ ë§ì´ ì‚­ì œí•˜ë ¤ëŠ” ê²½ìš°
 	if (quantity > item.GetQuantity()) {
 		return false;
 	}
 
 	item.SetQuantity(item.GetQuantity() - quantity);
 
-	//¼ö·®ÀÌ 0ÀÌ¸é º¤ÅÍ¿¡¼­ ¿ÏÀüÈ÷ »èÁ¦
+	//ìˆ˜ëŸ‰ì´ 0ì´ë©´ ë²¡í„°ì—ì„œ ì™„ì „íˆ ì‚­ì œ
 	if (item.GetQuantity() <= 0) {
 		items.erase(items.begin() + index);
 
-		//»èÁ¦ À§Ä¡ µÚ¿¡ ÀÖ´Â Àåºñ ÀÎµ¦½º Á¶Á¤
+		//ì‚­ì œ ìœ„ì¹˜ ë’¤ì— ìˆëŠ” ì¥ë¹„ ì¸ë±ìŠ¤ ì¡°ì •
 		if (equippedWeaponIndex > index) {
 			equippedWeaponIndex--;
 		}
@@ -324,7 +324,7 @@ bool Inventory::RemoveItem(int index, int quantity) {
 	return true;
 }
 
-//ÀåÂøÇÑ ¹«±â ¾ÆÀÌÅÛ ¹İÈ¯ ÇÔ¼ö
+//ì¥ì°©í•œ ë¬´ê¸° ì•„ì´í…œ ë°˜í™˜ í•¨ìˆ˜
 std::string Inventory::GetEquippedWeaponName() const
 {
 	if (equippedWeaponIndex == -1)
@@ -335,7 +335,7 @@ std::string Inventory::GetEquippedWeaponName() const
 	return items[equippedWeaponIndex].GetName();
 }
 
-//ÀåÂøÇÑ ¹æ¾î±¸ ¾ÆÀÌÅÛ ¹İÈ¯ ÇÔ¼ö
+//ì¥ì°©í•œ ë°©ì–´êµ¬ ì•„ì´í…œ ë°˜í™˜ í•¨ìˆ˜
 std::string Inventory::GetEquippedArmorName() const
 {
 	if (equippedArmorIndex == -1)
@@ -346,12 +346,12 @@ std::string Inventory::GetEquippedArmorName() const
 	return items[equippedArmorIndex].GetName();
 }
 
-//ÀåÂøÇÏÁö ¾ÊÀº ¾ÆÀÌÅÛ ¹İÈ¯
+//ì¥ì°©í•˜ì§€ ì•Šì€ ì•„ì´í…œ ë°˜í™˜
 std::vector<Item> Inventory::GetUnequippedItems() const {
 	std::vector<Item> result;
 
 	for (const Item& item : items) {
-		//ÀåÂø ÁßÀÎ ¾Æ´Ñ ¾ÆÀÌÅÛ¸¸ ÀÏ¹İ ÀÎº¥Åä¸®¿¡ Ãß°¡
+		//ì¥ì°© ì¤‘ì¸ ì•„ë‹Œ ì•„ì´í…œë§Œ ì¼ë°˜ ì¸ë²¤í† ë¦¬ì— ì¶”ê°€
 		if (!item.IsEquipped()) {
 			result.push_back(item);
 		}
@@ -359,12 +359,12 @@ std::vector<Item> Inventory::GetUnequippedItems() const {
 	return result;
 }
 
-//ÇöÀç ÀåÂø ÁßÀÎ ¾ÆÀÌÅÛ¸¸ ¹İÈ¯
+//í˜„ì¬ ì¥ì°© ì¤‘ì¸ ì•„ì´í…œë§Œ ë°˜í™˜
 std::vector<Item> Inventory::GetEquippedItems() const {
 	std::vector<Item> result;
 
 	for (const Item& item : items) {
-		//ÀåÂø ÁßÀÎ ¾ÆÀÌÅÛ¸¸ ÀåÂø ÀÎº¥Åä¸®¿¡ Ãß°¡
+		//ì¥ì°© ì¤‘ì¸ ì•„ì´í…œë§Œ ì¥ì°© ì¸ë²¤í† ë¦¬ì— ì¶”ê°€
 		if (item.IsEquipped()) {
 			result.push_back(item);
 		}
@@ -372,7 +372,7 @@ std::vector<Item> Inventory::GetEquippedItems() const {
 	return result;
 }
 
-//ÀåÂøÇÏÁö ¾ÊÀº ÀåºñµéÀÇ ½ÇÁ¦ ÀÎº¥Åä¸® À§Ä¡¸¦ ¸ğ¾Æ ³õ´Â ¸ñ·Ï
+//ì¥ì°©í•˜ì§€ ì•Šì€ ì¥ë¹„ë“¤ì˜ ì‹¤ì œ ì¸ë²¤í† ë¦¬ ìœ„ì¹˜ë¥¼ ëª¨ì•„ ë†“ëŠ” ëª©ë¡
 std::vector<int> Inventory::GetUnequippedEquipmentIndies() const {
 	std::vector<int> result;
 
@@ -387,7 +387,7 @@ std::vector<int> Inventory::GetUnequippedEquipmentIndies() const {
 	return result;
 }
 
-//ÆÇ¸Å ¸ñ·Ï¿ë ½ÇÁ¦ ÀÎµ¦½º ÇÔ¼ö
+//íŒë§¤ ëª©ë¡ìš© ì‹¤ì œ ì¸ë±ìŠ¤ í•¨ìˆ˜
 std::vector<int> Inventory::GetSellableItemIndices() const {
 	std::vector<int> result;
 

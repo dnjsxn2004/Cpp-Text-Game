@@ -1,27 +1,38 @@
-#include "Item.h"
+ï»¿#include "Item.h"
 
-//Item »ý¼ºÀÚ
+//Item ìƒì„±ìž
+Item::Item()
+	: name(""),
+	type(ItemType::Consumable),
+	equipmentType(EquipmentType::None),
+	quantity(0),
+	equipped(false),
+	price(0),
+	statBonus()
+{
+}
+
 Item::Item(const std::string& name, ItemType type, EquipmentType equipmentType, const StatBonus& statBonus, int quantity, int price)
 	:name(name), type(type), equipmentType(equipmentType), quantity(quantity),statBonus(statBonus), equipped(false), price(price){
 
 }
 
-//¾ÆÀÌÅÛ ÀÌ¸§ ¹ÝÈ¯
+//ì•„ì´í…œ ì´ë¦„ ë°˜í™˜
 std::string Item::GetName() const {
 	return name;
 }
-//¾ÆÀÌÅÛ Å¸ÀÔ ¹ÝÈ¯
+//ì•„ì´í…œ íƒ€ìž… ë°˜í™˜
 ItemType Item::GetType() const {
 	return type;
 }
 EquipmentType Item::GetEquipmentType() const {
 	return equipmentType;
 }
-//¾ÆÀÌÅÛ ¼ö·® ¹ÝÈ¯
+//ì•„ì´í…œ ìˆ˜ëŸ‰ ë°˜í™˜
 int Item::GetQuantity() const {
 	return quantity;
 }
-//¾ÆÀÌÅÛ ¼ö·® º¯°æ
+//ì•„ì´í…œ ìˆ˜ëŸ‰ ë³€ê²½
 void Item::SetQuantity(int quantity) {
 	this->quantity = quantity;
 }

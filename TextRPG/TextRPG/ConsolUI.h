@@ -1,3 +1,5 @@
+#pragma once
+
 // ConsoleUI 구현 규칙
 // 1. ConsoleUI는 출력만 담당합니다.
 // 2. ConsoleUI 안에서 입력을 받지 않습니다.
@@ -21,22 +23,32 @@
 //4. 성공 메시지는 ConsoleUI::PrintSuccess()를 사용한다.
 ///
 
-#pragma once
-
 #include <iostream>
 #include <string>
-#include <windows.h> // Windows API 헤더 추가
 #include <vector>
+#include <windows.h>
 
-#include "Battle.h"
+// [수정] 순환 include 방지를 위해 Battle.h는 여기서 include하지 않습니다.
+// #include "Battle.h"
+
 #include "Monster.h"
 #include "Inventory.h"
 #include "Item.h"
 #include "GameContext.h"
+#include "StatBonus.h"
+#include "Player.h"
+
+// [추가] 전방 선언
+class Battle;
+class GameContext;
+class Item;
 
 class ConsoleUI
 {
 public:
+    // 오류떠서 추가 플레이서 스테이터스 & 버전
+    static void PrintPlayerStatus(Player& player);
+
     // 구분선 출력 함수
     static void PrintLine();
 
@@ -66,7 +78,7 @@ public:
     // 항목: 전투 / 상점 / 인벤토리 / 포션 제작 / 훈련장 / 상태 보기 / 게임 종료
     static void PrintMainMenu();
 
-	// 메인 메뉴를 실행하고 사용자 선택에 따라 각 메뉴로 이동하는 함수
+    // 메인 메뉴를 실행하고 사용자 선택에 따라 각 메뉴로 이동하는 함수
     static void SwitchMainMenu();
 
 
@@ -85,21 +97,21 @@ public:
 
 
     // 아이템 타입을 출력 가능한 문자열로 변환 함수
-    static string ItemTypeToString(Item& item);
+    static std::string ItemTypeToString(const Item& item);
 
     // 아이템 목록을 번호와 함께 출력하는 함수
     // EX) 1. 아이템
-    static void PrintItemListWithIndex(const vector<Item>& items);
+    static void PrintItemListWithIndex(const std::vector<Item>& items);
 
     // 인벤토리 메뉴 출력 함수
     // 항목: 내가 가진 전체 아이템 보기 / 장비 아이템 / 소비 아이템 / 퀘스트 아이템 / 뒤로가기
     static void PrintInventoryMenu();
 
     // 아이템 1개의 정보를 화면에 출력 함수
-    static void PrintItem(Item& item);
+    static void PrintItem(const Item& item);
 
-	// 아이템 이름만 출력하는 함수
-    static void PrintItemName(Item& item);
+    // 아이템 이름만 출력하는 함수
+    static void PrintItemName(const Item& item);
 
     // 인벤토리에 저장된 모든 아이템 목록을 출력 함수
     static void PrintAllItems(GameContext& context);
@@ -115,19 +127,19 @@ public:
 
 
 
-	// 상점 메뉴 출력 함수
+    // 상점 메뉴 출력 함수
     static void PrintShopMenu();
 
-	// 상점 메뉴를 실행하고 사용자 선택에 따라 아이템 구매, 판매, 뒤로가기 기능을 수행하는 함수
-	static void SwitchShopMenu();
+    // 상점 메뉴를 실행하고 사용자 선택에 따라 아이템 구매, 판매, 뒤로가기 기능을 수행하는 함수
+    static void SwitchShopMenu();
 
     // 상점에 판매 중인 아이템 목록을 출력하는 함수
-    static void PrintShopItems(const vector<Item>& shopItems);
+    static void PrintShopItems(const std::vector<Item>& shopItems);
 
     // 아이템 구매 성공 메시지를 출력하는 함수
     static void PrintPurchaseSuccess(const Item& item);
 
-	// 아이템 구매 실패 메시지를 출력문은 Shop.h 에서 처리
+    // 아이템 구매 실패 메시지를 출력문은 Shop.h 에서 처리
 
 
 
@@ -149,27 +161,114 @@ public:
     // 전투 중 플레이어가 선택할 수 있는 행동 메뉴를 출력합니다.
     static void PrintBattleActionMenu();
 
-	// 전투 승리 보상 출력 함수
+    // 전투 승리 보상 출력 함수
     static void BattleReward(GameContext& context);
 
 
-	// 일반 주사위를 굴린 결과 메세지 출력 함수. (주사위 결과: 1~6)
+    // 일반 주사위를 굴린 결과 메세지 출력 함수. (주사위 결과: 1~6)
     void PrintNormalDiceResult(int diceValue) const;
 
     // 플레이어의 일반 공격 결과 메세지 출력 함수
-    void PrintPlayerMeleeAttackResult(const std::string& playerName, const std::string& monsterName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const;
+    void PrintPlayerMeleeAttackResult(
+        const std::string& playerName,
+        const std::string& monsterName,
+        int diceNumber,
+        int damage,
+        bool isStunSuccess,
+        Battle& battle,
+        GameContext& player,
+        GameContext& monster
+    ) const;
 
     // 플레이어의 스킬 공격 결과를 메시지로 출력합니다.
-    void PrintPlayerSkillAttackResult(const std::string& playerName, const std::string& monsterName, const std::string& skillName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const;
+    void PrintPlayerSkillAttackResult(
+        const std::string& playerName,
+        const std::string& monsterName,
+        const std::string& skillName,
+        int diceNumber,
+        int damage,
+        bool isStunSuccess,
+        Battle& battle,
+        GameContext& player,
+        GameContext& monster
+    ) const;
 
     // 플레이어가 도주를 시도한 결과를 출력합니다.
-    static void PrintPlayerRunawayResult();
+    // [수정] ConsoleUI는 로직을 처리하지 않으므로 결과값만 받아 출력
+    static void PrintPlayerRunawayResult(bool isSuccess);
 
     // 현재 플레이어 턴 번호를 출력합니다.
-    static void PrintPlayerTurnCount();
+    // [수정] ConsoleUI는 Battle 내부 값을 직접 알 수 없으므로 턴 수만 받아 출력
+    static void PrintPlayerTurnCount(int turnCount);
 
     // 전투 결과를 확인하고 승리 또는 패배 메시지를 출력합니다.
     static void PrintBattleResult(GameContext& player, GameContext& monster, Battle& battle);
+
+
+    //[추가] 전투 시작 출력 함수
+    static void PrintBattleStart(GameContext& context);
+
+
+    //[추가] 주사위 결과 출력 함수
+    static void PrintDiceResult(int diceValue);
+
+    //[추가] 플레이어 일반 공격 결과 출력 함수
+    static void PrintPlayerMeleeAttackResultMessage(
+        const std::string& playerName,
+        const std::string& monsterName,
+        int damage
+    );
+
+    //[추가] 플레이어 스킬 공격 결과 출력 함수
+    static void PrintPlayerSkillAttackResultMessage(
+        const std::string& playerName,
+        const std::string& monsterName,
+        int damage
+    );
+
+    //[추가] 공격 실패 출력 함수
+    static void PrintAttackMiss();
+
+    //[추가] 스킬 실패 출력 함수
+    static void PrintSkillMiss();
+
+    //[추가] MP 부족 출력 함수
+    static void PrintNotEnoughMp();
+
+    //[추가] 스턴 성공 출력 함수
+    static void PrintStunSuccess(const std::string& monsterName);
+
+    //[추가] 몬스터 스턴 상태 출력 함수
+    static void PrintMonsterStunned(const std::string& monsterName);
+
+    //[추가] 몬스터 공격 결과 출력 함수
+    static void PrintMonsterAttackResult(
+        const std::string& monsterName,
+        const std::string& playerName,
+        int damage
+    );
+
+    //[추가] 도망 성공 출력 함수
+    static void PrintRunawaySuccess();
+
+    //[추가] 도망 실패 출력 함수
+    static void PrintRunawayFail();
+
+    //[추가] 전투 승리 출력 함수
+    static void PrintBattleVictory(const std::string& monsterName);
+
+    //[추가] 전투 패배 출력 함수
+    static void PrintBattleDefeat(const std::string& playerName);
+
+    //[추가] 전투 중단 출력 함수
+    static void PrintBattleStopped();
+
+    // [추가] 보상 출력 함수
+    static void PrintReward(int exp, int gold);
+
+    //[추가] 레벨업 출력 함수
+    static void PrintLevelUp(const std::string& playerName, int level);
+
 
 
 
@@ -243,7 +342,7 @@ public:
 
     // 캐릭터의 등장 장면과 소개 문구를 출력하는 함수
     static void ShowCharacterIntro();
-    
+
     // Cut 1: 어린 시절 진태식, 강사라, 류노스케가 만나 즐겁게 노는 장면 출력 함수
     static void ShowCutScene1();
 
@@ -283,36 +382,36 @@ public:
 
 
     // New Cut Scene 1: 주사위 게임_ 진(승) 류(패)
-	static void ShowNewCutScene1();
+    static void ShowNewCutScene1();
 
-	// New Cut Scene 2: 류 - 야쿠자
-	static void ShowNewCutScene2();
+    // New Cut Scene 2: 류 - 야쿠자
+    static void ShowNewCutScene2();
 
-	// New Cut Scene 3: 진 - 경찰
-	static void ShowNewCutScene3();
+    // New Cut Scene 3: 진 - 경찰
+    static void ShowNewCutScene3();
 
-	// New Cut Scene 4: 강사라 - 의대
-	static void ShowNewCutScene4();
+    // New Cut Scene 4: 강사라 - 의대
+    static void ShowNewCutScene4();
 
-	// New Cut Scene 5: 류 - 후계자
-	static void ShowNewCutScene5();
+    // New Cut Scene 5: 류 - 후계자
+    static void ShowNewCutScene5();
 
-	// New Cut Scene 6: 진 경찰 - 언더커버 (마약 전담반)
-	static void ShowNewCutScene6();
+    // New Cut Scene 6: 진 경찰 - 언더커버 (마약 전담반)
+    static void ShowNewCutScene6();
 
-	// New Cut Scene 7: 조직원끼리 항쟁 컷신
-	static void ShowNewCutScene7();
+    // New Cut Scene 7: 조직원끼리 항쟁 컷신
+    static void ShowNewCutScene7();
 
-	// New Cut Scene 8: 강사라 진태식 류노스케 조우
-	static void ShowNewCutScene8();
+    // New Cut Scene 8: 강사라 진태식 류노스케 조우
+    static void ShowNewCutScene8();
 
-	// New Cut Scene 9: 류/진 상호 경계 컷신
-	static void ShowNewCutScene9();
+    // New Cut Scene 9: 류/진 상호 경계 컷신
+    static void ShowNewCutScene9();
 
-	// New Cut Scene 10: 강사라 제지
-	static void ShowNewCutScene10();
+    // New Cut Scene 10: 강사라 제지
+    static void ShowNewCutScene10();
 
-	// New Cut Scene 11: 뒷짐을 지고 있는 아버지->류에게 압박
+    // New Cut Scene 11: 뒷짐을 지고 있는 아버지->류에게 압박
     static void ShowNewCutScene11();
 
     // New Cut Scene 12: 카지노에서 습격
@@ -364,8 +463,8 @@ public:
     static void PrintNewCutScene7Image();
     static void PrintNewCutScene8Image();
     static void PrintNewCutScene9Image();
-	static void PrintNewCutScene10Image();
-	static void PrintNewCutScene11Image();
+    static void PrintNewCutScene10Image();
+    static void PrintNewCutScene11Image();
     static void PrintNewCutScene12Image();
     static void PrintNewCutScene13Image();
     static void PrintNewCutScene14Image();
@@ -379,7 +478,7 @@ public:
     static void PrintNewCutScene22Image();
     static void PrintNewCutScene23Image();
     static void PrintNewCutScene24Image();
-   
+
 
 
     // 주사위 눈금별 아스키 이미지 출력 함수 선언
@@ -390,8 +489,40 @@ public:
     static void PrintDice5();  // 주사위 눈금 5 출력
     static void PrintDice6();  // 주사위 눈금 6 출력
 
+    //래퍼 함수 컷신 출력하는건데 게임매니저 더 건들 자신이없어서 여기다 추가함 // 기존의 showcutscene 별명 붙여주는 겁니다.
+    static void PrintAct1Cutscene();
+    static void PrintAct2Cutscene();
+    static void PrintAct3Cutscene();
+    static void PrintEnding();
+    static void PrintPlayerStatus(GameContext& context);
+
     // 주사위 애니메이션 공통 실행 함수
     static void PrintDiceAnimationBySpeed(int delayMilliseconds);
 
+
+    //컷신 화면 나누기
+    static void DrawCutSceneScreen(
+        const std::vector<std::string>& sceneLines,
+        const std::vector<std::string>& dialogueLines
+    );
+
+    static void PrintFixedWidthText(const std::string& text, int width);
     
+    //게임 화면 나누기
+    static void DrawGameScreen(
+        const std::vector<std::string>& cutSceneLines,
+        const std::vector<std::string>& logLines,
+        Player& player,
+        const std::vector<std::string>& choiceLines
+    );
+
+    static void DrawGameScreen(
+        const std::vector<std::string>& cutSceneLines,
+        const std::vector<std::string>& logLines,
+        const std::vector<std::string>& statusLines,
+        const std::vector<std::string>& choiceLines
+    );
+
+
+
 };

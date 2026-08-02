@@ -1,4 +1,4 @@
-#include "Gang.h"
+﻿#include "Gang.h"
 
 Gang::Gang()
 {

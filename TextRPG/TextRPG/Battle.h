@@ -25,8 +25,7 @@ enum class DiceType
 
 // 플레이어 공격 한 번의 결과를 저장합니다.
 //
-// 피해량뿐만 아니라 주사위 값, 적중 여부, 치명타 여부,
-// 스턴 여부를 하나의 반환값으로 전달하기 위해 구조체를 사용합니다.
+// 피해량, 주사위 값, 적중 여부, 치명타 여부, 스턴 여부를 반환하기 위해 구조체를 사용.
 struct AttackResult
 {
 	int Damage;         // 최종 피해량
@@ -37,26 +36,15 @@ struct AttackResult
 	bool IsStun;        // 몬스터 스턴 발생 여부
 };
 
-// 배틀 시스템
-//
-// 역할:
-// GameConText에 저장된 Player와Monster를 이용해 전투를 진행합니다.
-// 플레이어 입력, 턴 진행, 피해 계산, 주사위 판정을 관리합니다.
-// Player, Monster, Inventory 객체를 직접 생성하지 않습니다.
-
-// 전투 진행을 담당하는 클래스입니다.
-//
-// 담당 범위:
-// - 플레이어 행동 입력
-// - 플레이어와 몬스터의 공격 처리
-// - 주사위 판정
-// - 방어, 스턴, 도망 처리
-// - 전투 종료 판정
-
 class Battle
 {
 public:
-	Battle(GameContext& context) {};
+	// 여기서 생성자 선언 초기화 안해서 cpp 에서 함
+	Battle(GameContext& context);
+
+	// [추가] 전투 전체 진행을 담당
+	bool RunBattle();
+
 	// 확률생성
 	int CheckChance();
 
@@ -116,7 +104,13 @@ public:
 
 	void SetTrunCount(int Count);
 
+	void AddMonsterKillCount();
+
+
 private:
+	// [추가] 전투 진행에 사용할 GameContext 참조
+	GameContext& context;
+
 	int TrunCount = 0;  // 현재 턴 번호
 	int LastDiceValue;  // 가장 최근에 나온 주사위 값
 	int MonsterkillCount = 0; // 몬스터 킬카운트

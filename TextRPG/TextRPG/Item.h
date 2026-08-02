@@ -30,6 +30,7 @@ private:
 
 //아이템 생성자
 public:
+	Item();
 	Item(const std::string& name, ItemType type, EquipmentType equipmentType = EquipmentType::None,const StatBonus& statBonus = StatBonus(), int quantity = 1, int price = 0);
 
 	std::string GetName() const;

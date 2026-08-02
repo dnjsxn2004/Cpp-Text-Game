@@ -1,12 +1,14 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <string>
-#include <thread>    // sleep_forÃ³·³ ½ÇÇà Èå¸§À» Àá½Ã ¸ØÃß´Â ±â´ÉÀ» »ç¿ëÇÏ±â À§ÇÑ Çì´õ
-#include <chrono>    // milliseconds, secondsÃ³·³ ½Ã°£ ´ÜÀ§¸¦ »ç¿ëÇÏ±â À§ÇÑ Çì´õ
-#include <conio.h> // _kbhit() ¹× _getch() »ç¿ë (Windows ÄÜ¼Ö ÀÔ·Â °¨Áö¿ë)
-#include <windows.h> // Windows API Çì´õ Ãß°¡
-#include <cstdlib> // system("cls") »ç¿ë
+#include <thread>    // sleep_forì²˜ëŸ¼ ì‹¤í–‰ íë¦„ì„ ì ì‹œ ë©ˆì¶”ëŠ” ê¸°ëŠ¥ì„ ì‚¬ìš©í•˜ê¸° ìœ„í•œ í—¤ë”
+#include <chrono>    // milliseconds, secondsì²˜ëŸ¼ ì‹œê°„ ë‹¨ìœ„ë¥¼ ì‚¬ìš©í•˜ê¸° ìœ„í•œ í—¤ë”
+#include <conio.h> // _kbhit() ë° _getch() ì‚¬ìš© (Windows ì½˜ì†” ì…ë ¥ ê°ì§€ìš©)
+#include <windows.h> // Windows API í—¤ë” ì¶”ê°€
+#include <cstdlib> // system("cls") ì‚¬ìš©
 #include <stdlib.h>
 #include <vector>
+#include <iomanip>
+
 
 #include "Jin.h"
 #include "Ryu.h"
@@ -23,9 +25,10 @@
 #include "GameContext.h"
 #include "InputManager.h"
 
+
 using namespace std;
 
-// ANSI »ö»ó ÀÌ½ºÄÉÀÌÇÁ ÄÚµå Á¤ÀÇ
+// ANSI ìƒ‰ìƒ ì´ìŠ¤ì¼€ì´í”„ ì½”ë“œ ì •ì˜
 #define RESET   "\033[0m"
 #define RED     "\033[31m"
 #define GREEN   "\033[32m"
@@ -69,62 +72,76 @@ void ConsoleUI::PrintSuccess(const std::string& message)
 
 
 
-// ¸ŞÀÎ ¸Ş´º
+// ë©”ì¸ ë©”ë‰´
 void ConsoleUI::PrintMainMenu()
 {
 	PrintLine();
-	PrintTitle("¸ŞÀÎ ¸Ş´º");
+	PrintTitle("ë©”ì¸ ë©”ë‰´");
 	PrintLine();
 
     cout << endl;
-    PrintMessage("1. ÀÏ¹İ ÀüÅõ");
-    PrintMessage("2. ¸ŞÀÎ ½ºÅä¸®");
-    PrintMessage("3. »óÅÂÃ¢");
-    PrintMessage("4. ÀÎº¥Åä¸®");
-    PrintMessage("5. »óÁ¡");
-    PrintMessage("0. °ÔÀÓ Á¾·á");
+    PrintMessage("1. ì¼ë°˜ ì „íˆ¬");
+    PrintMessage("2. ë©”ì¸ ìŠ¤í† ë¦¬");
+    PrintMessage("3. ìƒíƒœì°½");
+    PrintMessage("4. ì¸ë²¤í† ë¦¬");
+    PrintMessage("5. ìƒì ");
+    PrintMessage("0. ê²Œì„ ì¢…ë£Œ");
     cout << endl;
 
 	PrintLine();
 }
 
+void ConsoleUI::PrintPlayerStatus(Player& player)
+{
+    PrintLine();
+    PrintTitle("í”Œë ˆì´ì–´ ìƒíƒœ");
+    PrintLine();
+
+    PrintMessage("ì´ë¦„ : " + player.GetName());
+    PrintMessage("HP : " + std::to_string(player.GetHp()));
+    PrintMessage("MP : " + std::to_string(player.GetMp()));
+
+    PrintLine();
+}
+
+
 void ConsoleUI::SwitchMainMenu()
 {
     PrintMainMenu();
-    int choice = InputManager::InputInMassegeToRange("¸ŞÀÎ ¸Ş´º¿¡¼­ ¼±ÅÃÇÏ¼¼¿ä: ", 0, 5);
+    int choice = InputManager::InputInMassegeToRange("ë©”ì¸ ë©”ë‰´ì—ì„œ ì„ íƒí•˜ì„¸ìš”: ", 0, 5);
     switch (choice)
     {
     case 1:
-        // ÀÏ¹İ ÀüÅõ
+        // ì¼ë°˜ ì „íˆ¬
         break;
     case 2:
-        // ¸ŞÀÎ ½ºÅä¸®
+        // ë©”ì¸ ìŠ¤í† ë¦¬
         break;
     case 3:
-        // »óÅÂÃ¢
+        // ìƒíƒœì°½
         break;
     case 4:
-        // ÀÎº¥Åä¸®
+        // ì¸ë²¤í† ë¦¬
         break;
     case 5:
-        // »óÁ¡
+        // ìƒì 
         break;
     case 0:
-        // °ÔÀÓ Á¾·á
+        // ê²Œì„ ì¢…ë£Œ
         break;
     default:
-        PrintError("Àß¸øµÈ ÀÔ·ÂÀÔ´Ï´Ù. ´Ù½Ã ¼±ÅÃÇØÁÖ¼¼¿ä.");
+        PrintError("ì˜ëª»ëœ ì…ë ¥ì…ë‹ˆë‹¤. ë‹¤ì‹œ ì„ íƒí•´ì£¼ì„¸ìš”.");
         break;
     }
 }
 
 
 
-// »óÅÂÃ¢
+// ìƒíƒœì°½
 void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context)
 {
     Player& player = context.GetPlayer();
-    cout << "·¹º§ : " << player.GetLevel() << " ( " << player.GetExp() << " / " << player.GetMaxExp() << " ) " <<
+    cout << "ë ˆë²¨ : " << player.GetLevel() << " ( " << player.GetExp() << " / " << player.GetMaxExp() << " ) " <<
         "  HP : " << player.GetHp() << " / " << player.GetMaxHp() <<
         "  MP : " << player.GetMp() << " / " << player.GetMaxMp() <<
         endl;
@@ -141,57 +158,57 @@ void ConsoleUI::PrintStatus(GameContext& context, Battle& battle, StatBonus& equ
 
 
     PrintLine();
-    PrintTitle("ÇÃ·¹ÀÌ¾î »óÅÂ");
+    PrintTitle("í”Œë ˆì´ì–´ ìƒíƒœ");
     PrintLine();
 
     cout << endl;
     cout << player.GetName() << endl;
     PrintLine();
-    cout << "°ñµå : " << player.GetGold() << endl;
-    cout << "·¹º§ : " << player.GetLevel() << endl;
-    cout << "°æÇèÄ¡ : " << player.GetExp() << " / " << player.GetMaxExp() << endl;
+    cout << "ê³¨ë“œ : " << player.GetGold() << endl;
+    cout << "ë ˆë²¨ : " << player.GetLevel() << endl;
+    cout << "ê²½í—˜ì¹˜ : " << player.GetExp() << " / " << player.GetMaxExp() << endl;
     cout << "HP : " << player.GetHp() << " / " << player.GetMaxHp() << endl;
     cout << "MP : " << player.GetMp() << " / " << player.GetMaxMp() << endl;
-    cout << "°ø°İ·Â : " << player.GetMeleeDamage(equipBonus, potionBonus) << endl;
-    cout << "¹æ¾î·Â : " << player.GetTrueDefense(equipBonus, potionBonus) << endl;
+    cout << "ê³µê²©ë ¥ : " << player.GetMeleeDamage(equipBonus, potionBonus) << endl;
+    cout << "ë°©ì–´ë ¥ : " << player.GetTrueDefense(equipBonus, potionBonus) << endl;
     PrintLine();
 
     cout << endl;
-    PrintMessage("³»°¡ ÀåÂøÇÏ°í ÀÖ´Â Àåºñ ¾ÆÀÌÅÛ");
+    PrintMessage("ë‚´ê°€ ì¥ì°©í•˜ê³  ìˆëŠ” ì¥ë¹„ ì•„ì´í…œ");
     PrintLine();
 
-    cout << "ÀåÂø ÁßÀÎ ¹«±â: " << weaponName << endl;
-    cout << "ÀåÂø ÁßÀÎ ¹æ¾î±¸: " << armorName << endl;
+    cout << "ì¥ì°© ì¤‘ì¸ ë¬´ê¸°: " << weaponName << endl;
+    cout << "ì¥ì°© ì¤‘ì¸ ë°©ì–´êµ¬: " << armorName << endl;
     PrintLine();
 
     cout << endl;
-    PrintMessage("ÀüÅõ ±â·Ï");
+    PrintMessage("ì „íˆ¬ ê¸°ë¡");
     PrintLine();
 
-    cout << "ÀüÅõ¿¡¼­ ÀÌ±ä È½¼ö : "<< Battle::GetMonsterKillCount(context) << endl;
+    cout << "ì „íˆ¬ì—ì„œ ì´ê¸´ íšŸìˆ˜ : "<< battle.GetMonsterKillCount() << endl;
 
-    //Ä³¸¯ ÀÌ¸§, °ñµå, ·¹º§, °æÇèÄ¡, HP, MP, °ø°İ·Â, ¹æ¾î·Â
-    // ³»°¡ ÀåÂøÇÏ°í ÀÖ´Â (Àåºñ) ¾ÆÀÌÅÛ
-    // ¸ó½ºÅÍ Ã³Ä¡ ¼ö
+    //ìºë¦­ ì´ë¦„, ê³¨ë“œ, ë ˆë²¨, ê²½í—˜ì¹˜, HP, MP, ê³µê²©ë ¥, ë°©ì–´ë ¥
+    // ë‚´ê°€ ì¥ì°©í•˜ê³  ìˆëŠ” (ì¥ë¹„) ì•„ì´í…œ
+    // ëª¬ìŠ¤í„° ì²˜ì¹˜ ìˆ˜
 
     PrintLine();
 }
 
 
 
-// ¾ÆÀÌÅÛ, ÀÎº¥Åä¸®
-string ConsoleUI::ItemTypeToString(Item& item)
+// ì•„ì´í…œ, ì¸ë²¤í† ë¦¬
+string ConsoleUI::ItemTypeToString(const Item& item)
 {
     switch (item.GetType())
     {
     case ItemType::Equipment:
-        return "Àåºñ";  // ¹«±â& ¹æ¾î±¸ Àåºñ Å¸ÀÔ
+        return "ì¥ë¹„";  // ë¬´ê¸°& ë°©ì–´êµ¬ ì¥ë¹„ íƒ€ì…
 
     case ItemType::Consumable:
-        return "¼Òºñ";
+        return "ì†Œë¹„";
 
     default:
-        return "¾Ë ¼ö ¾øÀ½";
+        return "ì•Œ ìˆ˜ ì—†ìŒ";
     
     }
 }
@@ -207,29 +224,29 @@ void ConsoleUI::PrintItemListWithIndex(const vector<Item>& items)
 void ConsoleUI::PrintInventoryMenu()
 {
     PrintLine();
-    PrintTitle("ÀÎº¥Åä¸® È®ÀÎ");
+    PrintTitle("ì¸ë²¤í† ë¦¬ í™•ì¸");
     PrintLine();
 
-    PrintMessage("1. ³»°¡ °¡Áø ÀüÃ¼ ¾ÆÀÌÅÛ º¸±â");
-    PrintMessage("2. Àåºñ ¾ÆÀÌÅÛ");
-    PrintMessage("3. ¼Òºñ ¾ÆÀÌÅÛ");
-    //PrintMessage("4. Äù½ºÆ® ¾ÆÀÌÅÛ");
-    PrintMessage("0. µÚ·Î°¡±â");
+    PrintMessage("1. ë‚´ê°€ ê°€ì§„ ì „ì²´ ì•„ì´í…œ ë³´ê¸°");
+    PrintMessage("2. ì¥ë¹„ ì•„ì´í…œ");
+    PrintMessage("3. ì†Œë¹„ ì•„ì´í…œ");
+    //PrintMessage("4. í€˜ìŠ¤íŠ¸ ì•„ì´í…œ");
+    PrintMessage("0. ë’¤ë¡œê°€ê¸°");
 
     PrintLine();
 };
 
-void ConsoleUI::PrintItem(Item& item)
+void ConsoleUI::PrintItem(const Item& item)
 {
     PrintLine();
     cout << item.GetName() << endl;
     PrintLine();
-    cout << "°¡°İ : " << item.GetPrice() << endl;
-    cout << "Å¸ÀÔ : " << ItemTypeToString(item) << endl;
+    cout << "ê°€ê²© : " << item.GetPrice() << endl;
+    cout << "íƒ€ì… : " << ItemTypeToString(item) << endl;
     PrintLine();
 }
 
-void ConsoleUI::PrintItemName(Item& item)
+void ConsoleUI::PrintItemName(const Item& item)
 {
     cout << item.GetName() << endl;
 }
@@ -241,12 +258,12 @@ void ConsoleUI::PrintAllItems(GameContext& context)
 
     if (items.empty())
     {
-        PrintMessage("ÀÎº¥Åä¸®°¡ ºñ¾î ÀÖ½À´Ï´Ù.");
+        PrintMessage("ì¸ë²¤í† ë¦¬ê°€ ë¹„ì–´ ìˆìŠµë‹ˆë‹¤.");
         return;
     }
 
     PrintLine();
-    PrintTitle("³»°¡ °¡Áø ÀüÃ¼ ¾ÆÀÌÅÛ");
+    PrintTitle("ë‚´ê°€ ê°€ì§„ ì „ì²´ ì•„ì´í…œ");
     PrintLine();
 
     PrintItemListWithIndex(items);
@@ -261,13 +278,13 @@ void ConsoleUI::PrintEquipmentItems(GameContext& context)
 
     if (equipmentItems.empty())
     {
-        PrintMessage("Àåºñ ¾ÆÀÌÅÛÀÌ ¾ø½À´Ï´Ù.");
+        PrintMessage("ì¥ë¹„ ì•„ì´í…œì´ ì—†ìŠµë‹ˆë‹¤.");
         return;
     }
 
 
     PrintLine();
-    PrintTitle("Àåºñ ¾ÆÀÌÅÛ ¸ñ·Ï");
+    PrintTitle("ì¥ë¹„ ì•„ì´í…œ ëª©ë¡");
     PrintLine();
 
     PrintItemListWithIndex(equipmentItems);
@@ -281,12 +298,12 @@ void ConsoleUI::PrintConsumableItems(GameContext& context)
 
     if (consumableItems.empty())
     {
-        PrintMessage("¼Òºñ ¾ÆÀÌÅÛÀÌ ¾ø½À´Ï´Ù.");
+        PrintMessage("ì†Œë¹„ ì•„ì´í…œì´ ì—†ìŠµë‹ˆë‹¤.");
         return;
     }
 
     PrintLine();
-    PrintTitle("¼Òºñ ¾ÆÀÌÅÛ ¸ñ·Ï");
+    PrintTitle("ì†Œë¹„ ì•„ì´í…œ ëª©ë¡");
     PrintLine();
 
     PrintItemListWithIndex(consumableItems);
@@ -298,7 +315,7 @@ void ConsoleUI::SwitchInventory(GameContext& context)
     {
         PrintInventoryMenu();
 
-        int choice = InputManager::InputInMassegeToRange("ÀÎº¥Åä¸®¿¡¼­ ¼±ÅÃÇÏ¼¼¿ä: ",0, 3);
+        int choice = InputManager::InputInMassegeToRange("ì¸ë²¤í† ë¦¬ì—ì„œ ì„ íƒí•˜ì„¸ìš”: ",0, 3);
         
         switch (choice)
         {
@@ -322,16 +339,16 @@ void ConsoleUI::SwitchInventory(GameContext& context)
 
 
 
-// »óÁ¡
+// ìƒì 
 void ConsoleUI::PrintShopMenu()
 {
     PrintLine();
-    PrintTitle("»óÁ¡");
+    PrintTitle("ìƒì ");
     PrintLine();
 
-    PrintMessage("1. ¾ÆÀÌÅÛ ±¸¸Å");
-    PrintMessage("2. ¾ÆÀÌÅÛ ÆÇ¸Å");
-    PrintMessage("0. µÚ·Î°¡±â");
+    PrintMessage("1. ì•„ì´í…œ êµ¬ë§¤");
+    PrintMessage("2. ì•„ì´í…œ íŒë§¤");
+    PrintMessage("0. ë’¤ë¡œê°€ê¸°");
     PrintLine();
 }
 
@@ -340,14 +357,14 @@ void ConsoleUI::SwitchShopMenu()
     while (true)
     {
         PrintShopMenu();
-        int choice = InputManager::InputInMassegeToRange("»óÁ¡¿¡¼­ ¼±ÅÃÇÏ¼¼¿ä: ", 0, 2);
+        int choice = InputManager::InputInMassegeToRange("ìƒì ì—ì„œ ì„ íƒí•˜ì„¸ìš”: ", 0, 2);
         switch (choice)
         {
         case 1:
-            // ¾ÆÀÌÅÛ ±¸¸Å
+            // ì•„ì´í…œ êµ¬ë§¤
             break;
         case 2:
-            // ¾ÆÀÌÅÛ ÆÇ¸Å
+            // ì•„ì´í…œ íŒë§¤
             break;
         case 0:
             return;
@@ -359,12 +376,12 @@ void ConsoleUI::PrintShopItems(const vector<Item>& shopItems)
 {
     if (shopItems.empty())
     {
-        PrintMessage("»óÁ¡¿¡ ÆÇ¸Å ÁßÀÎ ¾ÆÀÌÅÛÀÌ ¾ø½À´Ï´Ù.");
+        PrintMessage("ìƒì ì— íŒë§¤ ì¤‘ì¸ ì•„ì´í…œì´ ì—†ìŠµë‹ˆë‹¤.");
         return;
     }
     
     PrintLine();
-    PrintTitle("»óÁ¡");
+    PrintTitle("ìƒì ");
     PrintLine();
 
 	PrintItemListWithIndex(shopItems);
@@ -374,41 +391,42 @@ void ConsoleUI::PrintPurchaseSuccess(const Item& item)
 {
 	PrintItem(item);
 
-    PrintMessage("»óÁ¡¿¡¼­ ¾ÆÀÌÅÛ ±¸¸Å Çß½À´Ï´Ù.");
+    PrintMessage("ìƒì ì—ì„œ ì•„ì´í…œ êµ¬ë§¤ í–ˆìŠµë‹ˆë‹¤.");
 }
 
 
 
-// ÀÏ¹İ ÀüÅõ
+// ì¼ë°˜ ì „íˆ¬
 void ConsoleUI::PrintNormalBattleMenu(const GameContext& context)
 {
     PrintLine();
-    PrintTitle("ÀÏ¹İ ÀüÅõ");
+    PrintTitle("ì¼ë°˜ ì „íˆ¬");
     PrintLine();
 
     PrintLine();
-    PrintTitle("ÇÃ·¹ÀÌ¾î Á¤º¸");
+    PrintTitle("í”Œë ˆì´ì–´ ì •ë³´");
     PrintLine();
 
-    // TODO: ÇÃ·¹ÀÌ¾î ÀÌ¸§ Ãâ·Â ÄÚµå
-    // TODO: ÇÃ·¹ÀÌ¾î ·¹º§ Ãâ·Â ÄÚµå
-    // TODO: ÇÃ·¹ÀÌ¾î ÇöÀçÃ¼·Â / ÃÖ´ëÃ¼·Â Ãâ·Â ÄÚµå
+    // TODO: í”Œë ˆì´ì–´ ì´ë¦„ ì¶œë ¥ ì½”ë“œ
+    // TODO: í”Œë ˆì´ì–´ ë ˆë²¨ ì¶œë ¥ ì½”ë“œ
+    // TODO: í”Œë ˆì´ì–´ í˜„ì¬ì²´ë ¥ / ìµœëŒ€ì²´ë ¥ ì¶œë ¥ ì½”ë“œ
 
     PrintLine();
-    PrintTitle("¸ó½ºÅÍ Á¤º¸");
+    PrintTitle("ëª¬ìŠ¤í„° ì •ë³´");
     PrintLine();
 
-    // TODO: ¸ó½ºÅÍ ÀÌ¸§ Ãâ·Â ÄÚµå
-    // TODO: ¸ó½ºÅÍ ·¹º§ Ãâ·Â ÄÚµå
-    // TODO: ¸ó½ºÅÍ ÇöÀçÃ¼·Â / ÃÖ´ëÃ¼·Â Ãâ·Â ÄÚµå
-
-    PrintLine();
-    PrintMessage("1. ÀÏ¹İ °ø°İ");
-    PrintMessage("2. ½ºÅ³ »ç¿ë");
-    PrintMessage("3. ¾ÆÀÌÅÛ »ç¿ë");
-    PrintMessage("4. µµ¸Á °¡±â");
-    PrintMessage("0. µÚ·Î°¡±â");
-	PrintLine();
+    // TODO: ëª¬ìŠ¤í„° ì´ë¦„ ì¶œë ¥ ì½”ë“œ
+    // TODO: ëª¬ìŠ¤í„° ë ˆë²¨ ì¶œë ¥ ì½”ë“œ
+    // TODO: ëª¬ìŠ¤í„° í˜„ì¬ì²´ë ¥ / ìµœëŒ€ì²´ë ¥ ì¶œë ¥ ì½”ë“œ
+    // 
+    //ë©”ì¸ë©”ë‰´ì—ì„œ ì¶œë ¥í•´ì„œ ì£¼ì„ì²˜ë¦¬ í•˜ê² ìŠµë‹ˆë‹¤.
+    //PrintLine();
+    //PrintMessage("1. ì¼ë°˜ ê³µê²©");
+    //PrintMessage("2. ìŠ¤í‚¬ ì‚¬ìš©");
+   // PrintMessage("3. ì•„ì´í…œ ì‚¬ìš©");
+   // PrintMessage("4. ë„ë§ ê°€ê¸°");
+   // PrintMessage("0. ë’¤ë¡œê°€ê¸°");
+	//PrintLine();
 }
 
 void ConsoleUI::PrintBattlePlayerInfo(GameContext& context)
@@ -416,11 +434,11 @@ void ConsoleUI::PrintBattlePlayerInfo(GameContext& context)
     Player& player = context.GetPlayer();
 
     PrintLine();
-    PrintTitle("ÇÃ·¹ÀÌ¾î Á¤º¸");
+    PrintTitle("í”Œë ˆì´ì–´ ì •ë³´");
     PrintLine();
 
-    PrintMessage("ÀÌ¸§ : " + player.GetName());
-    PrintMessage("·¹º§ : " + std::to_string(player.GetLevel()));
+    PrintMessage("ì´ë¦„ : " + player.GetName());
+    PrintMessage("ë ˆë²¨ : " + std::to_string(player.GetLevel()));
     PrintMessage(
         "HP : " +
         std::to_string(player.GetHp()) +
@@ -434,11 +452,11 @@ void ConsoleUI::PrintBattleMonsterInfo(GameContext& context)
     const Monster& monster = context.GetMonster();
 
     PrintLine();
-    PrintTitle("¸ó½ºÅÍ Á¤º¸");
+    PrintTitle("ëª¬ìŠ¤í„° ì •ë³´");
     PrintLine();
 
-    PrintMessage("ÀÌ¸§ : " + monster.GetName());
-    PrintMessage("·¹º§ : " + std::to_string(monster.GetLevel()));
+    PrintMessage("ì´ë¦„ : " + monster.GetName());
+   // PrintMessage("ë ˆë²¨ : " + std::to_string(monster.GetLevel()));
     PrintMessage(
         "HP : " +
         std::to_string(monster.GetHp()) +
@@ -450,11 +468,10 @@ void ConsoleUI::PrintBattleMonsterInfo(GameContext& context)
 void ConsoleUI::PrintBattleActionMenu()
 {
     PrintLine();
-    PrintMessage("1. ÀÏ¹İ °ø°İ");
-    PrintMessage("2. ½ºÅ³ »ç¿ë");
-    PrintMessage("3. ¾ÆÀÌÅÛ »ç¿ë");
-    PrintMessage("4. µµ¸Á °¡±â");
-    PrintMessage("0. µÚ·Î°¡±â");
+    PrintMessage("1. ì¼ë°˜ ê³µê²©");
+    PrintMessage("2. ìŠ¤í‚¬ ì‚¬ìš©");
+    PrintMessage("3. ì•„ì´í…œ ì‚¬ìš©");
+    PrintMessage("4. ë„ë§ ê°€ê¸°");
     PrintLine();
 }
 
@@ -464,26 +481,26 @@ void ConsoleUI::BattleReward(GameContext& context)
     Monster& monster = context.GetMonster();
 
     PrintLine();
-    PrintTitle("ÀüÅõ º¸»ó");
+    PrintTitle("ì „íˆ¬ ë³´ìƒ");
     PrintLine();
 
     PrintMessage(
-        "È¹µæ °æÇèÄ¡: " +
+        "íšë“ ê²½í—˜ì¹˜: " +
         std::to_string(monster.GetExpReward())
     );
 
     PrintMessage(
-        "È¹µæ °ñµå: " +
+        "íšë“ ê³¨ë“œ: " +
         std::to_string(monster.GetGoldReward())
     );
 
     PrintMessage(
-        "ÇöÀç °æÇèÄ¡: " +
+        "í˜„ì¬ ê²½í—˜ì¹˜: " +
         std::to_string(player.GetExp())
     );
 
     PrintMessage(
-        "ÇöÀç °ñµå: " +
+        "í˜„ì¬ ê³¨ë“œ: " +
         std::to_string(player.GetGold())
     );
 
@@ -494,8 +511,8 @@ void ConsoleUI::BattleReward(GameContext& context)
 
 void ConsoleUI::PrintNormalDiceResult(int diceValue) const
 {
-    cout << "ÁÖ»çÀ§¸¦ ±¼·È½À´Ï´Ù." << endl;
-    cout << "ÁÖ»çÀ§ °á°ú: " << diceValue << endl;
+    cout << "ì£¼ì‚¬ìœ„ë¥¼ êµ´ë ¸ìŠµë‹ˆë‹¤." << endl;
+    cout << "ì£¼ì‚¬ìœ„ ê²°ê³¼: " << diceValue << endl;
 }
 
 void ConsoleUI::PrintPlayerMeleeAttackResult(const std::string& playerName, const std::string& monsterName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const
@@ -503,12 +520,12 @@ void ConsoleUI::PrintPlayerMeleeAttackResult(const std::string& playerName, cons
     Player& p = player.GetPlayer();
     Monster& m = monster.GetMonster();
     Battle& b = battle;
-    cout << p.GetName() << "(ÀÌ) °¡ " << m.GetName() << "¿¡°Ô ÀÏ¹İ °ø°İÀ» ½ÃµµÇß½À´Ï´Ù." << endl;
-    cout << "ÁÖ»çÀ§ °á°ú: " << b.GetLastDiceValue() << endl;
-    cout << m.GetName() << "¿¡°Ô " << damage << "ÀÇ ÇÇÇØ¸¦ ÀÔÇû½À´Ï´Ù." << endl;
+    cout << p.GetName() << "(ì´) ê°€ " << m.GetName() << "ì—ê²Œ ì¼ë°˜ ê³µê²©ì„ ì‹œë„í–ˆìŠµë‹ˆë‹¤." << endl;
+    cout << "ì£¼ì‚¬ìœ„ ê²°ê³¼: " << b.GetLastDiceValue() << endl;
+    cout << m.GetName() << "ì—ê²Œ " << damage << "ì˜ í”¼í•´ë¥¼ ì…í˜”ìŠµë‹ˆë‹¤." << endl;
     if (isStunSuccess)
     {
-        cout << m.GetName() << "ÀÌ ±âÀı »óÅÂ°¡ µÇ¾ú½À´Ï´Ù!" << endl;
+        cout << m.GetName() << "ì´ ê¸°ì ˆ ìƒíƒœê°€ ë˜ì—ˆìŠµë‹ˆë‹¤!" << endl;
     }
 }
 
@@ -517,37 +534,37 @@ void ConsoleUI::PrintPlayerSkillAttackResult(const std::string& playerName, cons
     Player& p = player.GetPlayer();
     Monster& m = monster.GetMonster();
     Battle& b = battle;
-    cout << p.GetName() << "(ÀÌ) °¡ " << m.GetName() << "¿¡°Ô ½ºÅ³ °ø°İÀ» ½ÃµµÇß½À´Ï´Ù." << endl;
-    cout << "ÁÖ»çÀ§ °á°ú: " << b.GetLastDiceValue() << endl;
-    cout << m.GetName() << "¿¡°Ô " << damage << "ÀÇ ÇÇÇØ¸¦ ÀÔÇû½À´Ï´Ù." << endl;
+    cout << p.GetName() << "(ì´) ê°€ " << m.GetName() << "ì—ê²Œ ìŠ¤í‚¬ ê³µê²©ì„ ì‹œë„í–ˆìŠµë‹ˆë‹¤." << endl;
+    cout << "ì£¼ì‚¬ìœ„ ê²°ê³¼: " << b.GetLastDiceValue() << endl;
+    cout << m.GetName() << "ì—ê²Œ " << damage << "ì˜ í”¼í•´ë¥¼ ì…í˜”ìŠµë‹ˆë‹¤." << endl;
 
     if (isStunSuccess)
     {
-        cout << m.GetName() << "ÀÌ ±âÀı »óÅÂ°¡ µÇ¾ú½À´Ï´Ù!" << endl;
+        cout << m.GetName() << "ì´ ê¸°ì ˆ ìƒíƒœê°€ ë˜ì—ˆìŠµë‹ˆë‹¤!" << endl;
     }
 }
 
-void ConsoleUI::PrintPlayerRunawayResult()
+void ConsoleUI::PrintPlayerRunawayResult(bool IsSuccess)
 {
-    PrintMessage("µµÁÖ¸¦ ½ÃµµÇß½À´Ï´Ù. ");
-    if (PlayerRunaway())
+    PrintMessage("ë„ì£¼ë¥¼ ì‹œë„í–ˆìŠµë‹ˆë‹¤. ");
+    if (IsSuccess)
     {
-        PrintMessage("µµÁÖ¸¦ ¼º°øÇß½À´Ï´Ù. ");
+        PrintMessage("ë„ì£¼ë¥¼ ì„±ê³µí–ˆìŠµë‹ˆë‹¤. ");
     }
     else
     {
-        PrintMessage("µµÁÖ¸¦ ½ÇÆĞÇß½À´Ï´Ù. ");
-        PrintMessage("ÀüÅõ°¡ °è¼Ó ÁøÇàµË´Ï´Ù. ");
+        PrintMessage("ë„ì£¼ë¥¼ ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤. ");
+        PrintMessage("ì „íˆ¬ê°€ ê³„ì† ì§„í–‰ë©ë‹ˆë‹¤. ");
     }
 }
 
-void ConsoleUI::PrintPlayerTurnCount()
+void ConsoleUI::PrintPlayerTurnCount(int TurnCount)
 { 
     PrintLine();
-    PrintTitle("ÇÃ·¹ÀÌ¾î ÅÏ");
+    PrintTitle("í”Œë ˆì´ì–´ í„´");
     PrintLine();
 
-	cout << GetTrunCount(); << "ÅÏÂ° ÀÔ´Ï´Ù." << endl;
+	cout << TurnCount << "í„´ì§¸ ì…ë‹ˆë‹¤." << endl;
     PrintLine();
 }
 
@@ -559,23 +576,23 @@ void ConsoleUI::PrintBattleResult(GameContext& player, GameContext& monster, Bat
 
     if (b.CheckBattleResult(player, monster))
     {
-        cout << m.GetName() << "À»(¸¦) Ã³Ä¡Çß½À´Ï´Ù." << endl;
-        cout << "ÀüÅõ¿¡¼­ ½Â¸®Çß½À´Ï´Ù." << endl;
+        cout << m.GetName() << "ì„(ë¥¼) ì²˜ì¹˜í–ˆìŠµë‹ˆë‹¤." << endl;
+        cout << "ì „íˆ¬ì—ì„œ ìŠ¹ë¦¬í–ˆìŠµë‹ˆë‹¤." << endl;
     }
     else
     {
-        cout << p.GetName() << "Ã¼·ÂÀÌ ¸ğµÎ ¼ÒÁøµÇ¾ú½À´Ï´Ù." << endl;
-        cout << "ÀüÅõ¿¡¼­ ÆĞ¹èÇß½À´Ï´Ù." << endl;
+        cout << p.GetName() << "ì²´ë ¥ì´ ëª¨ë‘ ì†Œì§„ë˜ì—ˆìŠµë‹ˆë‹¤." << endl;
+        cout << "ì „íˆ¬ì—ì„œ íŒ¨ë°°í–ˆìŠµë‹ˆë‹¤." << endl;
     }
 }
 
 void ConsoleUI::PrintJobSelectMenu()
 {
 	PrintLine();
-	PrintTitle("Ä³¸¯ÅÍ ¼±ÅÃ");
+	PrintTitle("ìºë¦­í„° ì„ íƒ");
 	PrintLine();
-	cout << "1. ÁøÅÂ½Ä À¯µµ" << endl;
-	cout << "2. ·ù³ë½ºÄÉ °¡¶óµ¥" << endl;
+	cout << "1. ì§„íƒœì‹ ìœ ë„" << endl;
+	cout << "2. ë¥˜ë…¸ìŠ¤ì¼€ ê°€ë¼ë°" << endl;
 	PrintLine();
 }
 
@@ -584,17 +601,17 @@ void ConsoleUI::PrintJobSelectMenu()
 void ConsoleUI::PrintGameOver()
 {
 	PrintLine();
-	PrintTitle("°ÔÀÓ ÆĞ¹è");
+	PrintTitle("ê²Œì„ íŒ¨ë°°");
 	PrintLine();
-	cout << "Ä³¸¯ÅÍ°¡ »ç¸ÁÇß½À´Ï´Ù." << endl;
+	cout << "ìºë¦­í„°ê°€ ì‚¬ë§í–ˆìŠµë‹ˆë‹¤." << endl;
 	PrintLine();
 }
 
 void ConsoleUI::ClearScreen()
 {
-	// ÄÜ¼Ö ÇÚµé °¡Á®¿À±â
+	// ì½˜ì†” í•¸ë“¤ ê°€ì ¸ì˜¤ê¸°
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	// È­¸éÀ» Áö¿ì°í Ä¿¼­¸¦ (0, 0)À¸·Î ÀÌµ¿
+	// í™”ë©´ì„ ì§€ìš°ê³  ì»¤ì„œë¥¼ (0, 0)ìœ¼ë¡œ ì´ë™
 	COORD coord = { 0, 0 };
 	DWORD written;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -607,9 +624,9 @@ void ConsoleUI::ClearScreen()
 
 void ConsoleUI::MoveCursor(int x, int y)
 {
-	// ÄÜ¼Ö ÇÚµé °¡Á®¿À±â
+	// ì½˜ì†” í•¸ë“¤ ê°€ì ¸ì˜¤ê¸°
 	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	// Ä¿¼­ À§Ä¡ ¼³Á¤
+	// ì»¤ì„œ ìœ„ì¹˜ ì„¤ì •
 	COORD coord = { static_cast<SHORT>(x), static_cast<SHORT>(y) };
 	SetConsoleCursorPosition(hConsole, coord);
 }
@@ -618,28 +635,28 @@ void ConsoleUI::PrintStartScreen()
 {
     int frame = 0;
 
-    // Å°º¸µå ÀÔ·ÂÀÌ µé¾î¿Ã ¶§±îÁö °è¼Ó ÆÄµµ ¾Ö´Ï¸ŞÀÌ¼ÇÀ» Àç»ı
+    // í‚¤ë³´ë“œ ì…ë ¥ì´ ë“¤ì–´ì˜¬ ë•Œê¹Œì§€ ê³„ì† íŒŒë„ ì• ë‹ˆë©”ì´ì…˜ì„ ì¬ìƒ
     while (!_kbhit())
     {
 
         MoveCursor(0, 0);
 
-        cout.flush(); // È­¸é Å¬¸®¾î
+        cout.flush(); // í™”ë©´ í´ë¦¬ì–´
 
 
 
-        // 2. ÆÄµµ ¹°°á ¸ğ¾ç ¾Æ½ºÅ° ¾ÆÆ® (ÇÁ·¹ÀÓº° ¾Ö´Ï¸ŞÀÌ¼Ç)
+        // 2. íŒŒë„ ë¬¼ê²° ëª¨ì–‘ ì•„ìŠ¤í‚¤ ì•„íŠ¸ (í”„ë ˆì„ë³„ ì• ë‹ˆë©”ì´ì…˜)
         if (frame % 2 == 0)
         {
             system("cls");
 
-            // 1. »ó´Ü ±¸ºĞ¼± (Ã»·Ï»ö)
+            // 1. ìƒë‹¨ êµ¬ë¶„ì„  (ì²­ë¡ìƒ‰)
             cout << CYAN;
             PrintLine();
             cout << RESET;
 
 
-            // [ÇÁ·¹ÀÓ A]
+            // [í”„ë ˆì„ A]
             cout << CYAN << BOLD;
             cout << R"(
                 .  :%=..                 .--..                 . ..
@@ -659,12 +676,12 @@ void ConsoleUI::PrintStartScreen()
         {
             system("cls");
 
-            // 1. »ó´Ü ±¸ºĞ¼± (Ã»·Ï»ö)
+            // 1. ìƒë‹¨ êµ¬ë¶„ì„  (ì²­ë¡ìƒ‰)
             cout << CYAN;
             PrintLine();
             cout << RESET;
 
-            // [ÇÁ·¹ÀÓ B - ÁÂ¿ì ÇÑ Ä­ ÀÌµ¿ ¹× ¸ğ¾ç º¯È­]
+            // [í”„ë ˆì„ B - ì¢Œìš° í•œ ì¹¸ ì´ë™ ë° ëª¨ì–‘ ë³€í™”]
             cout << BLUE << BOLD;
             cout << R"(
                  .  :%=..                 .--..
@@ -680,7 +697,7 @@ void ConsoleUI::PrintStartScreen()
                 )" << endl;
         }
 
-        // 3. Å¸ÀÌÆ² ·Î°í ASCII ART : ÆÄµµ (Áß¾Ó Á¤·Ä)
+        // 3. íƒ€ì´í‹€ ë¡œê³  ASCII ART : íŒŒë„ (ì¤‘ì•™ ì •ë ¬)
         cout << CYAN << BOLD;
 
         cout << R"(
@@ -694,44 +711,44 @@ void ConsoleUI::PrintStartScreen()
 
         cout << RESET;
 
-        // ±¸ºĞ¼±
+        // êµ¬ë¶„ì„ 
         cout << CYAN;
         PrintLine();
         cout << RESET;
 
-        // 4. °ÔÀÓ ¼­»ç ¹®±¸
-        cout << MAGENTA << BOLD << "\n           \"¿ì¸®´Â ¼­·ÎÀÇ Ãµ±¹ÀÌÀÚ, °¡Àå ÀÜÀÎÇÑ Áö¿ÁÀÌ¾ú´Ù.\"\n\n" << RESET;
+        // 4. ê²Œì„ ì„œì‚¬ ë¬¸êµ¬
+        cout << MAGENTA << BOLD << "\n           \"ìš°ë¦¬ëŠ” ì„œë¡œì˜ ì²œêµ­ì´ì, ê°€ì¥ ì”ì¸í•œ ì§€ì˜¥ì´ì—ˆë‹¤.\"\n\n" << RESET;
 
-        // ±¸ºĞ¼±
+        // êµ¬ë¶„ì„ 
         cout << CYAN;
         PrintLine();
         cout << RESET;
 
-        // 5. ½ÃÀÛ ¾È³» ¹®±¸
-        cout << WHITE << BOLD << "                   >> ¾Æ¹« Å°³ª ´©¸£¸é ½ÃÀÛµË´Ï´Ù <<\n" << RESET;
+        // 5. ì‹œì‘ ì•ˆë‚´ ë¬¸êµ¬
+        cout << WHITE << BOLD << "                   >> ì•„ë¬´ í‚¤ë‚˜ ëˆ„ë¥´ë©´ ì‹œì‘ë©ë‹ˆë‹¤ <<\n" << RESET;
 
-        // ÇÏ´Ü ±¸ºĞ¼±
+        // í•˜ë‹¨ êµ¬ë¶„ì„ 
         cout << CYAN;
         PrintLine();
         cout << RESET;
 
-        // ÇÁ·¹ÀÓ Áõ°¡ ¹× ´ë±â (300ms °£°İÀ¸·Î ÆÄµµ°¡ Ãâ··°Å¸²)
+        // í”„ë ˆì„ ì¦ê°€ ë° ëŒ€ê¸° (300ms ê°„ê²©ìœ¼ë¡œ íŒŒë„ê°€ ì¶œë ê±°ë¦¼)
         frame++;
         this_thread::sleep_for(chrono::milliseconds(300));
     }
 
-    // ¹öÆÛ¿¡ ³²¾ÆÀÖ´Â Å° ÀÔ·Â ¼Ò¸ğ (´ÙÀ½ È­¸é¿¡ ¿µÇâ ¾øµµ·Ï ¹öÆÛ »èÁ¦)
+    // ë²„í¼ì— ë‚¨ì•„ìˆëŠ” í‚¤ ì…ë ¥ ì†Œëª¨ (ë‹¤ìŒ í™”ë©´ì— ì˜í–¥ ì—†ë„ë¡ ë²„í¼ ì‚­ì œ)
     _getch();
 }
 /*
-// ½Ã½ºÅÛ ´ã´çÀÚ »ç¿ë¿¹½Ã
+// ì‹œìŠ¤í…œ ë‹´ë‹¹ì ì‚¬ìš©ì˜ˆì‹œ
 int main()
 {
-    // ½ÃÀÛ È­¸é Ãâ·Â¸¸ ´ã´ç
+    // ì‹œì‘ í™”ë©´ ì¶œë ¥ë§Œ ë‹´ë‹¹
     ConsoleUI::PrintStartScreen();
 
-    // ÀÔ·Â ¹× ½ÇÇà ·ÎÁ÷ Ã³¸®
-    system("pause"); // ¶Ç´Â _getch(); / cin.get();
+    // ì…ë ¥ ë° ì‹¤í–‰ ë¡œì§ ì²˜ë¦¬
+    system("pause"); // ë˜ëŠ” _getch(); / cin.get();
 
     return 0;
 }
@@ -1106,62 +1123,62 @@ void ConsoleUI::PrintRyuLogo()
 void ConsoleUI::ShowJinIntro()
 {
     PrintLine();
-    PrintTitle("ÁøÅÂ½Ä");
+    PrintTitle("ì§„íƒœì‹");
     PrintLine();
     
     PrintJinWhiteImage();
 
     PrintLine();
-    PrintMessage("¹«¼ú: À¯µµ");
+    PrintMessage("ë¬´ìˆ : ìœ ë„");
     PrintLine();
-    PrintMessage("Á¶Á÷ÀÇ Çàµ¿´ëÀåÀ¸·Î, ÀÇ¸®¿Í Ã¥ÀÓÀ» ¹«¾ùº¸´Ù Áß¿äÇÏ°Ô ¿©±â´Â ÀÎ¹°.");
-    PrintMessage("Ä£±¸¿Í ¿¬ÀÎ »çÀÌ¿¡¼­ ³¡³» ¼ÕÀ» ³õÁö ¸øÇÑ ºñ±ØÀÇ ³²ÀÚ.");
-    PrintMessage("ÇÃ·¹ÀÌ ½ºÅ¸ÀÏ: ½ºÅ³ °ø°İ Æ¯È­ÇüÀ¸·Î, °­·ÂÇÑ À¯µµ ±â¼úÀ» È°¿ëÇØ ³ôÀº Æø¹ß ÇÇÇØ¸¦ ÀÔÈù´Ù.");
+    PrintMessage("ì¡°ì§ì˜ í–‰ë™ëŒ€ì¥ìœ¼ë¡œ, ì˜ë¦¬ì™€ ì±…ì„ì„ ë¬´ì—‡ë³´ë‹¤ ì¤‘ìš”í•˜ê²Œ ì—¬ê¸°ëŠ” ì¸ë¬¼.");
+    PrintMessage("ì¹œêµ¬ì™€ ì—°ì¸ ì‚¬ì´ì—ì„œ ëë‚´ ì†ì„ ë†“ì§€ ëª»í•œ ë¹„ê·¹ì˜ ë‚¨ì.");
+    PrintMessage("í”Œë ˆì´ ìŠ¤íƒ€ì¼: ìŠ¤í‚¬ ê³µê²© íŠ¹í™”í˜•ìœ¼ë¡œ, ê°•ë ¥í•œ ìœ ë„ ê¸°ìˆ ì„ í™œìš©í•´ ë†’ì€ í­ë°œ í”¼í•´ë¥¼ ì…íŒë‹¤.");
     PrintLine();
 }
 
 void ConsoleUI::ShowKangIntro()
 {
     PrintLine();
-    PrintTitle("°­»ç¶ó");
+    PrintTitle("ê°•ì‚¬ë¼");
     PrintLine();
 
     PrintKangWhiteImage();
 
     PrintLine();
-    PrintMessage("¹«¼ú: ÅÂ±Çµµ");
+    PrintMessage("ë¬´ìˆ : íƒœê¶Œë„");
     PrintLine();
-    PrintMessage("ºÒ¹ı ÁöÇÏ ÀÇ¿øÀ» ¿î¿µÇÏ´Â ÀÇ»çÀÌÀÚ, »ıÁ¸À» À§ÇØ ½º½º·Î ¾Ç¿ªÀ» ¼±ÅÃÇÑ ¿©ÀÚ.");
-    PrintMessage("³ÃÈ¤ÇÑ Çö½Ç ¼Ó¿¡¼­µµ µÎ Ä£±¸¸¦ »ì¸®·Á´Â ¸¶À½À» ¹ö¸®Áö ¾Ê´Â´Ù.");
-    PrintMessage("ÇÃ·¹ÀÌ ½ºÅ¸ÀÏ: ±âº» °ø°İ Æ¯È­ÇüÀ¸·Î, ºü¸£°í ¿¬¼ÓÀûÀÎ ÅÂ±Çµµ °ø°İÀ» ÅëÇØ ¾ÈÁ¤ÀûÀ¸·Î ³ôÀº ÇÇÇØ¸¦ ÁØ´Ù.");
+    PrintMessage("ë¶ˆë²• ì§€í•˜ ì˜ì›ì„ ìš´ì˜í•˜ëŠ” ì˜ì‚¬ì´ì, ìƒì¡´ì„ ìœ„í•´ ìŠ¤ìŠ¤ë¡œ ì•…ì—­ì„ ì„ íƒí•œ ì—¬ì.");
+    PrintMessage("ëƒ‰í˜¹í•œ í˜„ì‹¤ ì†ì—ì„œë„ ë‘ ì¹œêµ¬ë¥¼ ì‚´ë¦¬ë ¤ëŠ” ë§ˆìŒì„ ë²„ë¦¬ì§€ ì•ŠëŠ”ë‹¤.");
+    PrintMessage("í”Œë ˆì´ ìŠ¤íƒ€ì¼: ê¸°ë³¸ ê³µê²© íŠ¹í™”í˜•ìœ¼ë¡œ, ë¹ ë¥´ê³  ì—°ì†ì ì¸ íƒœê¶Œë„ ê³µê²©ì„ í†µí•´ ì•ˆì •ì ìœ¼ë¡œ ë†’ì€ í”¼í•´ë¥¼ ì¤€ë‹¤.");
     PrintLine();
 }
 
 void ConsoleUI::ShowRyuIntro()
 {
     PrintLine();
-    PrintTitle("·ù³ë½ºÄÉ");
+    PrintTitle("ë¥˜ë…¸ìŠ¤ì¼€");
     PrintLine();
 
     PrintRyuWhiteImage();
 
     PrintLine();
-    PrintMessage("¹«¼ú: °¡¶óµ¥");
+    PrintMessage("ë¬´ìˆ : ê°€ë¼ë°");
     PrintLine();
-    PrintMessage("¾ßÄíÀÚ ÈÄ°èÀÚ·Î¼­ Á¶Á÷°ú ¿ìÁ¤ »çÀÌ¿¡¼­ °¥µîÇÏ´Â ³ÃÃ¶ÇÑ ÆÄÀÌÅÍ.");
-    PrintMessage("´©±¸º¸´Ù Ä£±¸¸¦ ¾Æ³¢Áö¸¸, ¿î¸íÀº ±×¸¦ ÀûÀ¸·Î ¸¸µé¾ú´Ù.");
-    PrintMessage("ÇÃ·¹ÀÌ ½ºÅ¸ÀÏ: ¹ë·±½ºÇüÀ¸·Î, ±âº» °ø°İ°ú ½ºÅ³ ¸ğµÎ ¾ÈÁ¤ÀûÀÎ ¼º´ÉÀ» °®Ãá ¿Ã¶ó¿îµå Ä³¸¯ÅÍÀÌ´Ù.");
+    PrintMessage("ì•¼ì¿ ì í›„ê³„ìë¡œì„œ ì¡°ì§ê³¼ ìš°ì • ì‚¬ì´ì—ì„œ ê°ˆë“±í•˜ëŠ” ëƒ‰ì² í•œ íŒŒì´í„°.");
+    PrintMessage("ëˆ„êµ¬ë³´ë‹¤ ì¹œêµ¬ë¥¼ ì•„ë¼ì§€ë§Œ, ìš´ëª…ì€ ê·¸ë¥¼ ì ìœ¼ë¡œ ë§Œë“¤ì—ˆë‹¤.");
+    PrintMessage("í”Œë ˆì´ ìŠ¤íƒ€ì¼: ë°¸ëŸ°ìŠ¤í˜•ìœ¼ë¡œ, ê¸°ë³¸ ê³µê²©ê³¼ ìŠ¤í‚¬ ëª¨ë‘ ì•ˆì •ì ì¸ ì„±ëŠ¥ì„ ê°–ì¶˜ ì˜¬ë¼ìš´ë“œ ìºë¦­í„°ì´ë‹¤.");
     PrintLine();
 }
 
 void ConsoleUI::ShowCharacterIntro()
 {
     PrintLine();
-    PrintTitle("Ä³¸¯ÅÍ ¼Ò°³");
+    PrintTitle("ìºë¦­í„° ì†Œê°œ");
     PrintLine();
-    cout << "1. ÁøÅÂ½Ä: À¯µµ ¼±¼ö Ãâ½Å, °­·ÂÇÑ ±ÙÁ¢ °ø°İ°ú ¹æ¾î ´É·ÂÀ» °¡Áø Ä³¸¯ÅÍ." << endl;
-    cout << "2. °­»ç¶ó: ÅÂ±Çµµ ¼±¼ö Ãâ½Å, ºü¸¥ ¼Óµµ¿Í ´Ù¾çÇÑ ±â¼úÀ» °¡Áø Ä³¸¯ÅÍ." << endl;
-    cout << "3. ·ù³ë½ºÄÉ: °¡¶óµ¥ ¼±¼ö Ãâ½Å, ±ÕÇü ÀâÈù ´É·Â°ú Æ¯¼ö ±â¼úÀ» °¡Áø Ä³¸¯ÅÍ." << endl;
+    cout << "1. ì§„íƒœì‹: ìœ ë„ ì„ ìˆ˜ ì¶œì‹ , ê°•ë ¥í•œ ê·¼ì ‘ ê³µê²©ê³¼ ë°©ì–´ ëŠ¥ë ¥ì„ ê°€ì§„ ìºë¦­í„°." << endl;
+    cout << "2. ê°•ì‚¬ë¼: íƒœê¶Œë„ ì„ ìˆ˜ ì¶œì‹ , ë¹ ë¥¸ ì†ë„ì™€ ë‹¤ì–‘í•œ ê¸°ìˆ ì„ ê°€ì§„ ìºë¦­í„°." << endl;
+    cout << "3. ë¥˜ë…¸ìŠ¤ì¼€: ê°€ë¼ë° ì„ ìˆ˜ ì¶œì‹ , ê· í˜• ì¡íŒ ëŠ¥ë ¥ê³¼ íŠ¹ìˆ˜ ê¸°ìˆ ì„ ê°€ì§„ ìºë¦­í„°." << endl;
     PrintLine();
 }
 
@@ -1170,121 +1187,121 @@ void ConsoleUI::ShowCharacterIntro()
 // Cut Scene
 void ConsoleUI::ShowCutScene1()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ¾î¸° ½ÃÀı ¹è°æ ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì–´ë¦° ì‹œì ˆ ë°°ê²½ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½Ä, °­»ç¶ó, ·ù³ë½ºÄÉ µîÀå ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹, ê°•ì‚¬ë¼, ë¥˜ë…¸ìŠ¤ì¼€ ë“±ì¥ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ¼¼ ÀÎ¹°ÀÌ ÇÔ²² ³ë´Â Àå¸é ¹¦»ç ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì„¸ ì¸ë¬¼ì´ í•¨ê»˜ ë…¸ëŠ” ì¥ë©´ ë¬˜ì‚¬ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowCutScene2()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ¾îµÎ¿î ½Ã¼ú½Ç ¹è°æ ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì–´ë‘ìš´ ì‹œìˆ ì‹¤ ë°°ê²½ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÀÇ»ç °­»ç¶ó µîÀå ÀÌ¹ÌÁö ¶Ç´Â ·Î°í Ãâ·Â ÄÚµå
+    // TODO: ì˜ì‚¬ ê°•ì‚¬ë¼ ë“±ì¥ ì´ë¯¸ì§€ ë˜ëŠ” ë¡œê³  ì¶œë ¥ ì½”ë“œ
 
-    // TODO: °­»ç¶ó°¡ ºÒ¹ı ½Ã¼úÀ» ÁøÇàÇÏ´Â »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ê°•ì‚¬ë¼ê°€ ë¶ˆë²• ì‹œìˆ ì„ ì§„í–‰í•˜ëŠ” ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ±äÀå°¨ ÀÖ´Â ´ë»ç ¶Ç´Â ³»·¹ÀÌ¼Ç Ãâ·Â ÄÚµå
+    // TODO: ê¸´ì¥ê° ìˆëŠ” ëŒ€ì‚¬ ë˜ëŠ” ë‚´ë ˆì´ì…˜ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowCutScene3()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: º´¿ø ¶Ç´Â ½Ã¼ú½Ç ¹è°æ ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë³‘ì› ë˜ëŠ” ì‹œìˆ ì‹¤ ë°°ê²½ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÀÇ»ç°¡ µÈ °­»ç¶ó µîÀå ÀÌ¹ÌÁö ¶Ç´Â ·Î°í Ãâ·Â ÄÚµå
+    // TODO: ì˜ì‚¬ê°€ ëœ ê°•ì‚¬ë¼ ë“±ì¥ ì´ë¯¸ì§€ ë˜ëŠ” ë¡œê³  ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÌ Ä¡·á¸¦ ¹ŞÀ¸·¯ ¿Â »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì´ ì¹˜ë£Œë¥¼ ë°›ìœ¼ëŸ¬ ì˜¨ ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉ°¡ Ä¡·á¸¦ ¹ŞÀ¸·¯ ¿Â »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ê°€ ì¹˜ë£Œë¥¼ ë°›ìœ¼ëŸ¬ ì˜¨ ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½Ä°ú ·ù³ë½ºÄÉ°¡ ¼­·Î ¸¶ÁÖÄ¡´Â Àå¸é ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ê³¼ ë¥˜ë…¸ìŠ¤ì¼€ê°€ ì„œë¡œ ë§ˆì£¼ì¹˜ëŠ” ì¥ë©´ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: °­»ç¶ó°¡ µÎ »ç¶÷À» ¾Ë¾Æº¸°Å³ª ¹İÀÀÇÏ´Â ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ê°•ì‚¬ë¼ê°€ ë‘ ì‚¬ëŒì„ ì•Œì•„ë³´ê±°ë‚˜ ë°˜ì‘í•˜ëŠ” ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowCutScene4()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: µµ¹ÚÀå ºĞÀ§±â ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë„ë°•ì¥ ë¶„ìœ„ê¸° ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉÀÇ ±äÀå°¨ ÀÖ´Â ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ì˜ ê¸´ì¥ê° ìˆëŠ” ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÇ µµ¹ß ¶Ç´Â ¹İÀÀ ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì˜ ë„ë°œ ë˜ëŠ” ë°˜ì‘ ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ½ÂºÎ°¡ º»°İÀûÀ¸·Î ÁøÇàµÇ´Â »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ìŠ¹ë¶€ê°€ ë³¸ê²©ì ìœ¼ë¡œ ì§„í–‰ë˜ëŠ” ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ½ÂÆĞ°¡ °¥¸± µíÇÑ ±äÀå°¨ ¿¬Ãâ ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ìŠ¹íŒ¨ê°€ ê°ˆë¦´ ë“¯í•œ ê¸´ì¥ê° ì—°ì¶œ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowCutScene5()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: µµ¹ÚÆÇÀÌ µÚÁıÈ÷´Â »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë„ë°•íŒì´ ë’¤ì§‘íˆëŠ” ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁÖº¯ ÀÎ¹°µéÀÌ µ¿¿äÇÏ´Â ºĞÀ§±â ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì£¼ë³€ ì¸ë¬¼ë“¤ì´ ë™ìš”í•˜ëŠ” ë¶„ìœ„ê¸° ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉÀÇ ºĞ³ë ¶Ç´Â µµ¹ß ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ì˜ ë¶„ë…¸ ë˜ëŠ” ë„ë°œ ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÇ ¹İ°İ ¶Ç´Â °á½É ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì˜ ë°˜ê²© ë˜ëŠ” ê²°ì‹¬ ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉ¿Í ÁøÅÂ½ÄÀÇ Å« ½Î¿òÀÌ ½ÃÀÛµÇ´Â Àå¸é ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ì™€ ì§„íƒœì‹ì˜ í° ì‹¸ì›€ì´ ì‹œì‘ë˜ëŠ” ì¥ë©´ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: Å¬¶óÀÌ¸Æ½º ±äÀå°¨À» °­Á¶ÇÏ´Â ¿¬Ãâ ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: í´ë¼ì´ë§¥ìŠ¤ ê¸´ì¥ê°ì„ ê°•ì¡°í•˜ëŠ” ì—°ì¶œ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowCutScene6()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ½Î¿òÀÌ ³¡³­ µÚÀÇ ¾îµÎ¿î ºĞÀ§±â ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì‹¸ì›€ì´ ëë‚œ ë’¤ì˜ ì–´ë‘ìš´ ë¶„ìœ„ê¸° ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉ°¡ ½Â¸®ÇÑ »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ê°€ ìŠ¹ë¦¬í•œ ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÌ ÆĞ¹èÇÏ°í ¾²·¯Áø »óÅÂ ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì´ íŒ¨ë°°í•˜ê³  ì“°ëŸ¬ì§„ ìƒíƒœ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉÀÇ Â÷°¡¿î ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ì˜ ì°¨ê°€ìš´ ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÇ ¸¶Áö¸· ¹İÀÀ ¶Ç´Â µ¶¹é Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì˜ ë§ˆì§€ë§‰ ë°˜ì‘ ë˜ëŠ” ë…ë°± ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÌ °áÁ¤ÀûÀÎ À§±â¿¡ ºüÁö´Â Àå¸é ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì´ ê²°ì •ì ì¸ ìœ„ê¸°ì— ë¹ ì§€ëŠ” ì¥ë©´ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowCutScene7()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ½Î¿ò ÀÌÈÄÀÇ Á¤Àû ºĞÀ§±â ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì‹¸ì›€ ì´í›„ì˜ ì •ì  ë¶„ìœ„ê¸° ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÌ Ä¡¸í»óÀ» ÀÔÀº »óÈ² ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì´ ì¹˜ëª…ìƒì„ ì…ì€ ìƒí™© ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÇ °íÅë½º·¯¿î ¹İÀÀ ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì˜ ê³ í†µìŠ¤ëŸ¬ìš´ ë°˜ì‘ ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ·ù³ë½ºÄÉ ¶Ç´Â ÁÖº¯ ÀÎ¹°ÀÇ ¹İÀÀ ´ë»ç Ãâ·Â ÄÚµå
+    // TODO: ë¥˜ë…¸ìŠ¤ì¼€ ë˜ëŠ” ì£¼ë³€ ì¸ë¬¼ì˜ ë°˜ì‘ ëŒ€ì‚¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ÁøÅÂ½ÄÀÌ ¾²·¯Áö°Å³ª ¹öÆ¼´Â Àå¸é ¼³¸í ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì§„íƒœì‹ì´ ì“°ëŸ¬ì§€ê±°ë‚˜ ë²„í‹°ëŠ” ì¥ë©´ ì„¤ëª… ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::PrintCutScene1Image()
@@ -1694,21 +1711,21 @@ R"(
 
     int FrameCount = 3;
 
-    int RepeatCount = 3; // ¾Ö´Ï¸ŞÀÌ¼ÇÀ» 3¹ø ¹İº¹
+    int RepeatCount = 3; // ì• ë‹ˆë©”ì´ì…˜ì„ 3ë²ˆ ë°˜ë³µ
 
     for (int repeat = 0; repeat < RepeatCount; repeat++)
     {
         for (int i = 0; i < FrameCount; i++)
         {
-            // ÇöÀç i¹øÂ° ÇÁ·¹ÀÓ Ãâ·Â
+            // í˜„ì¬ ië²ˆì§¸ í”„ë ˆì„ ì¶œë ¥
             cout << Frames[i] << endl;
 
-            // 700¹Ğ¸®ÃÊ µ¿¾È Àá±ñ ¸ØÃã
+            // 700ë°€ë¦¬ì´ˆ ë™ì•ˆ ì ê¹ ë©ˆì¶¤
             this_thread::sleep_for(chrono::milliseconds(700));
 
             if (i != FrameCount - 1)
             {
-                // ¸¶Áö¸· ÇÁ·¹ÀÓÀÌ ¾Æ´Ï¸é È­¸é Áö¿ì±â
+                // ë§ˆì§€ë§‰ í”„ë ˆì„ì´ ì•„ë‹ˆë©´ í™”ë©´ ì§€ìš°ê¸°
                 system("cls");
             }
         }
@@ -1866,21 +1883,21 @@ void ConsoleUI::PlayCutScene6Animation()
 
     int FrameCount = 3;
 
-    int RepeatCount = 3; // ¾Ö´Ï¸ŞÀÌ¼ÇÀ» 3¹ø ¹İº¹
+    int RepeatCount = 3; // ì• ë‹ˆë©”ì´ì…˜ì„ 3ë²ˆ ë°˜ë³µ
 
     for (int repeat = 0; repeat < RepeatCount; repeat++)
     {
         for (int i = 0; i < FrameCount; i++)
         {
-            // ÇöÀç i¹øÂ° ÇÁ·¹ÀÓ Ãâ·Â
+            // í˜„ì¬ ië²ˆì§¸ í”„ë ˆì„ ì¶œë ¥
             cout << Frames[i] << endl;
 
-            // 700¹Ğ¸®ÃÊ µ¿¾È Àá±ñ ¸ØÃã
+            // 700ë°€ë¦¬ì´ˆ ë™ì•ˆ ì ê¹ ë©ˆì¶¤
             this_thread::sleep_for(chrono::milliseconds(700));
 
             if (i != FrameCount - 1)
             {
-                // ¸¶Áö¸· ÇÁ·¹ÀÓÀÌ ¾Æ´Ï¸é È­¸é Áö¿ì±â
+                // ë§ˆì§€ë§‰ í”„ë ˆì„ì´ ì•„ë‹ˆë©´ í™”ë©´ ì§€ìš°ê¸°
                 system("cls");
             }
         }
@@ -1893,216 +1910,216 @@ void ConsoleUI::PlayCutScene6Animation()
 // New Cut Scene
 void ConsoleUI::ShowNewCutScene1()
 { 
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-	// ÄÆ ½Å 1 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+	// ì»· ì‹  1 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene2()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 2 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  2 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene3()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 3 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  3 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene4()
 {    
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 4 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  4 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene5()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 5 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  5 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene6()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 6 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  6 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene7()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 7 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  7 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene8()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 8 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  8 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene9()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 9 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  9 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene10()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 10 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  10 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene11()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
-    // ÄÆ ½Å 11 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
+    // ì»· ì‹  11 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene12()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
-    // ÄÆ ½Å 12 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
+    // ì»· ì‹  12 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene13()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 3 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  3 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene14()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 4 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  4 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene15()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 5 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  5 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene16()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 6 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  6 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene17()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 7 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  7 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene18()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 8 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  8 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene19()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 9 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  9 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene20()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 10 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  10 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene21()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 1 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  1 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene22()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 2 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  2 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene23()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 3 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  3 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::ShowNewCutScene24()
 {
-    // TODO: ÄÆ¾À Á¦¸ñ Ãâ·Â ÄÚµå
+    // TODO: ì»·ì”¬ ì œëª© ì¶œë ¥ ì½”ë“œ
     // 
-    // ÄÆ ½Å 4 ÀÌ¹ÌÁö Ãâ·Â
-    // ´ë»ç Ãâ·Â ÇÔ¼ö
-    // TODO: ´ÙÀ½ Àå¸éÀ¸·Î ³Ñ¾î°¡±â À§ÇÑ ¾È³» ¹®±¸ Ãâ·Â ÄÚµå
+    // ì»· ì‹  4 ì´ë¯¸ì§€ ì¶œë ¥
+    // ëŒ€ì‚¬ ì¶œë ¥ í•¨ìˆ˜
+    // TODO: ë‹¤ìŒ ì¥ë©´ìœ¼ë¡œ ë„˜ì–´ê°€ê¸° ìœ„í•œ ì•ˆë‚´ ë¬¸êµ¬ ì¶œë ¥ ì½”ë“œ
 }
 
 void ConsoleUI::PrintNewCutScene1Image()
@@ -2987,7 +3004,7 @@ void ConsoleUI::PrintNewCutScene24Image()
 
 
 
-// ÁÖ»çÀ§
+// ì£¼ì‚¬ìœ„
 void ConsoleUI::PrintDice1()
 {
     cout << R"(
@@ -3333,48 +3350,541 @@ void ConsoleUI::PrintDiceAnimationBySpeed(int delayMilliseconds)
 
     int FrameCount = 5;
 
-    // Å°º¸µå ÀÔ·ÂÀÌ µé¾î¿Ã ¶§±îÁö °è¼Ó ÁÖ»çÀ§ ¾Ö´Ï¸ŞÀÌ¼Ç Àç»ı
+    // í‚¤ë³´ë“œ ì…ë ¥ì´ ë“¤ì–´ì˜¬ ë•Œê¹Œì§€ ê³„ì† ì£¼ì‚¬ìœ„ ì• ë‹ˆë©”ì´ì…˜ ì¬ìƒ
     while (!_kbhit())
     {
         system("cls");
 
-        // ÇöÀç ÇÁ·¹ÀÓ ÀÎµ¦½º º¯¼ö
+        // í˜„ì¬ í”„ë ˆì„ ì¸ë±ìŠ¤ ë³€ìˆ˜
         int currentFrame = frame % FrameCount;
 
-        // ÇöÀç ÇÁ·¹ÀÓ ¾Æ½ºÅ° ÀÌ¹ÌÁö Ãâ·Â ÄÚµå
+        // í˜„ì¬ í”„ë ˆì„ ì•„ìŠ¤í‚¤ ì´ë¯¸ì§€ ì¶œë ¥ ì½”ë“œ
         cout << CYAN << BOLD;
         cout << Frames[currentFrame] << endl;
         cout << RESET;
 
-        // ÇÁ·¹ÀÓ Áõ°¡ ÄÚµå
+        // í”„ë ˆì„ ì¦ê°€ ì½”ë“œ
         frame++;
 
-        // ÇÁ·¹ÀÓ °£ ´ë±â ½Ã°£ ÄÚµå
+        // í”„ë ˆì„ ê°„ ëŒ€ê¸° ì‹œê°„ ì½”ë“œ
         this_thread::sleep_for(chrono::milliseconds(delayMilliseconds));
     }
 
-    // ¹öÆÛ¿¡ ³²¾ÆÀÖ´Â Å° ÀÔ·Â ¼Ò¸ğ
+    // ë²„í¼ì— ë‚¨ì•„ìˆëŠ” í‚¤ ì…ë ¥ ì†Œëª¨
     _getch();
 }
 /*
-    // ÁÖ»çÀ§ ¾Ö´Ï¸ŞÀÌ¼Ç ¼Óµµ Á¶Àı »ç¿ë¿¹½Ã
+    // ì£¼ì‚¬ìœ„ ì• ë‹ˆë©”ì´ì…˜ ì†ë„ ì¡°ì ˆ ì‚¬ìš©ì˜ˆì‹œ
 
-    // delayMilliseconds °ªÀÌ Å¬¼ö·Ï ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ´À·ÁÁı´Ï´Ù.
-    // delayMilliseconds °ªÀÌ ÀÛÀ»¼ö·Ï ¾Ö´Ï¸ŞÀÌ¼ÇÀÌ »¡¶óÁı´Ï´Ù.
+    // delayMilliseconds ê°’ì´ í´ìˆ˜ë¡ ì• ë‹ˆë©”ì´ì…˜ì´ ëŠë ¤ì§‘ë‹ˆë‹¤.
+    // delayMilliseconds ê°’ì´ ì‘ì„ìˆ˜ë¡ ì• ë‹ˆë©”ì´ì…˜ì´ ë¹¨ë¼ì§‘ë‹ˆë‹¤.
 
-    // ¿¹½Ã)
-    // 700ms : ´À¸° ¾Ö´Ï¸ŞÀÌ¼Ç
-    // 300ms : º¸Åë ¼Óµµ ¾Ö´Ï¸ŞÀÌ¼Ç
-    // 150ms : ºü¸¥ ¾Ö´Ï¸ŞÀÌ¼Ç
+    // ì˜ˆì‹œ)
+    // 700ms : ëŠë¦° ì• ë‹ˆë©”ì´ì…˜
+    // 300ms : ë³´í†µ ì†ë„ ì• ë‹ˆë©”ì´ì…˜
+    // 150ms : ë¹ ë¥¸ ì• ë‹ˆë©”ì´ì…˜
 
     int main()
     {
-        // ´À¸° ÁÖ»çÀ§ ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà
+        // ëŠë¦° ì£¼ì‚¬ìœ„ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰
         ConsoleUI::PrintDiceAnimationBySpeed(700);
 
-        // ºü¸¥ ÁÖ»çÀ§ ¾Ö´Ï¸ŞÀÌ¼Ç ½ÇÇà
+        // ë¹ ë¥¸ ì£¼ì‚¬ìœ„ ì• ë‹ˆë©”ì´ì…˜ ì‹¤í–‰
         ConsoleUI::PrintDiceAnimationBySpeed(100);
 
         return 0;
     }
 */
+
+
+// ì¶”ê°€ ëª©ë¡ ë“¤ ê¸°ì¡´ì˜ í•¨ìˆ˜ì™€ ì¤‘ë³µë˜ëŠ” ê²ƒë“¤ ìˆëŠ”ì§€ í™•ì¸ ë¶€íƒë“œë¦½ë‹ˆë‹¤.
+// ê¸°ì¡´ì˜ í•¨ìˆ˜ë“¤ì´ ë§ì•„ ê·¸ëƒ¥ ìˆ˜ì •ëœ ë²„ì „ìœ¼ë¡œ ë‹¤ì‹œ ë§Œë“¤ì—ˆìŠµë‹ˆë‹¤.
+
+// [ì¶”ê°€] ì „íˆ¬ ì‹œì‘ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintBattleStart(GameContext& context)
+{
+    Player& player = context.GetPlayer();
+    Monster& monster = context.GetMonster();
+
+    PrintLine();
+    cout << "ì „íˆ¬ ì‹œì‘!" << endl;
+    cout << "í”Œë ˆì´ì–´: " << player.GetName() << endl;
+    cout << "ìƒëŒ€: " << monster.GetName() << endl;
+    PrintLine();
+}
+
+// [ì¶”ê°€] ì£¼ì‚¬ìœ„ ê²°ê³¼ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintDiceResult(int diceValue)
+{
+    cout << "ì£¼ì‚¬ìœ„ ê²°ê³¼: " << diceValue << endl;
+
+    switch (diceValue)
+    {
+    case 1:
+        PrintDice1();
+        break;
+
+    case 2:
+        PrintDice2();
+        break;
+
+    case 3:
+        PrintDice3();
+        break;
+
+    case 4:
+        PrintDice4();
+        break;
+
+    case 5:
+        PrintDice5();
+        break;
+
+    case 6:
+        PrintDice6();
+        break;
+
+    default:
+        PrintError("ì˜ëª»ëœ ì£¼ì‚¬ìœ„ ê°’ì…ë‹ˆë‹¤.");
+        break;
+    }
+}
+
+// [ì¶”ê°€] í”Œë ˆì´ì–´ ì¼ë°˜ ê³µê²© ê²°ê³¼ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintPlayerMeleeAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage
+)
+{
+    cout << playerName << "ì˜ ì¼ë°˜ ê³µê²©!" << endl;
+    cout << monsterName << "ì—ê²Œ " << damage << " ë°ë¯¸ì§€ë¥¼ ì…í˜”ìŠµë‹ˆë‹¤." << endl;
+}
+
+// [ì¶”ê°€] í”Œë ˆì´ì–´ ìŠ¤í‚¬ ê³µê²© ê²°ê³¼ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintPlayerSkillAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage
+)
+{
+    cout << playerName << "ì˜ ìŠ¤í‚¬ ê³µê²©!" << endl;
+    cout << monsterName << "ì—ê²Œ " << damage << " ë°ë¯¸ì§€ë¥¼ ì…í˜”ìŠµë‹ˆë‹¤." << endl;
+}
+
+// [ì¶”ê°€] ê³µê²© ì‹¤íŒ¨ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintAttackMiss()
+{
+    PrintMessage("ê³µê²©ì´ ë¹—ë‚˜ê°”ìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ìŠ¤í‚¬ ì‹¤íŒ¨ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintSkillMiss()
+{
+    PrintMessage("ìŠ¤í‚¬ ì‚¬ìš©ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] MP ë¶€ì¡± ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintNotEnoughMp()
+{
+    PrintError("MPê°€ ë¶€ì¡±í•©ë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ìŠ¤í„´ ì„±ê³µ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintStunSuccess(const std::string& monsterName)
+{
+    cout << "ì¹˜ëª…íƒ€!" << endl;
+    cout << monsterName << "ì´/ê°€ ìŠ¤í„´ ìƒíƒœê°€ ë˜ì—ˆìŠµë‹ˆë‹¤." << endl;
+}
+
+// [ì¶”ê°€] ëª¬ìŠ¤í„° ìŠ¤í„´ ìƒíƒœ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintMonsterStunned(const std::string& monsterName)
+{
+    cout << monsterName << "ì€/ëŠ” ìŠ¤í„´ ìƒíƒœë¡œ í–‰ë™í•˜ì§€ ëª»í–ˆìŠµë‹ˆë‹¤." << endl;
+}
+
+// [ì¶”ê°€] ëª¬ìŠ¤í„° ê³µê²© ê²°ê³¼ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintMonsterAttackResult(
+    const std::string& monsterName,
+    const std::string& playerName,
+    int damage
+)
+{
+    cout << monsterName << "ì˜ ê³µê²©!" << endl;
+    cout << playerName << "ì´/ê°€ " << damage << " ë°ë¯¸ì§€ë¥¼ ë°›ì•˜ìŠµë‹ˆë‹¤." << endl;
+}
+
+// [ì¶”ê°€] ë„ë§ ì„±ê³µ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintRunawaySuccess()
+{
+    PrintSuccess("ë„ë§ì— ì„±ê³µí–ˆìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ë„ë§ ì‹¤íŒ¨ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintRunawayFail()
+{
+    PrintError("ë„ë§ì— ì‹¤íŒ¨í–ˆìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ì „íˆ¬ ìŠ¹ë¦¬ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintBattleVictory(const std::string& monsterName)
+{
+    PrintSuccess(monsterName + "ì„/ë¥¼ ì“°ëŸ¬ëœ¨ë ¸ìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ì „íˆ¬ íŒ¨ë°° ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintBattleDefeat(const std::string& playerName)
+{
+    PrintError(playerName + "ì´/ê°€ ì“°ëŸ¬ì¡ŒìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ì „íˆ¬ ì¤‘ë‹¨ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintBattleStopped()
+{
+    PrintMessage("ì „íˆ¬ë¥¼ ì¤‘ë‹¨í–ˆìŠµë‹ˆë‹¤.");
+}
+
+// [ì¶”ê°€] ë³´ìƒ ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintReward(int exp, int gold)
+{
+    PrintLine();
+    cout << "ì „íˆ¬ ë³´ìƒ" << endl;
+    cout << "ê²½í—˜ì¹˜ +" << exp << endl;
+    cout << "ê³¨ë“œ +" << gold << endl;
+    PrintLine();
+}
+
+// [ì¶”ê°€] ë ˆë²¨ì—… ì¶œë ¥ í•¨ìˆ˜
+void ConsoleUI::PrintLevelUp(const std::string& playerName, int level)
+{
+    PrintSuccess(playerName + "ì˜ ë ˆë²¨ì´ ì˜¬ëìŠµë‹ˆë‹¤.");
+    cout << "í˜„ì¬ ë ˆë²¨: " << level << endl;
+}
+
+
+void ConsoleUI::PrintAct1Cutscene()
+{
+    ShowCutScene1();
+}
+
+void ConsoleUI::PrintAct2Cutscene()
+{
+    ShowCutScene2();
+}
+
+void ConsoleUI::PrintAct3Cutscene()
+{
+    ShowCutScene3();
+}
+
+void ConsoleUI::PrintEnding()
+{
+    PrintLine();
+    PrintTitle("ì—”ë”©");
+    PrintLine();
+    PrintMessage("ê²Œì„ì´ ì¢…ë£Œë˜ì—ˆìŠµë‹ˆë‹¤.");
+    PrintLine();
+}
+
+void ConsoleUI::PrintPlayerStatus(GameContext& context)
+{
+    PrintPlayerStatusEveryTime(context);
+}
+
+//ì»·ì‹  í™”ë©´ ë‚˜ëˆ„ê¸°
+void ConsoleUI::PrintFixedWidthText(const std::string& text, int width)
+{
+    std::string output = text;
+
+    if ((int)output.length() > width)
+    {
+        output = output.substr(0, width);
+    }
+
+    std::cout << std::left << std::setw(width) << output;
+}
+
+void ConsoleUI::DrawCutSceneScreen(
+    const std::vector<std::string>& sceneLines,
+    const std::vector<std::string>& dialogueLines
+)
+{
+    ClearScreen();
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    int consoleWidth = 120;
+    int consoleHeight = 35;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    }
+
+    // ì¢Œìš° í…Œë‘ë¦¬ 2ì¹¸ì„ ì œì™¸í•œ ì‹¤ì œ ë‚´ìš© í­
+    int screenWidth = consoleWidth - 2;
+
+    // ìµœì†Œ í¬ê¸° ë³´ì •
+    if (screenWidth < 40)
+    {
+        screenWidth = 40;
+    }
+
+    if (consoleHeight < 20)
+    {
+        consoleHeight = 20;
+    }
+
+    // ì „ì²´ ì¶œë ¥ ì¤„ ìˆ˜ ê³„ì‚°
+    // ìœ„/ì¤‘ê°„/ì•„ë˜ í…Œë‘ë¦¬ 3ì¤„ + ëŒ€ê¸° ë¬¸êµ¬ ê³µê°„ ì•½ 2ì¤„ì„ ì œì™¸
+    int usableHeight = consoleHeight - 5;
+
+    // ìƒë‹¨ ì»·ì‹  ì˜ì—­ ì•½ 2/3
+    int sceneHeight = usableHeight * 2 / 3;
+
+    // í•˜ë‹¨ ëŒ€ì‚¬ ì˜ì—­ ì•½ 1/3
+    int dialogueHeight = usableHeight - sceneHeight;
+
+    // ë„ˆë¬´ ì‘ì•„ì§€ëŠ” ê²ƒ ë°©ì§€
+    if (sceneHeight < 10)
+    {
+        sceneHeight = 10;
+    }
+
+    if (dialogueHeight < 5)
+    {
+        dialogueHeight = 5;
+    }
+
+    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+
+    // ìƒë‹¨ ì»·ì‹  ì˜ì—­
+    for (int i = 0; i < sceneHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i < static_cast<int>(sceneLines.size()))
+        {
+            PrintFixedWidthText(sceneLines[i], screenWidth);
+        }
+        else
+        {
+            PrintFixedWidthText("", screenWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+
+    // í•˜ë‹¨ ëŒ€ì‚¬ ì˜ì—­
+    for (int i = 0; i < dialogueHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintFixedWidthText("[ëŒ€ì‚¬]", screenWidth);
+        }
+        else if (i - 1 < static_cast<int>(dialogueLines.size()))
+        {
+            PrintFixedWidthText(dialogueLines[i - 1], screenWidth);
+        }
+        else
+        {
+            PrintFixedWidthText("", screenWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+}
+
+void ConsoleUI::DrawGameScreen(
+    const std::vector<std::string>& cutSceneLines,
+    const std::vector<std::string>& logLines,
+    const std::vector<std::string>& statusLines,
+    const std::vector<std::string>& choiceLines
+)
+{
+    ClearScreen();
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    int consoleWidth = 120;
+    int consoleHeight = 35;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    }
+
+    // ì½˜ì†” ëê¹Œì§€ ê½‰ ì±„ìš°ë©´ ìë™ ì¤„ë°”ê¿ˆì´ ìƒê¸¸ ìˆ˜ ìˆìœ¼ë¯€ë¡œ ì—¬ìœ ë¥¼ ë‘ 
+    int totalWidth = consoleWidth - 6;
+    int totalHeight = consoleHeight - 4;
+
+    if (totalWidth < 80)
+    {
+        totalWidth = 80;
+    }
+
+    if (totalHeight < 24)
+    {
+        totalHeight = 24;
+    }
+
+    int leftWidth = totalWidth / 2;
+    int rightWidth = totalWidth - leftWidth - 1;
+
+    int topHeight = totalHeight * 2 / 3;
+    int bottomHeight = totalHeight - topHeight;
+
+    auto PrintCell = [](const std::string& text, int width)
+        {
+            std::string output = text;
+
+            if ((int)output.length() > width)
+            {
+                output = output.substr(0, width);
+            }
+
+            std::cout << output;
+
+            int padding = width - static_cast<int>(output.length());
+
+            if (padding < 0)
+            {
+                padding = 0;
+            }
+
+            std::cout << std::string(padding, ' ');
+        };
+
+    auto PrintBorder = [&]()
+        {
+            std::cout
+                << "+"
+                << std::string(leftWidth, '-')
+                << "+"
+                << std::string(rightWidth, '-')
+                << "+"
+                << std::endl;
+        };
+
+    PrintBorder();
+
+    // ìƒë‹¨ ì˜ì—­: ì»·ì‹  / ê²Œì„ ë¡œê·¸
+    for (int i = 0; i < topHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[ì»·ì‹  / ë Œë”ë§]", leftWidth);
+        }
+        else if (i - 1 < static_cast<int>(cutSceneLines.size()))
+        {
+            PrintCell(cutSceneLines[i - 1], leftWidth);
+        }
+        else
+        {
+            PrintCell("", leftWidth);
+        }
+
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[ê²Œì„ ë¡œê·¸]", rightWidth);
+        }
+        else if (i - 1 < static_cast<int>(logLines.size()))
+        {
+            PrintCell(logLines[i - 1], rightWidth);
+        }
+        else
+        {
+            PrintCell("", rightWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    PrintBorder();
+
+    // í•˜ë‹¨ ì˜ì—­: í”Œë ˆì´ì–´ ìƒíƒœ / ì„ íƒì°½
+    for (int i = 0; i < bottomHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[í”Œë ˆì´ì–´ ìŠ¤í…Œì´í„°ìŠ¤]", leftWidth);
+        }
+        else if (i - 1 < static_cast<int>(statusLines.size()))
+        {
+            PrintCell(statusLines[i - 1], leftWidth);
+        }
+        else
+        {
+            PrintCell("", leftWidth);
+        }
+
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[ì„ íƒì°½]", rightWidth);
+        }
+        else if (i - 1 < static_cast<int>(choiceLines.size()))
+        {
+            PrintCell(choiceLines[i - 1], rightWidth);
+        }
+        else
+        {
+            PrintCell("", rightWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    PrintBorder();
+}
+
+void ConsoleUI::DrawGameScreen(
+    const std::vector<std::string>& cutSceneLines,
+    const std::vector<std::string>& logLines,
+    Player& player,
+    const std::vector<std::string>& choiceLines
+)
+{
+    std::vector<std::string> statusLines;
+
+    statusLines.push_back("ì´ë¦„ : " + player.GetName());
+    statusLines.push_back("ë ˆë²¨ : " + std::to_string(player.GetLevel()) + " / " + std::to_string(player.GetMaxLevel()));
+    statusLines.push_back("HP : " + std::to_string(player.GetHp()) + " / " + std::to_string(player.GetMaxHp()));
+    statusLines.push_back("MP : " + std::to_string(player.GetMp()) + " / " + std::to_string(player.GetMaxMp()));
+    statusLines.push_back("EXP : " + std::to_string(player.GetExp()) + " / " + std::to_string(player.GetMaxExp()));
+    statusLines.push_back("ê³µê²©ë ¥ : " + std::to_string(player.GetAttack()));
+    statusLines.push_back("ë°©ì–´ë ¥ : " + std::to_string(player.GetDefense()));
+    statusLines.push_back("ê³¨ë“œ : " + std::to_string(player.GetGold()));
+
+    statusLines.push_back(
+        "STR " + std::to_string(player.GetStr()) +
+        " / DEX " + std::to_string(player.GetDex()) +
+        " / INT " + std::to_string(player.GetIntel()) +
+        " / LUK " + std::to_string(player.GetLuk())
+    );
+
+    DrawGameScreen(
+        cutSceneLines,
+        logLines,
+        statusLines,
+        choiceLines
+    );
+}
+
