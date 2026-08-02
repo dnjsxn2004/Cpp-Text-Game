@@ -1,0 +1,3890 @@
+﻿#include <iostream>
+#include <string>
+#include <thread>    // sleep_for처럼 실행 흐름을 잠시 멈추는 기능을 사용하기 위한 헤더
+#include <chrono>    // milliseconds, seconds처럼 시간 단위를 사용하기 위한 헤더
+#include <conio.h> // _kbhit() 및 _getch() 사용 (Windows 콘솔 입력 감지용)
+#include <windows.h> // Windows API 헤더 추가
+#include <cstdlib> // system("cls") 사용
+#include <stdlib.h>
+#include <vector>
+#include <iomanip>
+
+
+#include "Jin.h"
+#include "Ryu.h"
+#include "Gang.h"
+#include "StatBonus.h"
+#include "GameContext.h"
+#include "Player.h"
+#include "Monster.h"
+#include "ConsolUI.h"
+#include "Inventory.h"
+#include "Item.h"
+#include "Shop.h"
+#include "Battle.h"
+#include "GameContext.h"
+#include "InputManager.h"
+
+
+using namespace std;
+
+// ANSI 색상 이스케이프 코드 정의
+#define RESET   "\033[0m"
+#define RED     "\033[31m"
+#define GREEN   "\033[32m"
+#define YELLOW  "\033[33m"
+#define BLUE    "\033[34m"
+#define MAGENTA "\033[35m"
+#define CYAN    "\033[36m"
+#define WHITE   "\033[37m"
+#define BOLD    "\033[1m"
+
+
+void ConsoleUI::PrintLine()
+{
+	cout << "============================================================================" << endl;
+}
+
+void ConsoleUI::PrintTitle(const std::string& title)
+{
+	cout << "                            [ " << title << " ]                     " << endl;
+}
+
+void ConsoleUI::PrintMessage(const std::string& message)
+{
+	cout << message << endl;
+}
+
+void ConsoleUI::PrintMessageValue(const std::string& message, int value)
+{
+	cout << message << ": " << value << endl;
+}
+
+void ConsoleUI::PrintError(const std::string& message)
+{
+	cout  << message << endl;
+}
+
+void ConsoleUI::PrintSuccess(const std::string& message)
+{
+	cout  << message << endl;
+}
+
+
+
+// 메인 메뉴
+void ConsoleUI::PrintMainMenu()
+{
+	PrintLine();
+	PrintTitle("메인 메뉴");
+	PrintLine();
+
+    cout << endl;
+    PrintMessage("1. 일반 전투");
+    PrintMessage("2. 메인 스토리");
+    PrintMessage("3. 상태창");
+    PrintMessage("4. 인벤토리");
+    PrintMessage("5. 상점");
+    PrintMessage("0. 게임 종료");
+    cout << endl;
+
+	PrintLine();
+}
+
+void ConsoleUI::PrintPlayerStatus(Player& player)
+{
+    PrintLine();
+    PrintTitle("플레이어 상태");
+    PrintLine();
+
+    PrintMessage("이름 : " + player.GetName());
+    PrintMessage("HP : " + std::to_string(player.GetHp()));
+    PrintMessage("MP : " + std::to_string(player.GetMp()));
+
+    PrintLine();
+}
+
+
+void ConsoleUI::SwitchMainMenu()
+{
+    PrintMainMenu();
+    int choice = InputManager::InputInMassegeToRange("메인 메뉴에서 선택하세요: ", 0, 5);
+    switch (choice)
+    {
+    case 1:
+        // 일반 전투
+        break;
+    case 2:
+        // 메인 스토리
+        break;
+    case 3:
+        // 상태창
+        break;
+    case 4:
+        // 인벤토리
+        break;
+    case 5:
+        // 상점
+        break;
+    case 0:
+        // 게임 종료
+        break;
+    default:
+        PrintError("잘못된 입력입니다. 다시 선택해주세요.");
+        break;
+    }
+}
+
+
+
+// 상태창
+void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context)
+{
+    Player& player = context.GetPlayer();
+    cout << "레벨 : " << player.GetLevel() << " ( " << player.GetExp() << " / " << player.GetMaxExp() << " ) " <<
+        "  HP : " << player.GetHp() << " / " << player.GetMaxHp() <<
+        "  MP : " << player.GetMp() << " / " << player.GetMaxMp() <<
+        endl;
+}
+
+void ConsoleUI::PrintStatus(GameContext& context, Battle& battle, StatBonus& equipBonus, StatBonus& potionBonus)
+{
+    Player& player = context.GetPlayer();
+    Inventory& inventory = context.GetInventory();
+    Item& item = context.GetItem();
+    
+    string weaponName = context.GetInventory().GetEquippedWeaponName();
+    string armorName = context.GetInventory().GetEquippedArmorName();
+
+
+    PrintLine();
+    PrintTitle("플레이어 상태");
+    PrintLine();
+
+    cout << endl;
+    cout << player.GetName() << endl;
+    PrintLine();
+    cout << "골드 : " << player.GetGold() << endl;
+    cout << "레벨 : " << player.GetLevel() << endl;
+    cout << "경험치 : " << player.GetExp() << " / " << player.GetMaxExp() << endl;
+    cout << "HP : " << player.GetHp() << " / " << player.GetMaxHp() << endl;
+    cout << "MP : " << player.GetMp() << " / " << player.GetMaxMp() << endl;
+    cout << "공격력 : " << player.GetMeleeDamage(equipBonus, potionBonus) << endl;
+    cout << "방어력 : " << player.GetTrueDefense(equipBonus, potionBonus) << endl;
+    PrintLine();
+
+    cout << endl;
+    PrintMessage("내가 장착하고 있는 장비 아이템");
+    PrintLine();
+
+    cout << "장착 중인 무기: " << weaponName << endl;
+    cout << "장착 중인 방어구: " << armorName << endl;
+    PrintLine();
+
+    cout << endl;
+    PrintMessage("전투 기록");
+    PrintLine();
+
+    cout << "전투에서 이긴 횟수 : "<< battle.GetMonsterKillCount() << endl;
+
+    //캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
+    // 내가 장착하고 있는 (장비) 아이템
+    // 몬스터 처치 수
+
+    PrintLine();
+}
+
+
+
+// 아이템, 인벤토리
+string ConsoleUI::ItemTypeToString(const Item& item)
+{
+    switch (item.GetType())
+    {
+    case ItemType::Equipment:
+        return "장비";  // 무기& 방어구 장비 타입
+
+    case ItemType::Consumable:
+        return "소비";
+
+    default:
+        return "알 수 없음";
+    
+    }
+}
+
+void ConsoleUI::PrintItemListWithIndex(const vector<Item>& items)
+{
+    for (int i = 0; i < items.size(); i++)
+    {
+        cout << i + 1 << ". " << items[i].GetName() << endl;
+    }
+}
+
+void ConsoleUI::PrintInventoryMenu()
+{
+    PrintLine();
+    PrintTitle("인벤토리 확인");
+    PrintLine();
+
+    PrintMessage("1. 내가 가진 전체 아이템 보기");
+    PrintMessage("2. 장비 아이템");
+    PrintMessage("3. 소비 아이템");
+    //PrintMessage("4. 퀘스트 아이템");
+    PrintMessage("0. 뒤로가기");
+
+    PrintLine();
+};
+
+void ConsoleUI::PrintItem(const Item& item)
+{
+    PrintLine();
+    cout << item.GetName() << endl;
+    PrintLine();
+    cout << "가격 : " << item.GetPrice() << endl;
+    cout << "타입 : " << ItemTypeToString(item) << endl;
+    PrintLine();
+}
+
+void ConsoleUI::PrintItemName(const Item& item)
+{
+    cout << item.GetName() << endl;
+}
+
+void ConsoleUI::PrintAllItems(GameContext& context)
+{
+    Inventory& inventory = context.GetInventory();
+    const vector<Item>& items = inventory.GetItems();
+
+    if (items.empty())
+    {
+        PrintMessage("인벤토리가 비어 있습니다.");
+        return;
+    }
+
+    PrintLine();
+    PrintTitle("내가 가진 전체 아이템");
+    PrintLine();
+
+    PrintItemListWithIndex(items);
+
+    PrintLine();
+}
+
+void ConsoleUI::PrintEquipmentItems(GameContext& context)
+{
+    Inventory& inventory = context.GetInventory();
+    vector<Item> equipmentItems = inventory.GetItemsByType(ItemType::Equipment);
+
+    if (equipmentItems.empty())
+    {
+        PrintMessage("장비 아이템이 없습니다.");
+        return;
+    }
+
+
+    PrintLine();
+    PrintTitle("장비 아이템 목록");
+    PrintLine();
+
+    PrintItemListWithIndex(equipmentItems);
+
+}
+
+void ConsoleUI::PrintConsumableItems(GameContext& context)
+{
+    Inventory& inventory = context.GetInventory();
+    vector<Item> consumableItems = inventory.GetItemsByType(ItemType::Consumable);
+
+    if (consumableItems.empty())
+    {
+        PrintMessage("소비 아이템이 없습니다.");
+        return;
+    }
+
+    PrintLine();
+    PrintTitle("소비 아이템 목록");
+    PrintLine();
+
+    PrintItemListWithIndex(consumableItems);
+}
+
+void ConsoleUI::SwitchInventory(GameContext& context)
+{
+    while (true)
+    {
+        PrintInventoryMenu();
+
+        int choice = InputManager::InputInMassegeToRange("인벤토리에서 선택하세요: ",0, 3);
+        
+        switch (choice)
+        {
+        case 1:
+            PrintAllItems(context);
+            break;
+
+        case 2:
+            PrintEquipmentItems(context);
+            break;
+
+        case 3:
+            PrintConsumableItems(context);
+            break;
+
+        case 0:
+            return;
+        }
+    }
+}
+
+
+
+// 상점
+void ConsoleUI::PrintShopMenu()
+{
+    PrintLine();
+    PrintTitle("상점");
+    PrintLine();
+
+    PrintMessage("1. 아이템 구매");
+    PrintMessage("2. 아이템 판매");
+    PrintMessage("0. 뒤로가기");
+    PrintLine();
+}
+
+void ConsoleUI::SwitchShopMenu()
+{
+    while (true)
+    {
+        PrintShopMenu();
+        int choice = InputManager::InputInMassegeToRange("상점에서 선택하세요: ", 0, 2);
+        switch (choice)
+        {
+        case 1:
+            // 아이템 구매
+            break;
+        case 2:
+            // 아이템 판매
+            break;
+        case 0:
+            return;
+        }
+    }
+}
+
+void ConsoleUI::PrintShopItems(const vector<Item>& shopItems)
+{
+    if (shopItems.empty())
+    {
+        PrintMessage("상점에 판매 중인 아이템이 없습니다.");
+        return;
+    }
+    
+    PrintLine();
+    PrintTitle("상점");
+    PrintLine();
+
+	PrintItemListWithIndex(shopItems);
+}
+
+void ConsoleUI::PrintPurchaseSuccess(const Item& item)
+{
+	PrintItem(item);
+
+    PrintMessage("상점에서 아이템 구매 했습니다.");
+}
+
+
+
+// 일반 전투
+void ConsoleUI::PrintNormalBattleMenu(const GameContext& context)
+{
+    PrintLine();
+    PrintTitle("일반 전투");
+    PrintLine();
+
+    PrintLine();
+    PrintTitle("플레이어 정보");
+    PrintLine();
+
+    // TODO: 플레이어 이름 출력 코드
+    // TODO: 플레이어 레벨 출력 코드
+    // TODO: 플레이어 현재체력 / 최대체력 출력 코드
+
+    PrintLine();
+    PrintTitle("몬스터 정보");
+    PrintLine();
+
+    // TODO: 몬스터 이름 출력 코드
+    // TODO: 몬스터 레벨 출력 코드
+    // TODO: 몬스터 현재체력 / 최대체력 출력 코드
+    // 
+    //메인메뉴에서 출력해서 주석처리 하겠습니다.
+    //PrintLine();
+    //PrintMessage("1. 일반 공격");
+    //PrintMessage("2. 스킬 사용");
+   // PrintMessage("3. 아이템 사용");
+   // PrintMessage("4. 도망 가기");
+   // PrintMessage("0. 뒤로가기");
+	//PrintLine();
+}
+
+void ConsoleUI::PrintBattlePlayerInfo(GameContext& context)
+{
+    Player& player = context.GetPlayer();
+
+    PrintLine();
+    PrintTitle("플레이어 정보");
+    PrintLine();
+
+    PrintMessage("이름 : " + player.GetName());
+    PrintMessage("레벨 : " + std::to_string(player.GetLevel()));
+    PrintMessage(
+        "HP : " +
+        std::to_string(player.GetHp()) +
+        " / " +
+        std::to_string(player.GetMaxHp())
+    );
+}
+
+void ConsoleUI::PrintBattleMonsterInfo(GameContext& context)
+{
+    const Monster& monster = context.GetMonster();
+
+    PrintLine();
+    PrintTitle("몬스터 정보");
+    PrintLine();
+
+    PrintMessage("이름 : " + monster.GetName());
+   // PrintMessage("레벨 : " + std::to_string(monster.GetLevel()));
+    PrintMessage(
+        "HP : " +
+        std::to_string(monster.GetHp()) +
+        " / " +
+        std::to_string(monster.GetMaxHp())
+    );
+}
+
+void ConsoleUI::PrintBattleActionMenu()
+{
+    PrintLine();
+    PrintMessage("1. 일반 공격");
+    PrintMessage("2. 스킬 사용");
+    PrintMessage("3. 아이템 사용");
+    PrintMessage("4. 도망 가기");
+    PrintLine();
+}
+
+void ConsoleUI::BattleReward(GameContext& context)
+{
+    Player& player = context.GetPlayer();
+    Monster& monster = context.GetMonster();
+
+    PrintLine();
+    PrintTitle("전투 보상");
+    PrintLine();
+
+    PrintMessage(
+        "획득 경험치: " +
+        std::to_string(monster.GetExpReward())
+    );
+
+    PrintMessage(
+        "획득 골드: " +
+        std::to_string(monster.GetGoldReward())
+    );
+
+    PrintMessage(
+        "현재 경험치: " +
+        std::to_string(player.GetExp())
+    );
+
+    PrintMessage(
+        "현재 골드: " +
+        std::to_string(player.GetGold())
+    );
+
+    PrintLine();
+}
+
+
+
+void ConsoleUI::PrintNormalDiceResult(int diceValue) const
+{
+    cout << "주사위를 굴렸습니다." << endl;
+    cout << "주사위 결과: " << diceValue << endl;
+}
+
+void ConsoleUI::PrintPlayerMeleeAttackResult(const std::string& playerName, const std::string& monsterName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const
+{
+    Player& p = player.GetPlayer();
+    Monster& m = monster.GetMonster();
+    Battle& b = battle;
+    cout << p.GetName() << "(이) 가 " << m.GetName() << "에게 일반 공격을 시도했습니다." << endl;
+    cout << "주사위 결과: " << b.GetLastDiceValue() << endl;
+    cout << m.GetName() << "에게 " << damage << "의 피해를 입혔습니다." << endl;
+    if (isStunSuccess)
+    {
+        cout << m.GetName() << "이 기절 상태가 되었습니다!" << endl;
+    }
+}
+
+void ConsoleUI::PrintPlayerSkillAttackResult(const std::string& playerName, const std::string& monsterName, const std::string& skillName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const
+{
+    Player& p = player.GetPlayer();
+    Monster& m = monster.GetMonster();
+    Battle& b = battle;
+    cout << p.GetName() << "(이) 가 " << m.GetName() << "에게 스킬 공격을 시도했습니다." << endl;
+    cout << "주사위 결과: " << b.GetLastDiceValue() << endl;
+    cout << m.GetName() << "에게 " << damage << "의 피해를 입혔습니다." << endl;
+
+    if (isStunSuccess)
+    {
+        cout << m.GetName() << "이 기절 상태가 되었습니다!" << endl;
+    }
+}
+
+void ConsoleUI::PrintPlayerRunawayResult(bool IsSuccess)
+{
+    PrintMessage("도주를 시도했습니다. ");
+    if (IsSuccess)
+    {
+        PrintMessage("도주를 성공했습니다. ");
+    }
+    else
+    {
+        PrintMessage("도주를 실패했습니다. ");
+        PrintMessage("전투가 계속 진행됩니다. ");
+    }
+}
+
+void ConsoleUI::PrintPlayerTurnCount(int TurnCount)
+{ 
+    PrintLine();
+    PrintTitle("플레이어 턴");
+    PrintLine();
+
+	cout << TurnCount << "턴째 입니다." << endl;
+    PrintLine();
+}
+
+void ConsoleUI::PrintBattleResult(GameContext& player, GameContext& monster, Battle& battle)
+{
+    Player& p = player.GetPlayer();
+    Monster& m = monster.GetMonster();
+    Battle& b = battle;
+
+    if (b.CheckBattleResult(player, monster))
+    {
+        cout << m.GetName() << "을(를) 처치했습니다." << endl;
+        cout << "전투에서 승리했습니다." << endl;
+    }
+    else
+    {
+        cout << p.GetName() << "체력이 모두 소진되었습니다." << endl;
+        cout << "전투에서 패배했습니다." << endl;
+    }
+}
+
+void ConsoleUI::PrintJobSelectMenu()
+{
+	PrintLine();
+	PrintTitle("캐릭터 선택");
+	PrintLine();
+	cout << "1. 진태식 유도" << endl;
+	cout << "2. 류노스케 가라데" << endl;
+	PrintLine();
+}
+
+
+
+void ConsoleUI::PrintGameOver()
+{
+	PrintLine();
+	PrintTitle("게임 패배");
+	PrintLine();
+	cout << "캐릭터가 사망했습니다." << endl;
+	PrintLine();
+}
+
+void ConsoleUI::ClearScreen()
+{
+	// 콘솔 핸들 가져오기
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	// 화면을 지우고 커서를 (0, 0)으로 이동
+	COORD coord = { 0, 0 };
+	DWORD written;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	GetConsoleScreenBufferInfo(hConsole, &csbi);
+	DWORD size = csbi.dwSize.X * csbi.dwSize.Y;
+	FillConsoleOutputCharacter(hConsole, ' ', size, coord, &written);
+	FillConsoleOutputAttribute(hConsole, csbi.wAttributes, size, coord, &written);
+	SetConsoleCursorPosition(hConsole, coord);
+}
+
+void ConsoleUI::MoveCursor(int x, int y)
+{
+	// 콘솔 핸들 가져오기
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	// 커서 위치 설정
+	COORD coord = { static_cast<SHORT>(x), static_cast<SHORT>(y) };
+	SetConsoleCursorPosition(hConsole, coord);
+}
+
+void ConsoleUI::PrintStartScreen()
+{
+    int frame = 0;
+
+    // 키보드 입력이 들어올 때까지 계속 파도 애니메이션을 재생
+    while (!_kbhit())
+    {
+
+        MoveCursor(0, 0);
+
+        cout.flush(); // 화면 클리어
+
+
+
+        // 2. 파도 물결 모양 아스키 아트 (프레임별 애니메이션)
+        if (frame % 2 == 0)
+        {
+            system("cls");
+
+            // 1. 상단 구분선 (청록색)
+            cout << CYAN;
+            PrintLine();
+            cout << RESET;
+
+
+            // [프레임 A]
+            cout << CYAN << BOLD;
+            cout << R"(
+                .  :%=..                 .--..                 . ..
+            .@@@@@*@@@@-           :@@@@@@@@@@           .@@@@@@@@@@.
+            @@@-.@@. ..@@=        .@@@ =@+.  @@@        .@@@. @@.. %@@
+        .@@# .@@    .@@        @@@  @@     @@.       .@@. @@*    =@@
+        @@@ ..@@@             .@@..@ @@              @@@ @ @@
+    .@@. .@%-@@.           @@@  %@.@@*           -@@. .@ @@@
+    :@@@ . .@@.#@@@.      .@@@.   #@@.@@@.      .@@@:.  .@@.@@@*
+@@      ..@@@.@@@@@@@@@@-      .@@@.*@@@@@@@@@@.      :@@@.@@@@@@@@@@@.
+                .@@@@@@@@@.           .@@@@@@@@@*            @@@@@@@@@@
+
+                )" << endl;
+
+        }
+        else
+        {
+            system("cls");
+
+            // 1. 상단 구분선 (청록색)
+            cout << CYAN;
+            PrintLine();
+            cout << RESET;
+
+            // [프레임 B - 좌우 한 칸 이동 및 모양 변화]
+            cout << BLUE << BOLD;
+            cout << R"(
+                 .  :%=..                 .--..
+              .@@@@@*@@@@-           :@@@@@@@@@@           .@@@@@
+             @@@-.@@. ..@@=        .@@@ =@+.  @@@        .@@@. @@
+           .@@# .@@    .@@        @@@  @@     @@.       .@@. @@*
+          @@@ ..@@@             .@@..@ @@              @@@ @ @@
+         @@. .@%-@@.           @@@  %@.@@*           -@@. .@ @@@
+      .@@.#@@@.              .@@@.   #@@.@@@.      .@@@:.  .@@.@@@*
+    .@@@            @@@.@@@@@@@@@@-      .@@@.*@@@@@@@@@@.      
+:@@@.@@@@@@@@@@
+    @@@@@    @@@@@@@@@.           .@@@@@@@@@*            @@@@@@@@@@
+                )" << endl;
+        }
+
+        // 3. 타이틀 로고 ASCII ART : 파도 (중앙 정렬)
+        cout << CYAN << BOLD;
+
+        cout << R"(
+                      ____   _    ____   ___  
+                     |  _ \ / \  |  _ \ / _ \ 
+                     | |_) / _ \ | | | | | | |
+                     |  __/ ___ \| |_| | |_| |
+                     |_| /_/   \_\____/ \___/ 
+                
+                )" << endl;
+
+        cout << RESET;
+
+        // 구분선
+        cout << CYAN;
+        PrintLine();
+        cout << RESET;
+
+        // 4. 게임 서사 문구
+        cout << MAGENTA << BOLD << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n" << RESET;
+
+        // 구분선
+        cout << CYAN;
+        PrintLine();
+        cout << RESET;
+
+        // 5. 시작 안내 문구
+        cout << WHITE << BOLD << "                   >> 아무 키나 누르면 시작됩니다 <<\n" << RESET;
+
+        // 하단 구분선
+        cout << CYAN;
+        PrintLine();
+        cout << RESET;
+
+        // 프레임 증가 및 대기 (300ms 간격으로 파도가 출렁거림)
+        frame++;
+        this_thread::sleep_for(chrono::milliseconds(300));
+    }
+
+    // 버퍼에 남아있는 키 입력 소모 (다음 화면에 영향 없도록 버퍼 삭제)
+    _getch();
+}
+/*
+// 시스템 담당자 사용예시
+int main()
+{
+    // 시작 화면 출력만 담당
+    ConsoleUI::PrintStartScreen();
+
+    // 입력 및 실행 로직 처리
+    system("pause"); // 또는 _getch(); / cin.get();
+
+    return 0;
+}
+*/
+
+void ConsoleUI::PrintJinBlackImage()
+{
+    cout << R"( 
+                  .                                         
+                .:.            ..          .                
+               .-:.            .......      .               
+              .:.       ....  ..:::-:::::..  .              
+              :.    ..:--=-:::=+***#*++++=-. ..             
+             ..   ....:-==++++*######**++++:...             
+             ..    ...::-==+**####******++=-:::             
+             :-.  ...::--=+##%@%%%###***++=-:-=             
+             :+:.  ..::-=++*%%#######***++==-=+             
+              +==:..::----=+**+=+******++++**+=             
+             .=+*+.   .....:---:---:...:::=#%+::.           
+            : .*#:   .      ..-:..   ..::::*%++-:           
+            . .*=       ..   =#*-:....::.:-=%+--.           
+            .  *-......::::..=**++-::--=++*+#+:=.           
+             . +=.::------:..=******++*****+#*+=            
+             ..:-..:--==-:..:=*#**+****+++++*++.            
+              ..-...:--=-:.::=*#**++***++===+=-             
+                =.  .:---:...:-=-=++++++=-:-+.              
+                -.   .:::.     .::***++=-::-=               
+                :    ..::....::=+++++++=-----               
+                .   .........-----=--==+=---.               
+                 .  .. ..  ..::---:-::-+=-::                
+                .:  .. .... .....:----:--:--:               
+               . .   .    ..::-------::-::-:::              
+             ... .      ...:---=====-::.::-..:-.            
+         ......            ...:::::::..::-:.:::-:::..       
+     ....   ..                     ..::--::.::::....:::..   
+ ......                           ..:::::::.:..........::::.
+ ....                            ..:::::::.:................
+  .                            ....::::::..:.........=: ....
+                               ....:::::..............    . 
+                   .     .........::::::......... ....      
+                          ...... ..::::..... ...            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintJinWhiteImage()
+{
+    cout << R"( 
+@@@@@@@@@@@@@@@@#-.                        .+@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@%+:..           ......         :%@@@@@@@@@@@@@
+@@@@@@@@@@@@@%=:.              ............   :#@@@@@@@@@@@@
+@@@@@@@@@@@@@-..      ..:::....:-===+=-----:.  :@@@@@@@@@@@@
+@@@@@@@@@@@@*..   ...:--===--=+*######**+++=:...*@@@@@@@@@@@
+@@@@@@@@@@@@-.   ....::-=+++++*#######****++=:..=@@@@@@@@@@@
+@@@@@@@@@@@@-.   ...:::--=++*##%%####*****++=:::=@@@@@@@@@@@
+@@@@@@@@@@@@+-.  ...::--=+*##%@%%%####****++=:-=+@@@@@@@@@@@
+@@@@@@@@@@@@*+:.....::--=+*#%%########***+++=--+#@@@@@@@@@@@
+@@@@@@@@@@@@#+==:..::-----=+***++********++++*+*#@@@@@@@@@@@
+@@@@@@@@@@@%%+***........::-===---=--:::::-=#%#+%%@@@@@@@@@@
+@@@@@@@@@@%: -*#=   ..      ..::...   .::--:+%#++-#@@@@@@@@@
+@@@@@@@@@@#  :*+        .    :+*-....  ....:-*%=-:#@@@@@@@@@
+@@@@@@@@@@%. .#-..  ...:::...=*#+=-:::---=+++*%--=%@@@@@@@@@
+@@@@@@@@@@@- .#-.::::::---::.-*#****+=++******%+++@@@@@@@@@@
+@@@@@@@@@@@# .==.::-------:..-*#************+*#++#@@@@@@@@@@
+@@@@@@@@@@@@=.:-..::-===-:..:=*#**++*****+++=++=*@@@@@@@@@@@
+@@@@@@@@@@@@@=:=. .::----::::=+****+++**++=--=++%@@@@@@@@@@@
+@@@@@@@@@@@@@@@=.  ..:---.   .::::-+++++==-:-+%@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@=.   ..:::.    ..--+#**++=--:-+%@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@=.  ....::....---++++++++==---=@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@#.  ..........:--:-----==++=--+@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@%:  .. ... ..:::-=----::-+=-::#@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@%::. ..  .... ......:----:--::=:#@@@@@@@@@@@@@
+@@@@@@@@@@@@@%: ..  .    ...::--------::-::--.-#@@@@@@@@@@@@
+@@@@@@@@@@@%*:  ..     ...::---==+===--:.:---.:-*%@@@@@@@@@@
+@@@@@@@%#=:...           ....::::--:-:..::--:.::---=*%@@@@@@
+@@@@#+-.   ..                 ........::---::.:::::..::=+#%@
+#+-:..                             ..:::---:.::..:......:::-
+.....                            ...::----::.:.............:
+..                              ....:::::::.::.........::...
+  .                            ....:::::::..:............  .
+                 .       ...  .....::::::...............    
+                  .      ..........:::--:...............    
+
+)" << endl;
+}
+
+
+void ConsoleUI::PrintKangBlackImage()
+{
+    cout << R"( 
+                                                            
+                              ..:.                          
+                             ...:.                          
+                                                            
+                              .                             
+                           ...........                      
+                        .......... .......                  
+                         ..:::-==-.   .::.                  
+                        .-=+++*###+:..::::.                 
+                       .:=++**###%%*-..:...                 
+                      .:--+*##%%#%%#*=:...                  
+                  .   :-==+*######%%%*=..                   
+                      ..:::-++*+=---==+-.                   
+                     . ..:-:.=*+=-:-=-+=:  ....             
+                     ...:-++:=%#+--=**#*-   ....            
+                    ..-=+++=:-%#%***###*:      ..           
+            .        .:-++=:.+%##******=       .            
+             .       ...-=-..:+=#*****+:       .            
+             ..       ...::..=+####***=  .......            
+             ..        ......:-==++*+-   .:..::.            
+             .....      .....:==+++=-    ..:.:...           
+             ......       ..-=+**+++.    . . ......         
+             .  ....        ..::=+*=.    . .. .:..          
+                 ...      ...:-++**-:     . ....:..         
+                         ..::-=++*+=.      ....  ...        
+         .              .-:=+===+**:        ..    .:.       
+      .:.        ...    .=+*##*=+*+..             .+-*-     
+     :...     .. ..      :+##**++*:..       ..    .=:%%#.   
+   .-:-::  .....     ..  .=******:.....     ....  .:-%%%%:  
+  .-+:-:*.......   ..:    .*****-.....::      ..:...+%%%%%- 
+ .:=#:::=..  .:.....-*     -***-.....:*-    . . ..:.-%%#%%%:
+ .-=#+...    .. ...-=#=     +*-......*%+.   ......-=.=##%%%=
+.::-=-.         ..=*+*#.    .-. . ..+%#*-. ....  ..::--*%#*.
+
+)" << endl;
+}
+
+void ConsoleUI::PrintKangWhiteImage()
+{
+    cout << R"( 
+*@@@@@@@@@@@@@@@@@@@@@@@%.    .::. =%@@@@@@@@@@@@@@@@@@@@@# 
+@@@@@@@@@@@@@@@@@@@@@@@@-    ..::.  =@@@@@@@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@@@@@@@%*:           :*%@@@@@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@@@@@#-        .       .+@@@@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@@@@#.      ...........  -%@@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@@@+     .......... ......:%@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@@%.      .::::-+=-.  ..::.*@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@@=      :=++***#%#+:..:::.-@@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@@#     .:-=+**###%%%*-..:.. +@@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@%: .   ::-=+#%%%%%%%#*=: .  .%@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@@=  .  .:-=++*#%%##%%%#*=..   -@@@@@@@@@@@@@@:
+@@@@@@@@@@@@@@-       ..:::-+**+=--=+++:.    -%@@@@@@@@@@@@:
+@@@@@@@@@@@@@+         ..:-::+*+=:.---+=. ....-%@@@@@@@@@@@:
+@@@@@@@@@@@@#.      ....:=++:+%#*==+*##*:   ...:#@@@@@@@@@@:
+@@@@@@@@@@@#:       .:=++++=:+%#%#**###*.      .:@@@@@@@@@@:
+@@@@@@@@@@@#:        .:=++=::*%##*#****-       :+@@@@@@@@@@:
+@@@@@@@@@@@@=.       ..:-=:..:++##*****.       =@@@@@@@@@@@:
+@@@@@@@@@@@@%.        ...::.:++#####**-  ......*@@@@@@@@@@@:
+@@@@@@@@@@@@#..        .... .-===+**+:   .::::.-%@@@@@@@@@@:
+@@@@@@@@@@@%: ....      ....:-=+**+=:    ..:.:..=%@@@@@@@@@:
+@@@@@@@@@@#- ......       ..-=+*+++=.    . . ....*#%@@@@@@@:
+@@@@@@@@@%+. .  ....       ...:-=**-.    . .. .:.:%#@@@@@@@:
+@@@@@@@@@*:      ..       ...:=+**+-.     . ....:.=%@@@@@@@:
+@@@@@@@@*=.             ...-:-++**+=.      ....  ..#@@@@@@@:
+@@@@@@@#-:              :-:=*+++*#*.        ..   .::*@@@@@@:
+@@@@@%=:.        ..     .++*##*+*#+..             :+=%@@@@@:
+@@@@*::..     .. .       -+###*+*+...       ..    :==%%%@@@:
+@@@+---::  .....     ..  .+*****+......     ....  ..*%%%%@@:
+@@==+:-:*... ...  ...:    :*****:.....-.       :....*@%%%%@:
+@=:=#-::-.. ..:.....-*     =***:.....-*:    . ...::.=%%#%%%.
+*.-+#+...    .  ..:=+%-    .+*:  ...:%%=.   .:....-=:+#%%%%.
+.::--:.         ..=*=**     ::     .+#**:. ....   .::--*#*= 
+
+)" << endl;
+}
+
+
+void ConsoleUI::PrintRyuBlackImage()
+{
+    cout << R"( 
+                          .. ...:.   ...                    
+                   ..    .     ....::. ..                   
+                  ..                 ... ..                 
+                ..                     ..  :                
+               .       .::::::-+===-.  ... ..               
+               .    .:=+*#####%%%%%%#*=.   ..               
+              ..   :==++*##%%%%%%%@%%%%#+.  .               
+                  .:==++*#%%%%%%%%%%%%%%#=. .               
+               . .::-=+*##%%%%%%%%%%%%%%#+...               
+               ..++--=+++*##%%##%%%%%###%%=..               
+               .:%*. .   .:=+**==:..:-==+@*.                
+             ...-%=..:::..  :+#+::::-=+++%*:-:              
+             ...=#.  .::=--.:#%#*=-::+==*%#*+:              
+              : +*-=--=++*+--#%%%%***##%%%@=#-              
+              . =%-=****#*-:-#@%%%%%%%%%%%%*#.              
+              ...+::=****+::+#@%%%%%%%%#####+               
+               :.--.:=+++=.:-*%###%%%##*+*#*.               
+                 .=...-++:   .---%%%%##++=.                 
+                  =:..:===-:-**%%%%%%%#*#:                  
+                  :::-.:---::=+=+*###%##*                   
+                   ::=:.-:.:-=+*++++###+.                   
+                    --:.::...::-+*****+:                    
+                    -.::.:-=+*######*+*-                    
+                 .. -  ..:-=+**###*++##- .                  
+                .-  :      ...:::-=*###= ::                 
+             ..:::           .:-=+*####+ .--:.              
+          .:.  . .           .:=+*####*-....: .::..         
+    .....-.             ....:-=+*#####+.. .   . .-.....     
+.:::.  .:. .          ...-:.:--=+##**+.. ..    . .:.=:..::. 
+:.      . .          .-:.-+=--==+##*+:...... .  . . .... .. 
+       . .           .++--##*+==+###=.:..:::.::.:. : .:::.  
+  .    . .            :++=+***+-=**+:. .....:::...  :.::..  
+
+)" << endl;
+}
+
+void ConsoleUI::PrintRyuWhiteImage()
+{
+    cout << R"( 
+%%%%%%%%%%%%%%%%%%%+::    ..  ...::......-%%%%%%%%%%%%%%%%%%
+@@@@@@@@@@@@@@@@@@*..           .. ..::....-*@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@#=.                   ... .:+@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@+:                        ..  :+@@@@@@@@@@@@@
+@@@@@@@@@@@@@%-.       ..::::::-====-:.  ... ..#@@@@@@@@@@@@
+@@@@@@@@@@@@@#.     .:-+**#***#%%%%%%##=:.   .:*@@@@@@@@@@@@
+@@@@@@@@@@@@@%:    :-==+*###%%%%%%%@@%%%#*-.   =@@@@@@@@@@@@
+@@@@@@@@@@@@@@:.  .:==++*##%%%%%%%%%%%%%%%#=. .*@@@@@@@@@@@@
+@@@@@@@@@@@@@%.   ::-=+*###%%%@%%%%%%%%%%%#+. .#@@@@@@@@@@@@
+@@@@@@@@@@@@@@-..-=--=+**##%%%%%#%%@%%%%%%%#-..%@@@@@@@@@@@@
+@@@@@@@@@@@@@@+.-#*:::::-=++####*#**++++++#%#.=@@@@@@@@@@@@@
+@@@@@@@@@@@@@@%:+%+ .:::.  .:=+*=-:..-=++=+%%.*@@@@@@@@@@@@@
+@@@@@@@@@@@@@+--+%:........  :*%*-::..:--=+%%:%#@@@@@@@@@@@@
+@@@@@@@@@@@@%...**.. .::-+==.-#%%#*=--=+=+*#@+#-%@@@@@@@@@@@
+@@@@@@@@@@@@@-..%+-====++**+--#@%%%#**##%%%%@+*#@@@@@@@@@@@@
+@@@@@@@@@@@@@* .##-+****#*+-:-#@%%%%%%%%%%%%@#*%@@@@@@@@@@@@
+@@@@@@@@@@@@@@:.:*:-=*****=.:+#@%%%%%%%%%######%@@@@@@@@@@@@
+@@@@@@@@@@@@@@#- =:.:=+**+-::+#%%%%#%%%%#*++##%@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@%+*-..:-++=.   :--:*%%%%#*++##%@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@+...:=+=:..:-+##%%%%%##**%@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@*::-.-=====+%*#%%%%%%%###@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@%-:-:.:......:---==*###*#@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@#---.:-::-=+***###**#**@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@@%=:-...:..:::-=+****++#@@@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@@+ = .-.:-=+*#%%%###*+*#::%@@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@@*  =   ..::=+**###*+=*##: -%@@@@@@@@@@@@@@@
+@@@@@@@@@@@@@@@@+:  :       ...:::--+####= .=%@@@@@@@@@@@@@@
+@@@@@@@@@@@@%#+=:.            ..:-=*#####= .:-+*#@@@@@@@@@@@
+@@@@@@@@#*+:. :...            .-=+**####*-....-..:=+*%@@@@@@
+@@@%#+-.-:.             ... ..:-+**#####+.. ... ...-:.:=*#%@
+#+-:...-...             .::..:-=++*####*..  ..   .  ::.::.:=
+:.    .. .           .::.:==::--=+*##**:.:.....   .  . ::.  
+      ...            .==::+#+====+*##*- :..::..::..:  . ....
+.     . .             -*+=+%%#*+=+#%%*:.....::.:-: :. .:.::-
+
+)" << endl;
+}
+
+
+void ConsoleUI::PrintJinLogo()
+{
+    cout << R"( 
+                                  .@@@@@@@@@@%                                  
+                                 .@@@@@@@@@@@@%..                               
+                                .@@@@@@@@@@@@@@@                                
+                               .@@+@@@@@@@@@@:@@@ .                             
+                                @@@@@@@@@@@@@@@@  .                             
+                                @@@@@@@@@@@@@@@@. .                             
+                               .@@@@@@@@@@@@@@@@@               .               
+                                 .@@@@@@@@@@@@*.                                
+                                  .@@@@@@@@@@+                    .             
+                              .:@@@@@.... .@@@@@*...                            
+                       ..%@@@@@+.  .@@@@@@@@..  .*@@@@@+....                    
+                     .@#       .@  .@      .@. .@.     ..@@.                    
+            . .     .@.         .@   @     @. .@          @@                    
+                  .=@.          ..-   =   - . -   .        @@:.                 
+                  @@      .        .. .@ -   .       .      :@#                 
+              -@% .      .% .         =   +  .        @  .     .@@. .           
+            :@@*. .     .*..         @   #          .#--  .     .@@@            
+            -@@  .@.  .@. :.      .@. .@  ..        .@  ++   .#   @@  .         
+            :@@ .    ..   :.          .              @.  ...... . @@.           
+           . @@        *.   -@.  @. .@           .@@   .@.       .@:  .         
+             .@%        %:  =. .@  .@            ..@  .@. .     .@@             
+              %@. .      :*.-:.@   @.              @  @.   .    @@. .           
+              .@@      + ...-@. %%##%%%#######%%# *@.   ..     .@#              
+               .@+ .@%.. .@                .         -*. ..@#..@@               
+               .@...+.#       .@    @.     *%   .@       .@+...=.  .            
+                      .@        @.+.         @..-       .@..                    
+                    ..@@@.      .#             @      .++@+. .                  
+                    .@@. .@@@@@@@ =@@@@@@@@@@@. @@@@@@#  .@=     .              
+                   .@@    .                               .@@                   
+                  .@@.                #. @. .              .@@  .               
+                .=@*                .*. . %.                .@@.                
+               ..@@          .@@@@.@%#     +@@-%@@@.         .@@ .              
+                 .@@            .*@..      . .@.   .        .@@                 
+                  .@@.         .@#.           .@+          :@#                  
+                    -:::::::::::.  .            ::::::::::::. .                 
+)" << endl;
+}
+
+void ConsoleUI::PrintKangLogo()
+{
+    cout << R"( 
+                                 . .@. ..       .@%.  .                         
+                              .@-  %.: ..:*= .     -@. .                        
+                           .*@  =%#@+.-        :.    .#.  .                     
+                           @.       .=.@..--@    ..   .@                        
+                         .#.   .:= .+*%. ...#@@    .    @ .                     
+                         *#   .. .%.          .=    .   :@.                     
+                        .@   .  =#             @      .  #.                     
+                        *.  -   @ .            .@      #  @                     
+                      .@  .   -@ ...@@@. . .@@@..-%   .   @.=  .                
+                      =. +   .#@ .@*@%-     =%@.@ .@.  .    @* .                
+                    .@==    @@ @.                  @.@.   %.  @..               
+                    @.    @:- @.:                 ..@%..%@=.   -@..             
+                  *@  :@.   =   @      .@.@.     .@ .# -     .@ .-..            
+               ..-. %   -   . . -@       .       @-  : #       :.@              
+               ..@ @   @   @  *  @@     . .     @.          #   =@              
+               ..@#   @   =   *   %@@         @@@  ...  @    =  @  ..           
+                 @*.+    @    .   @@ :@*. .#@. @.  . .   @    @@.               
+               . .@*   @     @    @+           @  .  @    #.   .@  .            
+                 @   --     @. @  @..          @  .   ..    +    @. ..          
+                =%  @.     +. #   @@.         .@       =     @    @.            
+               .#. @     @.  @   +. @%#.   .#@@=#  .  ...     @  ..+            
+               ..@@.   -.  ..   *+   @.     :@  @. .. . .      @@  @            
+              .@  @  %      @.    ...   @@-   .@.   %.     @    @..@.           
+              *%= .@ @   . -..     :*.. @+    @ .    .#    ..  #-.*@.           
+             .@   @.@...   @     .  .=.@.    #        **   .  .%@   @.          
+            ..*     #@%.   =..       .@.    @          @   @.%@.    @.          
+             @...    .@.#%  @.       @.    @         .-#  :*@       .@          
+             @        @   .@.@  .   @.    @          -+=@%  @       .@          
+            :+    .   #.    +%     @.   .@  .      .       .*  .    .=- .       
+            @.         @    :     @    .+                  @.        .@    .    
+            @     -.   @:      ..@     *              .   :@          @.        
+           *%      %   .@      .@.   .%                   @  .        ## .      
+          .@.. ..   =  @*@.   *@    ..  . .              @+@.         .@.       
+         . @        .. @.@@@@@@%#+:@.%@@@-@@@...-+#%@@@@@@ @.          @        
+          .+          .@ @@@@@@@@@@=+@@.@-@@@.+@@@@@@@@@@@ @           =.       
+         .#.          %. @@@@@@@@-@@@@@.@=@@@.@@@*@@@@@@@@ .#         ..%.      
+)" << endl;
+}
+
+void ConsoleUI::PrintRyuLogo()
+{
+     cout << R"( 
+                                 *@@-@@@.@@:%@:@@.                              
+                               .%@@@@@@@@@@@@@@@@@- .                           
+                                @@@.            @@@.                            
+                               .@@@            .@@=.                            
+                                .@ @@@.    .:@@* @  .                           
+                              .@*@ ..@+    .@@+ .@.%.                           
+                               %.@.             :#:. .                          
+                                @.-             @.=                             
+                                  @             @                               
+                                   @    ..    .@                                
+                                  .@#*       @.@.                               
+                                .@ @  .@@@@@   @ @                              
+                              .**..@          :=**@:.    .                      
+                         .:@#   . . @        .-.:.*   %@.  ..                   
+               .     .@@        . . .@.+   -.*-....       .@#                   
+                   -@.           -.  .@    .@.....           .@                 
+                 .@.     # .      .  ..*  ......         -     -=               
+                 .. ...   ..       . . =*@.%...         =    :. *               
+                .@  . .:  @ .       .  -@ #%..          - ..    .@              
+                =        . #          .# .**.          @..  .    #...           
+               .:    .  .  #..       @....*.         @+ #+ .@.    @             
+               : ..     .  .        @ .:-@         .*+. #...%     ...           
+               @         .  ...... @ ..+@        .@...% .= @       =.           
+               @       .#@                .+@@@@   ..     .@       %            
+               @       :#...:@=                 +.  .        .     :            
+               ..            +    #@.   .       =.   .            *             
+               .@           ..   @    .@*..  .   @    @           @             
+                ::        ..    @ .        :@=    =              @              
+                .@             =         %@%   :@@@    .       ...              
+                  .@..   @    @-%@@@-           .@@  ...-=*%@@@.                
+                        *@:  @@%=-                      .%                      
+                          @@.# ...      ..    .   .   .@@                       
+               .          @@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@          .            
+                          @@@@@@@@:@@@@@-@@@@@@@#@@@@@@@@          .            
+)" << endl;
+}
+
+void ConsoleUI::ShowJinIntro()
+{
+    PrintLine();
+    PrintTitle("진태식");
+    PrintLine();
+    
+    PrintJinWhiteImage();
+
+    PrintLine();
+    PrintMessage("무술: 유도");
+    PrintLine();
+    PrintMessage("조직의 행동대장으로, 의리와 책임을 무엇보다 중요하게 여기는 인물.");
+    PrintMessage("친구와 연인 사이에서 끝내 손을 놓지 못한 비극의 남자.");
+    PrintMessage("플레이 스타일: 스킬 공격 특화형으로, 강력한 유도 기술을 활용해 높은 폭발 피해를 입힌다.");
+    PrintLine();
+}
+
+void ConsoleUI::ShowKangIntro()
+{
+    PrintLine();
+    PrintTitle("강사라");
+    PrintLine();
+
+    PrintKangWhiteImage();
+
+    PrintLine();
+    PrintMessage("무술: 태권도");
+    PrintLine();
+    PrintMessage("불법 지하 의원을 운영하는 의사이자, 생존을 위해 스스로 악역을 선택한 여자.");
+    PrintMessage("냉혹한 현실 속에서도 두 친구를 살리려는 마음을 버리지 않는다.");
+    PrintMessage("플레이 스타일: 기본 공격 특화형으로, 빠르고 연속적인 태권도 공격을 통해 안정적으로 높은 피해를 준다.");
+    PrintLine();
+}
+
+void ConsoleUI::ShowRyuIntro()
+{
+    PrintLine();
+    PrintTitle("류노스케");
+    PrintLine();
+
+    PrintRyuWhiteImage();
+
+    PrintLine();
+    PrintMessage("무술: 가라데");
+    PrintLine();
+    PrintMessage("야쿠자 후계자로서 조직과 우정 사이에서 갈등하는 냉철한 파이터.");
+    PrintMessage("누구보다 친구를 아끼지만, 운명은 그를 적으로 만들었다.");
+    PrintMessage("플레이 스타일: 밸런스형으로, 기본 공격과 스킬 모두 안정적인 성능을 갖춘 올라운드 캐릭터이다.");
+    PrintLine();
+}
+
+void ConsoleUI::ShowCharacterIntro()
+{
+    PrintLine();
+    PrintTitle("캐릭터 소개");
+    PrintLine();
+    cout << "1. 진태식: 유도 선수 출신, 강력한 근접 공격과 방어 능력을 가진 캐릭터." << endl;
+    cout << "2. 강사라: 태권도 선수 출신, 빠른 속도와 다양한 기술을 가진 캐릭터." << endl;
+    cout << "3. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << endl;
+    PrintLine();
+}
+
+
+
+// Cut Scene
+void ConsoleUI::ShowCutScene1()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 어린 시절 배경 설명 문구 출력 코드
+
+    // TODO: 진태식, 강사라, 류노스케 등장 문구 출력 코드
+
+    // TODO: 세 인물이 함께 노는 장면 묘사 문구 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowCutScene2()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 어두운 시술실 배경 설명 문구 출력 코드
+
+    // TODO: 의사 강사라 등장 이미지 또는 로고 출력 코드
+
+    // TODO: 강사라가 불법 시술을 진행하는 상황 설명 문구 출력 코드
+
+    // TODO: 긴장감 있는 대사 또는 내레이션 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowCutScene3()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 병원 또는 시술실 배경 설명 문구 출력 코드
+
+    // TODO: 의사가 된 강사라 등장 이미지 또는 로고 출력 코드
+
+    // TODO: 진태식이 치료를 받으러 온 상황 설명 문구 출력 코드
+
+    // TODO: 류노스케가 치료를 받으러 온 상황 설명 문구 출력 코드
+
+    // TODO: 진태식과 류노스케가 서로 마주치는 장면 설명 문구 출력 코드
+
+    // TODO: 강사라가 두 사람을 알아보거나 반응하는 대사 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowCutScene4()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 도박장 분위기 설명 문구 출력 코드
+
+    // TODO: 류노스케의 긴장감 있는 대사 출력 코드
+
+    // TODO: 진태식의 도발 또는 반응 대사 출력 코드
+
+    // TODO: 승부가 본격적으로 진행되는 상황 설명 문구 출력 코드
+
+    // TODO: 승패가 갈릴 듯한 긴장감 연출 문구 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowCutScene5()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 도박판이 뒤집히는 상황 설명 문구 출력 코드
+
+    // TODO: 주변 인물들이 동요하는 분위기 설명 문구 출력 코드
+
+    // TODO: 류노스케의 분노 또는 도발 대사 출력 코드
+
+    // TODO: 진태식의 반격 또는 결심 대사 출력 코드
+
+    // TODO: 류노스케와 진태식의 큰 싸움이 시작되는 장면 설명 문구 출력 코드
+
+    // TODO: 클라이맥스 긴장감을 강조하는 연출 문구 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowCutScene6()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 싸움이 끝난 뒤의 어두운 분위기 설명 문구 출력 코드
+
+    // TODO: 류노스케가 승리한 상황 설명 문구 출력 코드
+
+    // TODO: 진태식이 패배하고 쓰러진 상태 설명 문구 출력 코드
+
+    // TODO: 류노스케의 차가운 대사 출력 코드
+
+    // TODO: 진태식의 마지막 반응 또는 독백 출력 코드
+
+    // TODO: 진태식이 결정적인 위기에 빠지는 장면 설명 문구 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowCutScene7()
+{
+    // TODO: 컷씬 제목 출력 코드
+
+    // TODO: 싸움 이후의 정적 분위기 설명 문구 출력 코드
+
+    // TODO: 진태식이 치명상을 입은 상황 설명 문구 출력 코드
+
+    // TODO: 진태식의 고통스러운 반응 대사 출력 코드
+
+    // TODO: 류노스케 또는 주변 인물의 반응 대사 출력 코드
+
+    // TODO: 진태식이 쓰러지거나 버티는 장면 설명 문구 출력 코드
+
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::PrintCutScene1Image()
+{
+    cout << R"(
+                                                                
+         .....                                              
+      .::     ...                                           
+      :          .:           ...                           
+     ..  .   .  .-:        .:.   ....              .:...... 
+      : .:-.:-:.:          -....    ..            -=.       
+      - ::---::::          .=-:...  ..            ==:.      
+:::-=-.--:::::.:           :=-==-:::.             --=-.  .  
+--::+=.::::..:-.         .:-+---::::.             .--=-..   
+-:-:**..... ---=-:    :+**#**-:.::=++*=:         .:=-:....  
+-::=**:..:..===++==.-****+*+#-...=******=      =***+..:::.  
+:-:+**-...:.===*=+++**+===+***::-*****+**=   .-#***=: :::.  
+.:-+*+=...::=+-+-++=+**+===+**+.+**+*+=*+*. :*##+**+- .:: ..
+.:++**+ ...-==::=++*=*==:-=-=++=+*+-+==+++=.****=++*=. .  -.
+.-=++++:   -=-.:***#=-=++:-----=+++-=-==++=+**+*-=*++-   :-.
+ ..::--- .:--:.=****+=**++::::--=++----====*#+*=--=++=. .=- 
+.:::----:-:::::=+***+=++*+=:..::-:-:::----****=-.::-==..=--.
+--. ...::....::+**++=--++*+---. ....:.:::+****=. .:::----==.
+........ ...:...:=+==-.==*+=::=..-=+****++++**+.:=-...-====.
+ ....:==+=-::....:--=**+=++=:.-- .+**++**++---:--:..:-::-==.
+.:.....-=-.....:=+*****++===-..:  =+++++++++---:::::::-====.
+::......:.....-+++++++==-----::: .--==++++++:-:.:::::=====-.
+ ..     .----===-------:::  .....:----====++:.......----::. 
+    .:::----:::-----:......... ...... .:---. ......... .... 
+     ....:..:::::.        ....           ...        .-.     
+       . ........                                           
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintCutScene2Image()
+{
+    cout << R"(
+                      ....    .     ....:..                     
+                .......   .  ....:::..:--.                  
+                   .:-:..  ..   .:..::::-=:                 
+                    ........  :-=++=-....:::                
+                    ......:...-====++-:.  :::               
+                   ....  ... .::+::-=+=-. .::.              
+                  ...::  .   ..=#*++**==:-: ::              
+                 .:-=-:. .   ::-=*+***==++- .:.             
+                  -----. .   .:.:=+***+=:.  ..:             
+                .---=:-. .    ..:+***===...  .:             
+                .-+=-=+. .     .:---:-+=... . .:            
+                 :=*+=- .. .      .-=++=... ...::           
+                 :-==. ..  .      .:-=--+-:. .:.::          
+                .-==. ..    .    .:...=#%#*++++=::.         
+                 ::.  .   ...   .-. .+#**#*###%%%+:.        
+            .:    .. .:.        :. -###*#*#*#####%=:        
+           .:----==:--.      .....=######*****###%*:        
+           ::==+++++-... ....   .+**####+#*+**###%*:        
+          ::-==++**-..   ...    =***#*++**+**####%+:        
+         :::-==+++-.. .   .    :***+*-:+#***###*##*:.       
+         -:-==+**+-::   . .    +**+**-:*+=+##%%###-.:.      
+         :--==+*+=---  .      :*#*+*+=**++*****##*. ..      
+          ..::----+-.         +#*++****=+**#####*-.. .      
+               .--=:         .##*++***-==+++*#*++.. .       
+              :-:-.   .      :##*+***=+=+**==+##: ...       
+             :--:.           -##++**+**#*+**+==-  ...       
+            :--.             =***#*####++++*++-   .   .     
+          .--:              .....-*##***==--:.    .   -:    
+       ..:-:.            .-=:....  =**++=-.                 
+   .:--:..             .-=+++-     .+=:.:=                  
+   ::.                 ::::::.     ..  ..:                  
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintCutScene3Image()
+{
+    cout << R"(
+                                                .:::.           
+            .::::::.                     .::... :::.        
+          .::......::-.                 ::.    ....::       
+         :-:........  .-               .-:..........-.      
+         -..... .. .. .-     ::::::.    =--::...:. .::      
+         -. .:.   .. .:-    ::...:.::   -.:::::.:....-.     
+ ::...  :-  .::. ..:..-    ::  .:::.:.  .=-::::.:..:-::-::::
+ ....:::.:::::::....::-    -   .::.: -   --:::........ :..:.
+     .   :::.........-.   .:  .::::. -    .-:..:.....  ...  
+    .    :..........-.    -.  .::::  -     .::..::-..  ..   
+        .:... .=::...    .-. . ..:...:-           -   ...   
+   .    ...   ..-.     :+=:.   .:-:+++++=.        .:  ...   
+   .    ....    .:    .+=-.  ...-:.*+*+++=        .:  .     
+   .    ... .   :.    ====.  .:...:***+++*.        - ....   
+        .. .   .:    .+===. .:-...:+*+++=+-        -  ..    
+        .      -     =+=-=::.==:..:*++++=++        .: .     
+              .:    .+==-+----=...:+=====++.        :..     
+              -.    :+==-=+====...:==+===+*:         -.     
+ .           -      -===-++====.. :===+===+-         -.     
+ ...   .    :.      ====-====+: . :===+===+-         :.     
+ :.:.       -      .+========+. . .===+=+=+=          :.    
+ .::.      :.      .+===++====  .. ====+=++=           -.   
+           -       -========== ... -===+=+==          .-.   
+ .        :.       -=====+===-  .  -==-+==+=          -.    
+         .:        :=-:-===-=:     :==----=:          -..   
+         :.         -..--=---:     :==--..-          .=-.   
+        .:          .::------:     .---::-.           . ::  
+       .-            .==-----. :   .---:-:               :  
+      -:             .-::::::. -    :::::-               :  
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintCutScene4Image()
+{
+    cout << R"(
+                ..                                              
+        .::::-:--: .                      .:. .... .        
+       .:. .  ::.:--.                   ::.:+=:-:-.  .      
+      .   .. :.::.::=-                 ::--:...--.:   .     
+      .     ...  .  .=.      +=        :--:.+#%%#+.         
+      .    =*+*+--+-.-     .==-=       .=@@@@@%%*+.  .:.    
+     .=. .-*+*#%%@%#.     -=+@@==:      :@%@%%+==-== .-:    
+     .-=.-#+-=.-====    -=-*@%@%+-=:     ---+-:+=*%=.:=.    
+   .. .: .:#%%#*#+*.  :=--+*%#@%*=--=.   :#*#*#%@%-.--:     
+ .:.   : .-+%#-=*%-  =-:.-=*#*%*+=:.:=-   =%#+-*%#+-:.:=.   
+.--:...  ..:-=-:==  +:. .:-=+=*=-::. :--   =#+=#*#+= .-+ .. 
+.::==:..   .==-+:  .=:   ..:-:=::..   :+    -#++#*.  -#:    
+ .--++=:    ..::    +:      . ..     .:+  ::::==-. .=%+  .. 
+ ::-:::-.  :. ==.   :=:....:=.:-:....-+-::.:-:-=#=:#@%: ... 
+ .---:. -=... :-+.    ------*-:+-----::.-*#####%%%###* .... 
+ .:-... -== : .--:         =-.:=:     -#%*+***#@@@@@@@-.... 
+  .++-:. .=.:  :+-       :*==-=-++. .*%+**%##@@@*+@@@%....  
+  .-+*+-   ... .-:.                  -*###@%%@%.  +@@=..    
+   .=+=+-   .   .::                  :.*####%%@#=+#%%.  --- 
+    . ::-----::---=::.     .=--==---.. :**#**+#%%##*+*#%-   
+      .....::=----:=##+=-: .:......:::*#*#+*+----+*+**##=.  
+            .       .:-:: :::.:--:.:.. ....::.::::==+*##::* 
+    ...     .:..... ..::-=--:-=++=::------=--:-:::-: .-:..+ 
+.::.   ....  .-::...:==--=...+****+-:-==-----:: :.-:... .:: 
+   .....      ......-=+=.-:..+####*-.-++-:::.....-----::.   
+  .               ..:+-=--+======-=++**:.........      ::   
+                     :+=*=---:+=---=+**+....            :   
+                      ..... ........ .              .:      
+                                                    :-.     
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintCutScene5Image()
+{
+    cout << R"(
+                                                                
+                               =-:.                         
+                   .:-++      -====+.                       
+                  :=----=    :=-----                        
+                  .---=---  .=:---=               .==-:     
+               .-=*+=::-:-: :---:=.              .=--=.     
+               ++=-=+=--::.    .:.  .            -===.      
+                ==-=++:            :*#+         .-:..       
+                 =*=-:   .....    .#+*.       :====+.       
+    -:.           .      .:-=-.    .:.       =+====::=+.    
+   .***+            :...::---:                :+=: =*++:    
+    .-=-       ---=*=+==-:::::.                    .-:      
+              .:::--=-===--.-=++-::-:.             :--.     
+          -=+*.    .-:=-==::-:-===-=---=++==:      ==-.     
+          +#+**    -::-==-::.  .:-:......:-::   ::..        
+          .#=-#-  .--=-==-:  . :=-. .          -*=:...      
+           -***=  ..::---: .:- . :+=:     .::.--::-:..      
+  . .:::.   :.   ...........=-=.-=-=.   :++*++::..::.       
+ .::::::::::.    ............-..=== ...-++=-==.....         
+  .........     ...... ......  :.  :.:+++==-=-:::-::        
+          .    ... ..   .. ...   .+-.===----=-:--:==-       
+        ..:...... .       .....    ...-+=+==-::.-+=-:.      
+      ..:... ... .         ............=++---:.::.--::      
+       ......  ..          .............++=:::....:---      
+        ....              ......   ...:.-=-:...   :-=-:     
+          .. .          . . ..............:.     .==--.     
+          . .          :..::..............   .:-:-=:..      
+         ....              . ......          .....          
+                                                            
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintCutScene6Image()
+{
+    cout << R"(
+                                                                
+                                   .:::::-.                 
+               ::::.           .:--:......:--               
+           .:::.::--=--       -=..----:.....:-              
+         .-:  :::...::-=:    .+::=####=-:.---::             
+        :-.  .... ..  .:--    :=-*++==*#=-+:=:-             
+       :-..: ...  :#+-  .=    .=-. .:++*#**+=--             
+:::    = :-:.... .-%%@*..:     ::#+-*+---:==-:.-::::::::.   
+  .:: -. =--+..=*#*#*+=::       ==-=--#*:.:......  .....:-: 
+.  ..:.-=:=*#--#%+=+=+=:         -.::.==-:. .. +*+:  ......:
+...  . =+-*%%%*+*#=.. .-          :.:-:.:..... ...==**-.....
+....:...#=::=+=..-::+::            -.-:. ... :: -..-: ::....
+   ..:::-=..:-+#+::-+:             ::.. ........:: .*  .  ..
+ .....: . . ...::::-.              :  :.... ....=- .:  -. ..
+   . .. .  . .......::::.           : -.-***+*+#*. .   +*=..
+          .    ...  ......-=:       : -.::-:...*+.     -*+:.
+       ..      .          -%#*-.    : -    . .::.      =#==:
+               .. ...     ::+#*--:  . .         .::.::. :-==
+         :. :..    ..... :. -**+---:. .      .       -...:-.
+         -. +#.     :... ... :-:-.:*-.. .             .     
+        .-. ==      :  ....: .-.:.+-+*=-..     ..    .      
+         :  .=      :.      ::.:.:::=#%%%%+-:..       ....  
+        :-  :-        ..        .... .:-==--.  ...          
+        :=. :          :.          .      .......           
+      .:-.. .            .:               . .....           
+      .=: ..               ...           .....   .. ..      
+      -=. .      :           ...         ...... .           
+  .  :=.        : ..                     .... .             
+   ..=.         .   ..                .   .... .   .        
+   .-.    .    :                          ....  .           
+          .   ..                           .                
+          .   .                             .               
+          .  :                              .               
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintCutScene7Image()
+{
+    cout << R"(
+                                                                
+                    ....::                                  
+                  ....  .:.                                 
+                   . .  ...                                 
+                   .. ::-:.  -:                             
+                    .:+##*=+=:*:.:-=+-+++=:.                
+                    .-=+*==+#++=---.:-:::-=-:               
+                    .:-:---+#=+=:=-:..::-===--.             
+                     .:.:##+=+*=::-.::..-::++--.            
+                    . .:.:=+*++=..: .: .:.:----:.           
+                  . .   ...:-++. .-....   ..::=-:           
+                   .        ..    .. .: . ..::=--:          
+                             .:.   .....   ..:==--.         
+                           . ..   . . .  .  .:---::.        
+                                 :.. :+:...  .:::-::.       
+                                -= .--.--.   ..:::....:     
+                                -+=-++---.     .:-....::    
+                      .        :--::::-::..   .:==...:-:    
+                       ...... .--:..    ..   ..-=-...:::    
+                       ....              .   ..--:...:--.   
+                                            ..---...:::-.   
+        .... ...............                .:=-...         
+    ..:......:::::::::::::::.     .        ..-=:..          
+    .:::::::-----=-:::......           .:.-++*-:.  .        
+    .:::::::::::..   ................:===+-=+=++: :-::::.   
+    .::::::::::......................:..+: =-:+.:-.....:.   
+     ......       ..........:....... ...:..:..::....::-:    
+
+    )" << endl;
+}
+
+void ConsoleUI::PlayCutScene5Animation()
+{
+    string Frames[] =
+    {
+        R"(
+      :--:.  .                   .-===:     .--::::-        
+    :=+=::...                       ..      .-::---         
+    -==-:...:.                                 .::          
+     :=:...-:::                                             
+      .-::::::               ..:-::..                   ..  
+        ::-:                . ..:-:..                 .-==: 
+         .                  .:.:-=:.                .-=-==-.
+.                  .      .::---:..                 .===-:  
+-=-:.           :=+=--=-:=---.::..:                  .:.    
+=--==.      ::---::..+*:::-:......          :.          .::.
+::-=-     .-::..--:.=+--*=+-.....:.         .:.       .:..:.
+          ::........-=.+=--:==:. .=-                  ::..  
+          ......  ..:::+:----....::-:  .::.                 
+      .:-=.       .::.:::---:::.:.::-.  ..:-:               
+  .-+++==+=       .-: ::---::.....:-=:    .:.               
+   ==++=**+:      :-:.:-----:. .  .:---                     
+   :+*+.::==.    :--::::-=:.. .    .:-+=.        ......     
+    -+:..:=+-    .:--:::-:::..      :---.       :-=. .  .   
+    .===--==-.   ..:......:...       .:-:      .=++-: .  . .
+     :==---=-:  .... .                .-=.    :-::::-..     
+      ---:.       ....                ---:    .-::..::.     
+               ....                   ...-=++=:.........    
+.:.    .      ....            ..       .=+**+-.........     
+.........    ....              ..     -++-=-::......  :     
+             ....               ..  :++*=::=+-:.......::.   
+            ....                  .=+===::-:=:.:.:::.:.-:   
+            ...                  .=++--.:-.:-.::-=. .==--:  
+           ...                   -=++-. .::-::..:. :-==-:-. 
+                                .--==:.:--:...::..---:::.:: 
+   .... ..                     . .-==::-:::::-:..:::.:::.:. 
+.........                   ..... :=++:++:::..  ......::....
+... .. .                ...:... . .:---..:::. ........:.::..
+.. ..                ......  ...    :--:.... ......   .::.:.
+ . .              .......     ..    :-==:   ......    .:.::.
+                .. ...              .::--.    ..      ...:::
+  ..          . ...             .... ......            .---.
+    .         .               .......                 .:-::.
+    . .          ..         .:......             .    .::. .
+ ..      .....:....   ...........                     ::..  
+ ..            .          .    .                   ....     
+   .....               .                       ..::-=-.     
+     .........                                ....:::-:     
+        ..............                     ....  .. . .     
+           ............................  .......  ..::...   
+
+)",
+
+R"(
+     ..   ::-:::    .:...           .****=    .             
+           ::..       .  ... .     .+*:-*:                  
+                  ..    .  :::::.  .:=++=             .     
+               :--+*+.   .-...::--:    :.          -::--:   
+           .:-::....:    ::..:+=..-                .::::    
+    :-:.  :=-....        :-:-=--.:                .:--:     
+  .---:-: ....:-:...... .-:-:::-..           .    ..:.      
+  ::-:::.   ...-++**#+-:-:..:.:::.          ..              
+   .-:::-:..::::::=+=--:::....:....       .---.             
+     .-==: ......:+-++*=:::..:.--:.. .    .----:.           
+       .:.   ....=:*==-===-:.-++-==-....   .-==:.       ..  
+        .  .  ..::=+==-::-=:=++-.:-:=-:.......              
+        .      .=:-===*--=:-==----:..--:.  :..              
+        .      -::=++=::::.-:::....:.::.....:.. ---:       .
+              .=.--===-:. .::...   ...:-:....  ...:--. ..   
+              ::--==:.-: .::..       .-+-:.     .. .. ..    
+             :-:-:-=-:.. ...        .::.:-:      .    .:::. 
+    ..   .: ...:::::::. ...       .-+::......    ..   .---:.
+           ...........  ..       :=++..........: . .::--:-. 
+           ..... ..           .:=-:==...  ..   ::. ..--:.   
+            ......           :+==::-.:. ...   .:-=-:        
+ ..  ........               -*+-:.:.--:........:..::.       
+.....:......               :-=-:...-=::.....:.:..-:--.     .
+ .... ..... .              :--.::..::-..::::  ::=--=-::...  
+      . .                 :===:::. .::....:. .:----:-+-:..  
+     .            .       -::--.   ..::.  .. ::..:.::::.:.  
+      .                   ..:..     ...  .. :::.:::::...:-: 
+     .        .                     .....   .......::::---::
+              .         ...          .....  ...  .:..::-----
+                   .....                .  ..         ..-++=
+         .   ..                            .           .-=-:
+          ....                               .         .--:.
+                                    ...             ..:-... 
+                                   ...            ::---::   
+          ...                     ..             .....::.   
+             . .    ..   ..   .....           ..    ....    
+     ..  .......          ..... .                           
+  ...... ..     .    .... ...                               
+   ......  .         ......                       .         
+    .................              .                  .:..  
+     ..........  ..   .        .....                 .:::::.
+       .........  ....                             .::::::. 
+         ..........                              ..::.:::   
+
+)",
+
+R"( 
+        .......      -+===+=          :=------.             
+            ..       :-====-.       .-==-===.               
+                                  .------=:                 
+  :++:          .                =--:--=:      ...          
+.-+++*+.        ..           .    :-=-:                     
+.:=+-+*+-                  .                                
+  .-=++=:          .    .:----:.                            
+    :-.              .  .--:::-=-      .         :===-.     
+          .....::..     ::..:.:-               :=-=+=.      
+         :....----:    .::....:              .-=++=:        
+        .:-:::...:.    :-:::::                .-=:          
+        .::-:.  .        ..::       ..             ..       
+        :::....:.                  ..:---=:                 
+      .:-:......:.:.        .:::::--*+=:--::         .==-.  
+  .---:.:... ..:-+=++*=+--=++----::.:--:            .=-=-==:
+ :-=:-=-......-*+=-=++++=+==--::.....              :=----=*:
+ :-:++=-:::...:-::::.--.::::......           ..... .-=-=-=. 
+ ::==::::..::.-::...:::::::.....           :===:.     :--.  
+.-:=:--...-=..-::...:.        ...      ...:::+=-.           
+-::-:::-:::: ..::..:.         ....   .:::--:...:.           
+-..:::::::.. .-:::..           ::.......... .....           
+:.:::---:....::::::    ...  .    ....:  .     ...           
+:..-:::..:. ...:::.     .  .:-+*+=---. .. .  ...            
+...-:==-:.. ...:..      . .-+*==-::-.... ..   ..            
+.-:::::...  .....  ..  .:=+--=++==:::....  .                
+ .:-:.::.........  .:--=+-:---.:--==:::... .                
+ .....    .    .==*+=--:.:=::..---+-...--:.                 
+...         .:-==+=-::...--=:-:..:....-+==-:.         ::.   
+..      .:===::...::.....-::..:.::..:====---:.      .----:. 
+     ..:-:-=.    ....  .--::::-:..-=-:::::.....     .:-:::-.
+      .::.-.           :==-:::. .:-----::..:..        .::--:
+       . .            .--=:::  ......:-.:::...          ::: 
+                     .+-.:-.  ........:--......             
+ ...                ..:=-:. ...........--::. ...            
+ :--:.              ...::....:..........:=-:::..       .    
+ .-:-:                   ..::.......    .::-=:..    ::::    
+  ::::.            .         .......    .:.:.:-:... ::::    
+.  :--:.           .....                 ..-=-...   ::.:    
+    :::..           .                    .=+=-:..  .:::.    
+                 .....                   :--:...  .:::.     
+        ....  ......                     :=:.  .            
+   ........   .....                     .-:.                
+ ......     ......                   .:--:.            .:.  
+   ..      .....                  .::---::.           ::::::
+   ..    ....                    .. .:....          .:..::.:
+       ....                       ........         ....::..:
+       ...                      .       ...      .........: 
+
+)"
+
+    };
+
+    int FrameCount = 3;
+
+    int RepeatCount = 3; // 애니메이션을 3번 반복
+
+    for (int repeat = 0; repeat < RepeatCount; repeat++)
+    {
+        for (int i = 0; i < FrameCount; i++)
+        {
+            // 현재 i번째 프레임 출력
+            cout << Frames[i] << endl;
+
+            // 700밀리초 동안 잠깐 멈춤
+            this_thread::sleep_for(chrono::milliseconds(700));
+
+            if (i != FrameCount - 1)
+            {
+                // 마지막 프레임이 아니면 화면 지우기
+                system("cls");
+            }
+        }
+    }
+}
+
+void ConsoleUI::PlayCutScene6Animation()
+{
+    string Frames[] =
+    {
+        R"(
+                                                                                
+                                                                                
+                                             :---=-----=--.                     
+                    :----:.               :-=-:...:..:....--                    
+                :---...::-===:          :+-..:::---.....:..:=                   
+              --. ..::::::.::-+-       .+-..:*#***+:.::..-:::-                  
+            :=.   .::::..  ..:--+.     :+=:-=*#%@%#**--.=:=-:+                  
+           --.   ..:..  ...   .::+:     .==-*+==--=+*=--*:.=:=.                 
+          --...  ....   .**-.   .:=      =+-.  .:-***##*#+*=-.:                 
+::       :- .:--.....  .:#%%%+:  ::      =: +-::++=-=*+==*::-:-:  ....::.       
+ .:::    =. -=-:. .. ...:*%#%%#.::        :=%%*-=+===:..-=-:...:-:...:...:::.   
+   ..-: =: .=+:=*- .=%%%###++=:.-          +:..=-:+%#+..:........  .:..:....:-: 
+..  ..:-.::+.+=+#-:-#%#=++=++*::.           -::--::+*=::.  .. .#%#=.  .. ......-
+...   .  :#:::#@%%#**#%#=--..---            .=. :-::.::. .... .- .+*.+*=........
+  ...  .  +#-+#%#*#=:-=*=.... ::              -:..--... ....:.  -  :+:-+*...:...
+....::::..:#* ..-++=:..--.=*::                 -:--:. ..... .-. ::..:+  .+......
+     ..::::=+:. .-=*##-..=**-                  -:..  ..... ...-  =   #:  ..  ...
+ .....:.:. : :....:-=---:.::                   -   : .... .... ..*.  +-  :.   ..
+    . : :  . .  .......::-:..                  :.  -..... .....-++. .    .*... .
+    . ... ..   .      .....::--::.              -  =..#%%%%##*###:  .    :#**:..
+                    ....  ........:=-:          - .-.:----....:#*:       .=*+:..
+        .......       .            =%%*-.       - .-  .......::-:..       *%#:-.
+                  ...              -#*%#+-:     : .:          .::.    .. :++=+=:
+                    ........      .: -+##=-=-.  . ..      . .    ::::::..  :-:+=
+            :.  .       .....:.   -  .=##+==--- .. .  .            .  .-.. ..--.
+            -:  +#+        .   ....   :==-=--.=+.. .. .                .:....   
+           .-:  -%=        -::::.   .  .:..:.:-**:.. ..              ..         
+           .-.  -=-       :.     ...:. :=::-.=--=**+=:..      ...     ..        
+            -   .--       .:.        :::. . .-.-=##%%@%#+--...   .      ...  . .
+           ::.  .+.         .:.         ..:.::::.:=+**#**==:. .. .         .    
+           :+.  .=            :.                     ..::::. .. ...             
+          .:+.  ..             ::.            ..         .... ....  ...         
+         .--:.  .                .:.                    .. .. .. .              
+         :=- . ..                  .:.                 . ..... ..... ..         
+        .==. .                       .:.               ... ... ..  .  ...       
+        =+:  .        ::.               ..             .. ....   .              
+   .   :+=   .        : .:.               .            ..... ..                 
+   .. .+=            :.   ..                            :...  ..  ...           
+     .=-             :       .                     .    . ...  ..    .          
+    .::      ..     :                                    :  ..  .               
+   .         .     ..                                    ..                     
+             .     :                                      :                     
+             .    :                                        :                    
+             .   ..                                        ..                   
+
+        )",
+
+        R"(
+                                                                                  
+                                                                                  
+                                               :---=-----=--.                     
+                      :----:.               :-=-:...:..:....--                    
+                  :---...::-===:          :+-..:::---.....:..:=                   
+                --. ..::::::.::-+-       .+-..:*#***+:.::..-:::-                  
+              :=.   .::::..  ..:--+.     :+=:-=*#%@%#**--.=:=-:+                  
+             --.   ..:..  ...   .::+:     .==-*+==--=+*=--*:.=:=.                 
+            --...  ....   .**-.   .:=      =+-.  .:-***##*#+*=-.:                 
+  ::       :- .:--.....  .:#%%%+:  ::      =: +-::++=-=*+==*::-:-:  ....::.       
+   .:::    =. -=-:. .. ...:*%#%%#.::        :=%%*-=+===:..-=-:...:-:...:...:::.   
+     ..-: =: .=+:=*- .=%%%###++=:.-          +:..=-:+%#+..:........  .:..:....:-: 
+  ..  ..:-.::+.+=+#-:-#%#=++=++*::.           -::--::+*=::.  .. .#%#=.  .. ......-
+  ...   .  :#:::#@%%#**#%#=--..---            .=. :-::.::. .... .- .+*.+*=........
+    ...  .  +#-+#%#*#=:-=*=.... ::              -:..--... ....:.  -  :+:-+*...:...
+  ....::::..:#* ..-++=:..--.=*::                 -:--:. ..... .-. ::..:+  .+......
+       ..::::=+:. .-=*##-..=**-                  -:..  ..... ...-  =   #:  ..  ...
+   .....:.:. : :....:-=---:.::                   -   : .... .... ..*.  +-  :.   ..
+      . : :  . .  .......::-:..                  :.  -..... .....-++. .    .*... .
+      . ... ..   .      .....::--::.              -  =..#%%%%##*###:  .    :#**:..
+                      ....  ........:=-:          - .-.:----....:#*:       .=*+:..
+          .......       .            =%%*-.       - .-  .......::-:..       *%#:-.
+                    ...              -#*%#+-:     : .:          .::.    .. :++=+=:
+                      ........      .: -+##=-=-.  . ..      . .    ::::::..  :-:+=
+              :.  .       .....:.   -  .=##+==--- .. .  .            .  .-.. ..--.
+              -:  +#+        .   ....   :==-=--.=+.. .. .                .:....   
+             .-:  -%=        -::::.   .  .:..:.:-**:.. ..              ..         
+             .-.  -=-       :.     ...:. :=::-.=--=**+=:..      ...     ..        
+              -   .--       .:.        :::. . .-.-=##%%@%#+--...   .      ...  . .
+             ::.  .+.         .:.         ..:.::::.:=+**#**==:. .. .         .    
+             :+.  .=            :.                     ..::::. .. ...             
+            .:+.  ..             ::.            ..         .... ....  ...         
+           .--:.  .                .:.                    .. .. .. .              
+           :=- . ..                  .:.                 . ..... ..... ..         
+          .==. .                       .:.               ... ... ..  .  ...       
+          =+:  .        ::.               ..             .. ....   .              
+     .   :+=   .        : .:.               .            ..... ..                 
+     .. .+=            :.   ..                            :...  ..  ...           
+       .=-             :       .                     .    . ...  ..    .          
+      .::      ..     :                                    :  ..  .               
+     .         .     ..                                    ..                     
+               .     :                                      :                     
+               .    :                                        :                    
+               .   ..                                        ..                   
+
+        )",
+
+        R"(
+                                                                              
+                                                                              
+                                           :---=-----=--.                     
+                  :----:.               :-=-:...:..:....--                    
+              :---...::-===:          :+-..:::---.....:..:=                   
+            --. ..::::::.::-+-       .+-..:*#***+:.::..-:::-                  
+          :=.   .::::..  ..:--+.     :+=:-=*#%@%#**--.=:=-:+                  
+         --.   ..:..  ...   .::+:     .==-*+==--=+*=--*:.=:=.                 
+        --...  ....   .**-.   .:=      =+-.  .:-***##*#+*=-.:                 
+       :- .:--.....  .:#%%%+:  ::      =: +-::++=-=*+==*::-:-:  ....::.       
+:::    =. -=-:. .. ...:*%#%%#.::        :=%%*-=+===:..-=-:...:-:...:...:::.   
+ ..-: =: .=+:=*- .=%%%###++=:.-          +:..=-:+%#+..:........  .:..:....:-: 
+  ..:-.::+.+=+#-:-#%#=++=++*::.           -::--::+*=::.  .. .#%#=.  .. ......-
+.   .  :#:::#@%%#**#%#=--..---            .=. :-::.::. .... .- .+*.+*=........
+...  .  +#-+#%#*#=:-=*=.... ::              -:..--... ....:.  -  :+:-+*...:...
+..::::..:#* ..-++=:..--.=*::                 -:--:. ..... .-. ::..:+  .+......
+   ..::::=+:. .-=*##-..=**-                  -:..  ..... ...-  =   #:  ..  ...
+....:.:. : :....:-=---:.::                   -   : .... .... ..*.  +-  :.   ..
+  . : :  . .  .......::-:..                  :.  -..... .....-++. .    .*... .
+  . ... ..   .      .....::--::.              -  =..#%%%%##*###:  .    :#**:..
+                  ....  ........:=-:          - .-.:----....:#*:       .=*+:..
+      .......       .            =%%*-.       - .-  .......::-:..       *%#:-.
+                ...              -#*%#+-:     : .:          .::.    .. :++=+=:
+                  ........      .: -+##=-=-.  . ..      . .    ::::::..  :-:+=
+          :.  .       .....:.   -  .=##+==--- .. .  .            .  .-.. ..--.
+          -:  +#+        .   ....   :==-=--.=+.. .. .                .:....   
+         .-:  -%=        -::::.   .  .:..:.:-**:.. ..              ..         
+         .-.  -=-       :.     ...:. :=::-.=--=**+=:..      ...     ..        
+          -   .--       .:.        :::. . .-.-=##%%@%#+--...   .      ...  . .
+         ::.  .+.         .:.         ..:.::::.:=+**#**==:. .. .         .    
+         :+.  .=            :.                     ..::::. .. ...             
+        .:+.  ..             ::.            ..         .... ....  ...         
+       .--:.  .                .:.                    .. .. .. .              
+       :=- . ..                  .:.                 . ..... ..... ..         
+      .==. .                       .:.               ... ... ..  .  ...       
+      =+:  .        ::.               ..             .. ....   .              
+ .   :+=   .        : .:.               .            ..... ..                 
+ .. .+=            :.   ..                            :...  ..  ...           
+   .=-             :       .                     .    . ...  ..    .          
+  .::      ..     :                                    :  ..  .               
+ .         .     ..                                    ..                     
+           .     :                                      :                     
+           .    :                                        :                    
+           .   ..                                        ..                   
+
+        )"
+    };
+
+    int FrameCount = 3;
+
+    int RepeatCount = 3; // 애니메이션을 3번 반복
+
+    for (int repeat = 0; repeat < RepeatCount; repeat++)
+    {
+        for (int i = 0; i < FrameCount; i++)
+        {
+            // 현재 i번째 프레임 출력
+            cout << Frames[i] << endl;
+
+            // 700밀리초 동안 잠깐 멈춤
+            this_thread::sleep_for(chrono::milliseconds(700));
+
+            if (i != FrameCount - 1)
+            {
+                // 마지막 프레임이 아니면 화면 지우기
+                system("cls");
+            }
+        }
+    }
+
+}
+
+
+
+// New Cut Scene
+void ConsoleUI::ShowNewCutScene1()
+{ 
+    // TODO: 컷씬 제목 출력 코드
+    // 
+	// 컷 신 1 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene2()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 2 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene3()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 3 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene4()
+{    
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 4 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene5()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 5 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene6()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 6 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene7()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 7 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene8()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 8 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene9()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 9 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene10()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 10 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene11()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 컷 신 11 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene12()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 컷 신 12 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene13()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 3 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene14()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 4 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene15()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 5 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene16()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 6 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene17()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 7 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene18()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 8 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene19()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 9 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene20()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 10 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene21()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 1 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene22()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 2 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene23()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 3 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::ShowNewCutScene24()
+{
+    // TODO: 컷씬 제목 출력 코드
+    // 
+    // 컷 신 4 이미지 출력
+    // 대사 출력 함수
+    // TODO: 다음 장면으로 넘어가기 위한 안내 문구 출력 코드
+}
+
+void ConsoleUI::PrintNewCutScene1Image()
+{
+    cout << R"(
+                                                            
+                                                            
+          .                              .::                
+         :::.    .::::.               .*##@##@:*:           
+         :##*:  :*#*##         ::.    .#@#:*@@@###:         
+          #@:  . :*::. .  ... *##:     :#*##*::**#.         
+         *## .:. ....... .. . *@*      .:...:. :*:          
+         @@#  . ..  .   :  . :##      :.     .:..           
+        .@@# .. :..:###*. :..@@*     .:.::.   :             
+        .@@#* .. .*@@##: .. #@@.      ::**:**:.             
+         :@@@@*#::##::*::*##@@.       .*:**:**.:.           
+           *@@#@**#***#@@@@*:          #**@@**#@@#:         
+            :#@@*###**#::.            .**#*#:@#*@@@:        
+            :#@@*##@***              .@@*#*@@*:@@@##        
+            *@@@**#@***              #@@***#@@:#@#:@.       
+            #@@@@:@@*#:            ..@@@: .*@@###*@@:       
+           :#@@@#*@@.*::**#@#.   .:. .:....#*@@**@@@*       
+          .@####:**#*#@@**@@@:   :.  .:.  .:.  .*#@@@       
+          *@@#**####*#**@@@#:     :.   ::..      :*#*       
+           .*#@@@@@@@@@##*:**#* .@@#*...     ..   . :       
+            :@@@@***##**.::**:.  :*:......::::    .:        
+              ... **:*::::.:*:  .:...:...*##. .....         
+                    .:..::: ::  : .. : . :.                 
+                     ::..:* ::  ..   :  ..                  
+                      ...::..     ...:..          .         
+                                                            
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene2Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                 .  .                                       
+             .............                    ..   . .      
+          .:.............. ....          .   ....... .      
+        ..:..:...:............... ..   .. .... ...:....     
+       .:....::.......... ....:::.....  ....:....::..:.     
+      .:.........:.     .:.*#####*.....   ..........:..     
+      .:....  ......... .*..:**::*:...:.  ... ..:..:...     
+      .:....     : .... .:.::****#*.......    .... ..:.     
+      .:....        .    :.*::*#*: ..........    .....:     
+       .::......          ...:**::  .:..:....:::....::      
+     .....:.......   .. .....:::::....:...............      
+    ....::...:..:.......      .::....................:.     
+     . ...:...........  ......::.............     .. ..     
+               .  . .. ... .*#*:. ...........               
+              ..  ..   . :   #:...........  ..              
+              ..   .  .. ..  ::. ..........  ..             
+             .     .  ...... .. ............  .             
+             .       ................. .....  ..            
+             .    ............... ....  ...    .            
+            .     ....  ... ....  ...    .. .. .            
+            .     ...    ........ ..      .  .  .           
+            .      .  .  ............     .   . .           
+           .       .      . ......:.:. ::...  .  .          
+           .      .       .  ..   ..   .::..     .          
+           .      .       .  .    .:    .. ..   ..          
+                 .       .   ..          .  .  .  .         
+          .      .       .   .                              
+                                                            
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene3Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                      .......                               
+                    .. .::::  ..                            
+                   .  ...*:...  . .:.                  ::   
+                   ..::::::::::..  ***::.:. :*:  .:::*#*:   
+                     ::.......:     :**:::*..##.:*:****.    
+                    .:@####*##:.     .:**::.**#::::**:      
+                    .*@@@##@@#:        ..::.:**..:. .       
+                      *@@##@@.        :**:.:* ::..***.      
+                      .*@#@#*         **:#*::*::***:#.      
+                     .:#::*#*:        ::#::#*##**:*#:.      
+                .:.::.. :#*. :::.:..    #**#*.:#**#.        
+              ::...   ... .... .....:.   .*:#*#*::          
+             *..  .     ....  .... ..*                      
+            :.... .:.   . .   @@# .:...                     
+            :..:..:.:.. . . ..:*:..:....                    
+           :. .... . .. . . .. . .... .:                    
+           :.. . .... . ... . .... .  .:                    
+          .. .. .. .. ..  . . .. ... . ..                   
+          :.............  . .....:...:...                   
+          :....:.: .. ..  ..  . .:.:....:                   
+          ..   .....   .   ..........  ..                   
+            ... .......::::............                     
+              ::.:  :@##*#@@@#. ...:.                       
+             .::....:*####@@#:..:..::               .       
+             .........:*##**:.......:                       
+             .:...  .....::... .....:                       
+              : .   .    ..   .   ..                        
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene4Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                             . ..                           
+                           :*:.. ::                         
+                         ..********:                        
+                         :..*@@@@#...                       
+                         ...:#@@**#.:                       
+                        ...#@@@@@@#::                       
+                        :. *@@##@@:.:.                      
+                        :.: *@#@@* ::.                      
+                        ..:.****#*..:                       
+                        ..:*#@@@@#*...                      
+                     :*@#:###*##*##*##@*:                   
+                    #@@#::*########*#@@@@*                  
+                   :@##*##*##@##@#@:#@@##@.                 
+                  .*#***@#*@#@@#@##:##*##@#                 
+                  ..:******@#@@#@***#***##@.                
+                  :......#:*##@####*****##@*                
+                 .@: ... :##*####*@#########                
+                 *#*..::  #*#*@#*#@###*:*#@*:               
+                .###*:.:.##*#####@@@@##:*@*#*               
+                 #@@@@##@@@@#*@##@@@@@#.:**#*               
+                 .*#@@***:****####@@@@#::.::                
+                    .*::::..::  .@@@@@@*                    
+                     .#*#@#@#.  .@@@@###.                   
+                     .:::::::    :::::::.                   
+                                                            
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene5Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                          ..:::..                      .:.  
+                         .::*::::...            .   ..:::.  
+                        ...::..:::..              .:::....  
+  .:.                   .::@@@@@#@*:       ..     :...:::.  
+  .::.:.                .*:##@@@##*:      .  .:   ..:..     
+  .::.:.::..            .:::::#:**#*      .:::.   .  ..::.  
+   ::.::::.:.            :*@@#@@@#*:    ..:....   ..... ..  
+  .::.:.::.:.             :*#.:*##:      .:.. .     .::::.  
+  .::.::::.:.             ..::**::..   :. ..:::   :.:::::.  
+  .::.::::::.          .*:: .:**:::##:.:*###*::   :.:::::.  
+  .::.:.::::.      .::#@@ * . .:::#*@##*:###::*::.:**::::.  
+  .::.::::.:.  :#@##*@@@*.*.:###:::**##*::###***:*:*@@#*:.  
+  .::.::::::. .#@@#@@@@@*: .*@#*:::*@###**:*###:.:::@@@@#:  
+     ...::::. .*@@*@@@@##*:***#:#**#@@#####**:*#:...:**#@*  
+             . :#@*@@@@*@####******#@@@*###* .****.   .*#*  
+             :  *#*@@@##@##*:#:*#**@@@*#@@@*      ..    ..  
+            .   ::*@@@:#@@*@***#*@*@@#*@@@@:                
+            .    .*@## ....:@:#:#@:@*   :##.:::.            
+     :::.   .   ......*::   :*:*:..*   :***#@@@@#*.         
+     *::*  .  ..   ...*@@#**#:#*#:.* **@@:*#@@#@#@@*        
+    .:*::.  .:    . ...:.**:@*@@@:.:#@##*.:##@#.*#@@@.      
+     :.::  .:  .   ...:...**#*##@:.:@@@#:: #@@*.##@@@@.     
+    .#*##  .   .  . .  ....:*:#*:. #@@@*##:#@@. *###@@#.    
+    .#::#..  . . ..     . .        #@@@.#::#@#   :*####*    
+     :..:       .  ...  .          :@@@.#*#@#. :#@#@@#:     
+    .:#:* .:.. .    ..  .           @@@:**@#..#@#**:.  :    
+     :.:. :# ..   .. ..:.           .....*#::@##*#**@*  .   
+          :.          ..::.           .::.  :::.:::..       
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene6Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                       ........                             
+                      . :****:.     ..                 ..   
+                       .##@@##.     .**::....:*  ...::**.   
+                      :*###@#@*.     .**:::*.:#:.*:::**.    
+                       :@@##@@:      ...:*::.*#*.:**::..    
+                        *@##@*       ***:....:::....:***    
+                       .*:****.      ::***:.:...:.:**:*:    
+                  ...::.##**@#.....  .:*******#******::.    
+                ::::.::::#::#::::.:::: ::***#*.##***::      
+               :..:::::::#::#:::::::::.   ::*#*#*::         
+              :....::.:::.::.:::.::.:::       :             
+            .:::.. :::..:::*::::::..::..                    
+           .:......::#.:@@@#*:..... .:::                    
+          ...::.:::::#::***:...:..  .::..                   
+          .....................:. . .::::                   
+           ......  .   ......::.... ......                  
+                   :..:...:::.:::.:  ..:..                  
+                   :.::.::.::::::..  ..:::                  
+                  ...:..::::::::.... ..:..                  
+                  ....:.:::::.::.. . ..::.                  
+                  :.:::.::::::::.:.. .:::.                  
+                  :.:::.::::::::::.: .**:                   
+                 ..::::.::::::::::...#@@:           .       
+                  .......::::::.....:::*.                   
+                  ..:...      ...... :.                     
+                  :.:.:..    .::.:.:                        
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene7Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                       ...                                  
+                 .-.  .. ::         .::..                   
+              .:-*+: :=###-         .***:.  ---.            
+             .. :...:.##%+:.  . :    =%@#=:..-+#=.          
+             ....    .--.. .:..-++....++%#=. . ::..         
+               ...: . ....... . =@=--:.-+**..:..            
+                  :   .  -+-:.:=:::..:-=**#* :.:.           
+                 :..  -++%*#* .+..:::: .*%###+:             
+              ...:...+%#%%##-  *. +##:- +*=*%*==-.          
+            ::.     .#%+*#*-  .=- -#@##===+++-=+++.         
+          .-=+-....  :#%-:.:..:+*==+%**%#*==#+==-:          
+         .+**+==:.          ::+##+-:-=-=****++=:.           
+         :%*+*+: .       .:.+*+-+=.-**=+*%**++=:.           
+         .+*+*+#-.  .. .-+=+=-:..=.==+-=+*****=- ..         
+           :-++#%#=:: .-++#*-    -++===#--+=*+++            
+            :. .-#%%#+:.+*=:..   .=---:*%--+**++-.          
+           ::.. :=-+=::   ..:-    -+-: .*+-*==*--..         
+          :......:.::.::.  ..::   ..-.  -+--+=-:.:.         
+         ..  ...  .. .   .:.    .:.... .:....:.   .         
+               ..::...     .:      .:.. .                   
+              .:.  .::..     :   .:.          ...           
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene8Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                 ....                 .........             
+              ..........             :::::...  :.           
+             .    .. ....            :..**.::.  .           
+             .     #@@#.:   ....     .#@####::: .           
+             ..*::@#**@*  .**.. ::   .**:#@@*#* .           
+          :...:*@@@@@@*. ..:**##*:.   :@@@@##*#*:           
+         ::..:@@#@@@##: ....:#@@#* .  .:*###*:*:.:.         
+       .:..:::#@#:#@#:  . ..*#@@##.:    :*:.:*::....:..     
+     .::::.....#@* .:   ...:@@@#@#.:     :: #::..:......    
+    ::..:*:.....::...:. : . *@###.::.  .....*...:...:..     
+   .:.::...:.....:....:.....:#**:...  ::...:*..:.:.....     
+   .::.:....:::..::..:...::*#@@@#*::. :.......:.........    
+   .:...  ..:::: ::..:*#@**##*#*##*#@#*.:.:...:..:::. ..    
+    ...    ......::..*@#****##*##@:#@##*..:..:.......       
+   .:.     .......:..#***##*#@@###*####@:............       
+   .. .    .....:::::..:::::**#@*:*#**#@* ......... .       
+   .:::.  . .:::::::#*......*:###****:#@# ...:      ....    
+     ....:.  .....::@#. ... .#***###*##@@.:......::.:...    
+   ..   . ..#:*....*#*:  ::.****#@##*:##:.:...::::::...     
+     .:    :*.::...*#####**@@@###@@##*###*.: .  .::*  .     
+      :.   .   . ..:#@@@@***#####*#@@@@@#. ..               
+       :.  .. .  .....:***:.*#@@@*#@@#*:....  .             
+       :       . ......##**@#:..*::***..  ... .. .   .      
+       :....   ..... .:@@##@@.  #@@#@@*.    .......   .     
+       :...::........ *@@#@@@   @@@#@@#.  ...  ..           
+       :...::::..   ..#@@#@@#   #@@#@@@.    ..  .     .     
+       . ......      .:::::::   :::::::.                    
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene9Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                 .....                .........             
+               ..........            ::::....  .            
+              .    .......           :.:*#:::.  .           
+              . .  :@@@*:.           .#####*.** .           
+              .:*:@@*:#*.             :*:#@###*..           
+          .:...**@@@@@#:              .##@@##*#*:.          
+         .::..*@#*@@@#:                .*##*:**:.::.        
+        .:....:#@#.*#:                  ::: **:......:.     
+     .:::::.....*@....                   .. *.:........     
+    .:...:*:....... ..:.              .:...:#..:.......     
+    ..:::....:.........:             .::...::.:........     
+    .*:.:. ...:: .*:..::       ..   .:.:.....::...:....     
+    ....   .......::.....       **:.:. .....:::..:... .     
+    ...     ...:..::.....       .#**:::....:::....:.        
+    .. .    .......:......:     :.:**::.  :. ......         
+    ....  . ....:::*...:**:    .....:**:: .. :  ...         
+     ..:...  .....:::.**::     ..   ..**::::...  ......     
+        ......:**::::*:.:.       ...   ::::.....:::....     
+     ...    :@@@#*::....:.             :..:. ...::::        
+       :    .###*:::.....:             :. ... .. ... .      
+       ...  ..... .:.  ..:.            :.    .::.           
+       .:      .. ... .  ..            :. ... ...           
+        :.       .... . .::            :  . .......  .      
+        :..............:#@*           ..   .  ....          
+        :....:::.. . .::#*#.          ..  ...  ...          
+        .....:...   ....:*:           ..      .             
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene10Image()
+{
+    cout << R"(
+                                                            
+     ...................................................    
+     %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:   
+     %@#::::::::::::::::::::::::::::::::::::::--:::::=@@:   
+     %@*               ..::..                :.      -@@:   
+     %@*             .-.  ..:=.              .:      -@@:   
+     %@*            .:*=:.:--- :              .= .   -@@:   
+     %@*            . .:-#@@@#...              *+*-  -@@:   
+     %@*            .  :+#%%**#::              -@#++.-@@:   
+     %@*            :.-*#*%@%%@::               +@%##+@@:   
+     %@*   *- -=    ::.=@@@%%@#..  ..            +%**+@@:   
+     %@* -=.#::#     ...-#@##%-=##@@%#-:.         ..++@@:   
+     %@* .-*-#-%:  -##**-=:--**=%#@%##%%@%*==.  .=#%#+@@:   
+     %@* ===%@@@#.=###%*-#=#%#+=#%@%##%#%%**#%#:@@%##+@@:   
+     %@*   =%%%%@%*+*%*#-@=*%+*=%##%=+=#*+%@@@+#%%##*+@@:   
+     %@*    =%%%#*=@#%====*+=+#=**=**. ..+##*+%#%#*##+@@:   
+     %@*     .::=--%*-:=%**++++=****+=  .*%%*#%%#####+@@:   
+     %@*      :=-:-:  =#%%*#++==#%@@*+  +##**+######*+@@:   
+     %@*              :%*%*+=+**@%%#%*:=++=+=**##*+--+@@:   
+     %@*               =##%%===#@@###%##**+**###*-.=++@@:   
+     %@*               -%@@%++*##+@@@@%%##%*#*=: .+*#+@@:   
+     %@*               +*@%#+#%@%+######*+--:    #+#*+@@:   
+     %@*              -#%##**#%@%+*###**+        *#*#+@@:   
+     %@*             =##%@**=++:*%@@%#%%@*      -####+@@:   
+     %@*            -%@%%@@+ .  =@@@%%@@@@+     #@*##+@@:   
+     %@*           :#@@%@@%.    .%%@@@%@@%%-    %##*#+@@:   
+     %@*          .*#@@@@@+   -. =@@@@@@@@@@.  -%#%#*+@@:   
+     %@*          .#@@@@@%   .-:  #@@@@@@@%-   #%####+@@:   
+     %@%############################%################%@@:   
+     +**************************************************.   
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene11Image()
+{
+    cout << R"(
+    ....................................................    
+   :            .::::.                                 ..   
+   :          :*:. ..:*.                               ..   
+   :         .*...::...*                               ..   
+   :         .*.  .  . *                               ..   
+   :         .*.       *.              ...:.           ..   
+   :          *:.     :*            .::... .::         ..   
+   :          :**:*:*:*.            *....... .:        ..   
+   :          .*::::::*.           .*.*##:.  .:        ..   
+   :       .:::.......::::.         .**#**#*:*:        ..   
+   :  ..:**::::::::::::::::*::.      *##@@@@*::        ..   
+   :  *.::::::::.::::::::::::::*      *##@@**:.::.     ..   
+   : ::.::::::::.::::::::.:::.:*.    ::::::*:.  .::::. ..   
+   : *:...::::::.:.::::::.....::*  ::.. ..#*.....  ...*..   
+   :::....::::..........:.......:.:. .:..:#:..::.  .  ::.   
+   :*:.. ..... ........ .... ...:*:.  ::..*..::.      .#.   
+   *:.... ..   ........      ..:::#.  .........       .*.   
+   *:....       .....        ...:.#.  . .:.:.          .:   
+  :::... *        .   .    .:....::.     :..            :   
+  *......*.      ...       ::.......     ....          .:.  
+  :.....::.    ......     ..........  . ....       :..  :.  
+   ::....:..... ....   .........:*..     ...       .... .:  
+     .:.  ...:::.:*::*.:.... .:: *:.    ....        ... :.  
+       .*   ..::*##*::*:... .*   ::*:  . ...        .:*:*   
+        *.   .:*###*:.::    .:   *:::    ..          ***.   
+        *....:::*##**:.  ...::   **:*   .....       .::*    
+       :::..::*::::::.......:*  .*@@:     ...      :#@**    
+ ......*::........  ........:::.:*#**.  .    .    :#@@**..  
+ ......:*....................*:..:***:.      .... .:***:..  
+ .......*.                 .::......::.     :....    *....  
+  ..... ..   .    .         ...........     .. ..    . ...  
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene12Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                ....                        
+                              ::....:.                      
+                             .:..:.. :                      
+                              :*#**:::...                   
+                    .*:.     :::##@#:...:::.                
+        ..    .....  .**::..::. .**::...  .::.              
+       .**::.::..:*    .*:**:   :..*:...     .:.            
+        :*#*:...##**. .***: :**.. ..:..   :....:.           
+        ..:::  .*###*. .:**.  .*::::...   ::*:::            
+        :.:::: .:###**        .:  .:::::...*:::             
+        ...::.:..::::::.     .. ..:**....::** :             
+         :..  ......::::::   :.*::***.    .:..::..          
+            ..:...........:::::::........  :.  ..:..        
+               . . . .  ...........  .....  :     ..::      
+                           ..........  .... .:              
+                           ...:.::::.   .... .:             
+                   ..       ... ....::.   ... .:.           
+                        ..     ....  :::  ..:.  :  .        
+                                   :....:::....  :          
+                                     .... .:  .. ..         
+                                       ...      : :         
+                                                            
+                                                            
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene13Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                 ...        
+                                              ....          
+           .===.                          ....         :    
+           .@@@:                      ....             :    
+        ---=@@@+---               ....                 :    
+        %@@@@@@@@@@.          ....     ......          :    
+        ===+@@@+===.       ....    .:--===-:.. ..  ....:    
+           .@@@:          :      ..:-=+*++==----::..::.-    
+           .+++.     .....:...      .-+###*+=++*=-:--::-    
+                    .. ..... : .:...:---::.  *#%#****=--    
+                          :- : :--..         **##***+=:-    
+                    .  .::+= : -==.:.        *+#+++=*+:-    
+                  :....=:+++ : =++:-:        ++*++=++=:-    
+                .:.:.=++=:-: : =*+:-:..      +=++--==-:-    
+             ..:::....=+-.   : -**:-:...     =-::::::::-    
+            ::..:-:....:..:: : -++:-::..     -+-====----    
+           :-:::..:....:..::.: :=-.::...     -=====---:-    
+          :.::.. ...:..-: .::: :--.:.        --::::---:.    
+         :.....  .  ...-....:: .-:.:.        ::::::=:.      
+        :.::..   ... ::-...:.: .::...        :::::-...      
+        ....::  . ...::-:... .:.:. ..        .:::::::..     
+            ..::. .::.:::=:   :...:::::-::::......:....     
+              . .:***=::.     .:...::-=-====-.....:         
+             .   :=+=::.. .  ...:     ...::::.... :.        
+             .  .  . ....:... . ..          ..:::::         
+             .     . .:::::.. ..:.             .  .:        
+                    ..........:=+:                .:        
+               .:.::::::.:.:::::=.                          
+               ...:--:..   .::--:                           
+                  .....      ....                           
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene14Image()
+{
+    cout << R"(                                
+                                                            
+                                                            
+                   .::                                      
+                   --*+-                                    
+                  --+***+-                                  
+                 .-=*+****+-                                
+            :.   --**=-=+***+-...      ...                  
+             .  :=+*+=...-+**+=-:.. :=-::.--                
+      ..        ==**-=   :-:=++==:..=..:.. .-               
+      :=--:.   -=*#+.. ...:---+**+-:+*%**-:=.               
+      :=--:-::.==#+-. ..::.=-*+##+==-+##%@*=-.              
+      :====--:-=+*= :.... =-+++=:++--.:%%*++::---::         
+      :==-=---==+=-.. ...:==+.  =#. -::--*#++.::::-.        
+      :==---===*:-     .:::-:.. -=...:++*%*++=:-   -.       
+      ::----=-+*-. :. .::=-::-. -=..+==+**=+++:..  .-:      
+      . ..::=-**:  ..:-===.:..  =. =+=-*%#===: :.    :-:.   
+           :-=+=:..:::===.  .:.-:  :=+=*%#++=-..+:. .       
+          :--=+=  .--=====-----+. ..:=++++=+=:  .-+. .-     
+      ..  :-==--::-:..  ..::::--::..-::=+-==:   =+=:   +.   
+      .   ::++=. . .::::::.   ..::.....::%#--:--+=-..   .   
+        . ::*+=-..:.=*=::.:-:::   .....  =##=**==:.  .::    
+          :-**+::.--+++: ...   .--:  .... :--*#+.           
+      .-. :-*+==+=--++*-  :...:..::=..:..  -:--:--.         
+          .=**+**+=:==+:...:- ..... -. .  .-    ::--.       
+          .=+*==*+*=+-=:            -.    .-      ::--.     
+           ==+*+***=+==:   .        .-    .-        .:=:    
+           ==++****+==-:             -    .-     .:         
+           -===++++=:.               -    -.                
+           ---==:.                   -.   -.                
+           ...                       .:   :.                
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene15Image()
+{
+    cout << R"(
+                                                                                
+                                                                                
+                                       .                                        
+                                    ::..:.:                                     
+                                   :..*#*..:                                    
+                                   :.:*#*:.:                                    
+                                   ..:#***.:                                    
+                                   :..*##:.:.                                   
+                                 .:::.....::::..                                
+                              .:*:::..:::...::*:::                              
+                             ::*:::*::::*:*:::.:*::                             
+                            ::.:.:::*****:**.::.:.::                            
+                           .::.:..::********:.:::.:::.                          
+                          :... ....::::::::::...: .:::.                         
+                        .:.:..  ....:*****:::..    ..:::                        
+                       .:*:..    ..:::*******.. ..  ..:::                       
+                      ::::.. ...: .:::::*: .:..  :.:  .:::.                     
+                    .:::.  .:.:.: ...:::::.::.. .:.:.. .:::.                    
+                   .::.. .. :.*.:.....::::*:... ::.:  .  .:..                   
+                  :*:  ..   :......::::***:::.. . ...  .. ..::                  
+                 **....     :.  ...:..................   :::#**:                
+                 :....        .. :::::.:::::::::   ::::.  *.::::                
+                .....           ::***:::::::****.  ...:: .:.:::                 
+                 ..             ::***:.....::*##:    .:.::..                    
+                               .::#**:.   ..:****:    .....:                    
+                               .::**..      .:*##*.    .:..:                    
+                               ::::::.       .:*##:   :.: ..                    
+                               :.:*:.  ....  ..:*#*  .::.                       
+                               ::*:.. .   .. .:.:**: ...                        
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene16Image()
+{
+    cout << R"(
+                                                            
+     ...................................................    
+     %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:   
+     %@#::::::::::::::::::::::::::::::::::::::--:::::=@@:   
+     %@*               ..::..                :.      -@@:   
+     %@*             .-.  ..:=.              .:      -@@:   
+     %@*            .:*=:.:--- :              .= .   -@@:   
+     %@*            . .:-#@@@#...              *+*-  -@@:   
+     %@*            .  :+#%%**#::              -@#++.-@@:   
+     %@*            :.-*#*%@%%@::               +@%##+@@:   
+     %@*   *- -=    ::.=@@@%%@#..  ..            +%**+@@:   
+     %@* -=.#::#     ...-#@##%-=##@@%#-:.         ..++@@:   
+     %@* .-*-#-%:  -##**-=:--**=%#@%##%%@%*==.  .=#%#+@@:   
+     %@* ===%@@@#.=###%*-#=#%#+=#%@%##%#%%**#%#:@@%##+@@:   
+     %@*   =%%%%@%*+*%*#-@=*%+*=%##%=+=#*+%@@@+#%%##*+@@:   
+     %@*    =%%%#*=@#%====*+=+#=**=**. ..+##*+%#%#*##+@@:   
+     %@*     .::=--%*-:=%**++++=****+=  .*%%*#%%#####+@@:   
+     %@*      :=-:-:  =#%%*#++==#%@@*+  +##**+######*+@@:   
+     %@*              :%*%*+=+**@%%#%*:=++=+=**##*+--+@@:   
+     %@*               =##%%===#@@###%##**+**###*-.=++@@:   
+     %@*               -%@@%++*##+@@@@%%##%*#*=: .+*#+@@:   
+     %@*               +*@%#+#%@%+######*+--:    #+#*+@@:   
+     %@*              -#%##**#%@%+*###**+        *#*#+@@:   
+     %@*             =##%@**=++:*%@@%#%%@*      -####+@@:   
+     %@*            -%@%%@@+ .  =@@@%%@@@@+     #@*##+@@:   
+     %@*           :#@@%@@%.    .%%@@@%@@%%-    %##*#+@@:   
+     %@*          .*#@@@@@+   -. =@@@@@@@@@@.  -%#%#*+@@:   
+     %@*          .#@@@@@%   .-:  #@@@@@@@%-   #%####+@@:   
+     %@%############################%################%@@:   
+     +**************************************************.   
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene17Image()
+{
+    cout << R"( 
+                                                            
+         .:::::.                                            
+  .::::::* ..:.*:::::::::::::::::::::::::::::::::***::::::. 
+  :.     *..*#*:                               .:*:::.   .. 
+  :.    .:::#**                                *:##:.*   .. 
+  :. ::*:::*.:*.                               .**#:.*   .. 
+  :..:.:::.::.:*                               :#*####*. .. 
+  :.*....::..::::                             .*#**###@* .. 
+  :::.. .:......::                            :****#**@#... 
+  :*..:..::.......::**:::.........:::::::     **:::##:##:.. 
+  :*.:*...:...:**...:**::**#####***::*::  .:****..*@#*##:.. 
+  :*.::..::...:: ....::::.                ...##*::*@####:.. 
+  :.::*..:.....*                            :#*::::#@##*:.. 
+  :.:**....  ..:                            **#:*::*@#** .. 
+  :.  *::....:::                             :#:*:.*@##* .. 
+  :.  :.:.**.::.                             *#:*::*@##* .. 
+  :.  *....*..:.                              :**:**::*  .. 
+  :. .:..: *..*                               .**::****  .. 
+  :. .:..: :..*                               .**::::**  .. 
+  :. :..:. :..:.                              ::*:..*:*. .. 
+  .::*..*::*. .:::::::::::::::::::::::::::::::#***::***:::. 
+     ::::   ......                           :::..  *#*     
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene18Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                             .*::                           
+                             *.*                            
+                           .*:::                            
+           .::::::::..:**:..*:::                            
+          ::.::.....:##@@@****.                             
+        ..:..***##::###*#@*:.:*****:.                       
+       *#*...#*#@##*#*#***#@::*##@@@#*.                     
+      .#.:.  ...:.:*:::**:**#:***:**#@*:                    
+     :***:::.......***::.:*#: ::::*:::**:                   
+        .*#***:#:*****::*#*...::..*::::*#*:.                
+      .:*::..:****:.*###...::..::.:::*: *###**::..          
+      .***#**:::**:###*.    :*:.:*::**::::*:::...:*         
+        ..:: .***#*:*:::.::.    :**.::..::**:::::.::.       
+              .::::**::.*:*......*:*:.....::::*:*...*:      
+                  .:.  :*:****:*:::::::... .::::.::..*      
+                      .**:..*:::.:::::*.         .....      
+                        .:::::***::.:**:                    
+                             ...                            
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene19Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                ..                                          
+             .**:**:.                                       
+            .*::#****:..::::.                               
+            .*.***##**:..::::*:.                            
+           :::  .::*.*##**::...::*::.    .:::.              
+          :**: .  ...:*###:#*::....::*:*****#**             
+       .:::*####*:::.:::#####*.*:.. .:****::***.            
+       *****::#**.:..:...*#*####*:::****::..:***            
+         .::***:.:.:. ..:.*::#*:::::::::::*:****.           
+        :******: *.:. : .:.:::::*:::...::  *.:::*           
+        :*******:*.:. **.. .:.::**::.::    .:...*.          
+         ::::***:*.*..***...  ..:****::     :..:.::.        
+        .******.*::..*:*:. ..   .:****::    :.....::**      
+       .*:#**#***##.*.::.        .::***:**:::::::**:::      
+        :####:******. ::: ..       .:***:***:::*:::*.       
+        .*:    ::*:*:****###.    .****::::::::....:::*      
+                   ::: .:*:***#**..:.    ...:::::::.::.     
+                        ::.::::::.               ..:::      
+                         .#*:::*::*.                        
+                           ..                               
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene20Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                     :---:.                                 
+                   =+-=:.--+:                               
+                  :+::--::. #                               
+            .::.  :#=%%#*:.:+*+++==-:.   .::.               
+          :*++*#*+**+=**%#+-=*+=*#+=***+**+=++.             
+          *-:-:+=-:=+++%@#+=:--.-=-:=+:-+=:-:-+             
+          -+-:=:+: =+#+=-:+-..-===++=..-+:=:=+:             
+            :*-:=::=+-. . -: :=-:===--.-=:-*:               
+             *::-=:....--.:- :+=-.:----:---+                
+             +--=:-. --==-:=:-===-. .::-::==                
+             +===-.:.:=-=:-::---==. .-::--=-                
+             *-=-:..  -:=----:::=-   ..-=--==               
+           .=*=-:.    .+++==+=::-:.    ..++=++:             
+          :*+-:=++:  .++=-::-=+=---.  .-+**#==+:            
+          +=:-==:=- :+===-...--==---. :-=:**-.-*            
+          :*-::----:====-:++: ::--.:: .-:.:.::+:            
+           .-+---:===--:.-+=-  ...  .. =-:::+=.             
+             ==+-=---:. .-==: .:::--==.:=-+-+               
+             *-* .--:.  :=-=-.=====+==-.+-*-*               
+        :-:-=+:.   :..  :=--- :-------:.-:--*               
+       =+----::.  :::.  .-=--.::::::::---:-:*               
+        -==:.. . :=--:.. :---.-==--==--==.-:*               
+           --+::::---:::.:=--.::---------:::*               
+             :*-:-=-----+--:::+-------==+.:==               
+              -+.*      .+.. +:         +::*                
+              :+-*       +::.--         =--*    .           
+               :-.      .+--::=          :-.    ..          
+                        -=::.:+                             
+                         :===-                              
+                                                            
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene21Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                  -****++=.                                 
+                 ++:.::::=#                                 
+                 %. .:-%##-                                 
+                 *-.=+%#+%.                                 
+                -#:-==#%*#.                                 
+               +*--:--=##:                                  
+              *+:-==-::#-                                   
+             -#:.++-.=::%.             .:..                 
+             ++:.=-. .-:=+           =*+==+++:              
+             ++:.=+. .:-:%          .%-+=.:..*-             
+             =+:.-=. .:-:#.          #**#::. -+             
+             -*: :-: ::-:*-         .%*@%++..#.             
+             :#::.:-..:=:=+          ***===:=*              
+             .#:...-- .::-*          .-%=-.==+*:            
+             *+=....-:.::-*           .#::==+==#=           
+             #-.  ..:=:::#.           #=-====+=-%.          
+              -*:   ++*:=+           :*:=+:--=--*:          
+               += . :-=-*-           *=--=:===::%.          
+               .#= ::-+:%.           %::=-:=+-:-#           
+                ++ :-+=+*            %.-=::--:.++           
+                *=.:-*:*-           **.--+=:...*+           
+               .#:::---#          .#=-:==:...--=#           
+               ++.:::.#:         =#**=::...:---:#.          
+               #-..-::%          #=++=..:=-==-=.*=          
+               %:..:.:%          .%=:.-=-=+==--.=#+         
+               #:..: :*.        .++-:=+=-:.    .::*-        
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene22Image()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                         .::::.                             
+                      .###*::*##*.                          
+                     ##:....:...:#*                         
+                    *#............#*                        
+                    @*..***::**:. *#                        
+                    #*.:########. *#                        
+                   .@:.***:*****:.*@                        
+                    ##.#*********.#*                        
+                    :@*:########:*@:                        
+                .:###:::*##**##*:.:###:.                    
+             :###*:....::******::....:*###*.                
+            ##::.......#:.::::.:#.......::*#                
+           .@:.........::::::*:::.........:@:               
+           #*:..........:**###::...........*#               
+          .@*............*:##:*............:@.              
+          ##.... ........##****........ ....*#              
+          #*. ..  ........##*#........ .....:@              
+         .@:..... ........:**......... .....:@:             
+         :#. ...   ........... ......   .....#*             
+         *#:....   ... ..  ... .. ..    .....#*             
+        .@*.....    ................   ......:@.            
+        .@: ....     ..   ..... ...     .... .@.            
+         @*  :*#**  .... ...... ....  :***:. :@             
+         *#.:##***: .... ...... ...  :**#@#:.#*             
+          *#:::::**. ..  ......  ..  :***:*:#*              
+           *#*::***:..  ... ....  ..:**::.:#*               
+            :@:..**:*: ... .. ..  :*:*:...@*                
+            #*.. .:#***:........::***:. ..*#                
+           .@:.....:***##:    :##::*:......@:               
+          .@*.......**####:  :#*#*#*.......*@.              
+          #*:........***#****:*#*#*........:*#              
+         *#...........::::.**.::::..........:#*             
+        .@:..........      .:      ..........:@.            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene23Image()
+{
+    cout << R"(
+                                                            
+                                                            
+     *:::::::::                                             
+     *... .....:.                                           
+     *..: ......::         ::::.                            
+     *..: .......*        *... .*.                          
+     *..: .......*        ##*. ..:                          
+     *..: .......*        **#*::.*....                      
+     * .: .......*        :*#*::*.:::.*:.                   
+     * .: .......*         :**:**:.:....:*:.                
+     *..: .......*         .*::*::.:.......:::              
+     *..: ::..::.*  .:..   ::::*..:..  .:..:**:             
+     * .: ::::::.*  #*:#.  *::.:.....  ::.#*::*             
+     *..: .  .**:*  **::****.........  .*. **:*             
+     *..:  . .:..*   .:::::*  . .......  ::.***.            
+     *..:  ......*       :::::* ....:.... :*#*:*            
+     *..: . .....*            *  ......... .*#**:           
+     *.:: ...:...*            :. ....  ....:**:.            
+     *::: :::..:.*            .*::...    *:.                
+     *..: ..::**:*          .**:...      *                  
+     *.:: :..*#*:*         **:..   ::    .:        ..:.     
+     *.:: ...:*:.*        .*... ::: ::.   ::***:::::..*     
+     *.::.:..:#:.*        .*.. :.    .*..  ..... .    *     
+     *.:: ...:*:.*        ::.. *      .*:..:::::::::. .:    
+     *..: ...:*:.*        *..  *         ..         ::.:    
+     *..: ....::::       .*.. :.                     ::     
+     *..: ...:::         *:.  *                             
+     *... .::.      .*::**.  ::                             
+     *...::.         :::..   :.                             
+     *:::               .:::::                        ..    
+     ..                                                     
+                                                            
+
+)" << endl;
+}
+
+void ConsoleUI::PrintNewCutScene24Image()
+{
+    cout << R"(                                
+                                                            
+                                                            
+ ...**......::***:..:::::*::......*:....*.                  
+ ..:*#:*****::.::::.:::***:*...:::*:....*.                  
+ ..:*#**::**....**:...:*****.:.:::#:....*.                  
+ ..:*#*::**::.....::.::*****...:::*:::::*.                  
+ ..:*#:*::*............:****:.::::*:::***.                  
+  ..**:::.:....::.......**#*::::::*:.**##.   .              
+ :::**:*:....:*::.......:*#*:::**:#*.::*:   .*:             
+.*****:*::  ........::::***:::::::#*::.    . .*:            
+.:::**::::.. ...:.:....:****:::::*:.     :... .::           
+ ..:*#::::::....***:**:********:.        :*::. ::           
+ ...*#:::::*:...::::*::*****:.       .    .:....::.         
+ ..:**:*:::*....:::::****:.      .         ....::*.         
+ ..:***#::::....:*:*:....                    .. ::          
+ ::****#:::::..:****: .....:  .                 ..          
+ :::***#::*:::***:. ..:##.          ..*:.::::.              
+ :*:***#*::***:.::   .*##...         .:.:..:..              
+.:#****#***:.     .   .*#* .          .::**:.               
+.:#*****:.         .  .:*:..            .:**#:   ...        
+.:***:.               .**###::::*.    .:.::**:*::::..       
+.*:.             .     .:*##@##*#:**::*:.:*::**##**:        
+                 .   . .. .::***.:*#*:**:*::**:**:.         
+                    ...:*.   ..:.:****##*:*#*::::           
+             .         :**..:.....::******:::::..           
+                        ::::::::..       ....               
+                        .:***:.          :::                
+                         .:.             :.                 
+                                        :*  .  .            
+
+)" << endl;
+}
+
+
+
+// 주사위
+void ConsoleUI::PrintDice1()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                  .........................                 
+                 .:::..................   ..                
+                 ::....                   ..                
+                 ::..                     ..                
+                 :..                      ..                
+                 :.                       ..                
+                 :.         .:::.         ..                
+                 :.         *####.        ..                
+                 :.         :###:         ..                
+                 :.                       ..                
+                 :.                       ..                
+                 :.                       ..                
+                 :.                       ..                
+                 :.                       ..                
+                  .........................                 
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintDice2()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                   ::::::..................                 
+                  .:......                :                 
+                  .:..*###.               :                 
+                  .: .##@@.               :                 
+                  .:   ...                :                 
+                  .:                      :                 
+                  .:                      :                 
+                  .:                      :                 
+                  .:                      :                 
+                  .:               .***.  :                 
+                  .:               *##@*  :                 
+                  ..               .**:.  :                 
+                  ..                      :                 
+                   .......................                  
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintDice3()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                  .::::...................                  
+                  ::.. .                 :                  
+                  :. :*##.               :                  
+                  :. *#@@:               :                  
+                  :.  ::.                :                  
+                  :         .::.         :                  
+                  :.       .*###.        :                  
+                  :         *#@*         :                  
+                  :                      :                  
+                  :               .:**:  :                  
+                  :               :##@#  :                  
+                  :                :*:.  :                  
+                  :                      :                  
+                   ......................                   
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintDice4()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                    ......................                  
+                   :::.................   :                 
+                   ::.....          .::.  :                 
+                   :. :###*        :###*  :                 
+                   :. :#@#:        .*##:  :                 
+                   :.                     :                 
+                   :.                     :                 
+                   :.                     :                 
+                   :.                     .                 
+                   :   .:.          .::.  :                 
+                   :. :###*        .*###  :                 
+                   :  .*##:        .*##:  :                 
+                   :                      :                 
+                    ......................                  
+                                                            
+                                                            
+                                                            
+                                                            
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintDice5()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                  .........................                 
+                 .::...                   :                 
+                 .:. .:::.         .:**.  :                 
+                 .:. *##@*         *##@#  :                 
+                 ..  :#@#.         .*##.  :                 
+                 ..                       :                 
+                 ..         .:**.         :                 
+                 ..         *##@*         :                 
+                 ..         .***.         :                 
+                 ..                  .    :                 
+                 ..  :*##:         .**#*  :                 
+                 ..  *##@*         :##@#  :                 
+                 ..  .:*:.          :::.  :                 
+                 ..                       :                 
+                   .......................                  
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+
+    )" << endl;
+}
+
+void ConsoleUI::PrintDice6()
+{
+    cout << R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                  ........................                  
+                  :::..                  :                  
+                  :. .***.        .***.  :                  
+                  :. *##@*        :##@*  :                  
+                  :. .:*:          :*:.  :                  
+                  :    .            ..   :                  
+                  :  :*##:        .*##*  :                  
+                  :  :##@:        .##@*  :                  
+                  :   .:.          ...   :                  
+                  :   ...          ...   :                  
+                  :  :*##:        .*##*  :                  
+                  :  .#@#:        .*##:  :  ...             
+                  :                      :  ...             
+                   .......................                  
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+
+    )" << endl;
+}
+
+
+
+void ConsoleUI::PrintDiceAnimationBySpeed(int delayMilliseconds)
+{
+    int frame = 0;
+
+    string Frames[5] =
+    {
+        R"(
+                                                                    
+                                                            
+                                                            
+      ............   ..........                             
+ ...........................-**=-:.                         
+..........................-#%#+=--==-.                      
+ .......................-#%%%*+=:..-===-.                   
+ .....................-*%%%%#*===----=====:.                
+ ....................+*%%%%%#+===---:---:.:=-.              
+ ...................*+#+**##*=:.:--:. :--:.-=-              
+ ..................=%##***%*+=-:.:---:-------:              
+ .................:#%%%%%#*======----------=-.              
+  ................+#+#%#*+=:::---====--...---               
+    ..............#=##*+=--...:-----===-::--.               
+       ..........=%##+==----------------===-.               
+       ..........+#*=-:::---:..::-:....----.                
+             .....===:...:--:...:--:..:--:.                 
+                 ...:-=-------::-------:.                   
+                      .:-----:...:---:.                     
+                         ..:--::::-:.                       
+                             .::-:.                         
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+
+        )",
+        R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                       .:.                                  
+                      =%%#*=-:.                             
+                     =%#**###*+=:.                          
+                    =%#: .+*####*+=::.                      
+                   =%##=:=*####*****+=-:.                   
+                  =%%###*******=..=**++==-:.                
+                 =%####**-::***- :=**+=-====-               
+                -%#=-=**+. :+*******+-.:====:               
+               :%#+ ..***++********+=::-===:                
+               +##*==*******+*****+=--:-==:                 
+               .-+********=. .+**+=--..-=-                  
+                  .:-+****+:.=**+=-----=-                   
+                      .-=+*****+=-==-::-                    
+                         .:-++==--==:.:                     
+                             .::-----:                      
+                                  ...                       
+                                                            
+                                                            
+
+        )",
+        R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                    .:::...                                 
+                   #%%%%%%%%%###**++==-:                    
+                  =@%*-:=#########*###**+-                  
+                  %%#. .:######*-  :##*+==+:                
+                 -@%#*==*######*: :+#**+::=+=.              
+                 #%%#####*=-=####*###**=.:==++              
+                :@%#####*-  :+#######*+=--====              
+                +%%######+::+#######**+==-===-              
+                %%#-..=#######*++###**==-.-==:              
+               -@%*  :=######+. .-#**+==-.-==.              
+               +%%#*++#######+. -*#*++==--==-               
+               +###***########**##**+=====-=:               
+                -++---====+++++++++======- -.               
+                  -+=-::---::--------====:.-                
+                    -+=---::..:::::::--==--.                
+                      .:::::::::::....:----                 
+                                    ......                  
+                                                            
+                                                            
+                                                 :          
+                                                            
+                                                            
+                                                            
+
+        )",
+        R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                         :-====-::.                         
+                       -#%*::*######*+=-.                   
+                     =#%####*+*########*+:                  
+                   =#%######--*######**+==.                 
+                 .#%#########*==####*+=-.:-                 
+                 +%##########*=+***+===-.-=                 
+                 **+++++++*****++==========.                
+                 =*++======-:-=====-==--===:                
+                 -*++======- .-======- :===:                
+                  #++===::-==========-:-===:                
+                  +*+===:.:===============-                 
+                  :*=..=================-:                  
+                   -+-:-===============-.                   
+                     :--=============-.                     
+                          ..::-----:.                       
+                                                            
+                                             ..             
+                                                            
+                                                            
+                                                            
+
+        )",
+        R"(
+                                                            
+                                                            
+                                                            
+                                                            
+                                                            
+                       .-==--:.                             
+                     :*%@@@@%%%%#+-.                        
+                    +%++%@@@@@%%#*++=-.                     
+                  .*%+=%@@@%@%%#*+======:.                  
+                 .*@%%%%%@@%@%%*+=-:.-=====:                
+                .*@@%%+-%@@@%%*+==.. .-======-.             
+               .*@@%%+-#@@@%%*+===-..---=======-.           
+              .#@%%@%%%%%@%%*+===-----------::===.          
+             .*@%%@@%%#=#%%*+==------------.  :-=:          
+             =@%%@@%%*:+%%*+==------.  :---...:==.          
+             #%%%%%%%%#%#*+=-..:----.  :-------=:           
+             =####%%%%##*==-:.  -----:-------==:            
+              :====+++++==---:::-------------=:             
+                .::---::--------------::----=:              
+                  .:---:::-----------.  .--=:               
+                     .:-:::----------:..:--:                
+                        ...:--::----------.                 
+                           ..::::::-----:.                  
+                                  .....                     
+                                                 :.         
+                                                            
+                                                            
+                                                            
+
+        )"
+    };
+
+    int FrameCount = 5;
+
+    // 키보드 입력이 들어올 때까지 계속 주사위 애니메이션 재생
+    while (!_kbhit())
+    {
+        system("cls");
+
+        // 현재 프레임 인덱스 변수
+        int currentFrame = frame % FrameCount;
+
+        // 현재 프레임 아스키 이미지 출력 코드
+        cout << CYAN << BOLD;
+        cout << Frames[currentFrame] << endl;
+        cout << RESET;
+
+        // 프레임 증가 코드
+        frame++;
+
+        // 프레임 간 대기 시간 코드
+        this_thread::sleep_for(chrono::milliseconds(delayMilliseconds));
+    }
+
+    // 버퍼에 남아있는 키 입력 소모
+    _getch();
+}
+/*
+    // 주사위 애니메이션 속도 조절 사용예시
+
+    // delayMilliseconds 값이 클수록 애니메이션이 느려집니다.
+    // delayMilliseconds 값이 작을수록 애니메이션이 빨라집니다.
+
+    // 예시)
+    // 700ms : 느린 애니메이션
+    // 300ms : 보통 속도 애니메이션
+    // 150ms : 빠른 애니메이션
+
+    int main()
+    {
+        // 느린 주사위 애니메이션 실행
+        ConsoleUI::PrintDiceAnimationBySpeed(700);
+
+        // 빠른 주사위 애니메이션 실행
+        ConsoleUI::PrintDiceAnimationBySpeed(100);
+
+        return 0;
+    }
+*/
+
+
+// 추가 목록 들 기존의 함수와 중복되는 것들 있는지 확인 부탁드립니다.
+// 기존의 함수들이 많아 그냥 수정된 버전으로 다시 만들었습니다.
+
+// [추가] 전투 시작 출력 함수
+void ConsoleUI::PrintBattleStart(GameContext& context)
+{
+    Player& player = context.GetPlayer();
+    Monster& monster = context.GetMonster();
+
+    PrintLine();
+    cout << "전투 시작!" << endl;
+    cout << "플레이어: " << player.GetName() << endl;
+    cout << "상대: " << monster.GetName() << endl;
+    PrintLine();
+}
+
+// [추가] 주사위 결과 출력 함수
+void ConsoleUI::PrintDiceResult(int diceValue)
+{
+    cout << "주사위 결과: " << diceValue << endl;
+
+    switch (diceValue)
+    {
+    case 1:
+        PrintDice1();
+        break;
+
+    case 2:
+        PrintDice2();
+        break;
+
+    case 3:
+        PrintDice3();
+        break;
+
+    case 4:
+        PrintDice4();
+        break;
+
+    case 5:
+        PrintDice5();
+        break;
+
+    case 6:
+        PrintDice6();
+        break;
+
+    default:
+        PrintError("잘못된 주사위 값입니다.");
+        break;
+    }
+}
+
+// [추가] 플레이어 일반 공격 결과 출력 함수
+void ConsoleUI::PrintPlayerMeleeAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage
+)
+{
+    cout << playerName << "의 일반 공격!" << endl;
+    cout << monsterName << "에게 " << damage << " 데미지를 입혔습니다." << endl;
+}
+
+// [추가] 플레이어 스킬 공격 결과 출력 함수
+void ConsoleUI::PrintPlayerSkillAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage
+)
+{
+    cout << playerName << "의 스킬 공격!" << endl;
+    cout << monsterName << "에게 " << damage << " 데미지를 입혔습니다." << endl;
+}
+
+// [추가] 공격 실패 출력 함수
+void ConsoleUI::PrintAttackMiss()
+{
+    PrintMessage("공격이 빗나갔습니다.");
+}
+
+// [추가] 스킬 실패 출력 함수
+void ConsoleUI::PrintSkillMiss()
+{
+    PrintMessage("스킬 사용에 실패했습니다.");
+}
+
+// [추가] MP 부족 출력 함수
+void ConsoleUI::PrintNotEnoughMp()
+{
+    PrintError("MP가 부족합니다.");
+}
+
+// [추가] 스턴 성공 출력 함수
+void ConsoleUI::PrintStunSuccess(const std::string& monsterName)
+{
+    cout << "치명타!" << endl;
+    cout << monsterName << "이/가 스턴 상태가 되었습니다." << endl;
+}
+
+// [추가] 몬스터 스턴 상태 출력 함수
+void ConsoleUI::PrintMonsterStunned(const std::string& monsterName)
+{
+    cout << monsterName << "은/는 스턴 상태로 행동하지 못했습니다." << endl;
+}
+
+// [추가] 몬스터 공격 결과 출력 함수
+void ConsoleUI::PrintMonsterAttackResult(
+    const std::string& monsterName,
+    const std::string& playerName,
+    int damage
+)
+{
+    cout << monsterName << "의 공격!" << endl;
+    cout << playerName << "이/가 " << damage << " 데미지를 받았습니다." << endl;
+}
+
+// [추가] 도망 성공 출력 함수
+void ConsoleUI::PrintRunawaySuccess()
+{
+    PrintSuccess("도망에 성공했습니다.");
+}
+
+// [추가] 도망 실패 출력 함수
+void ConsoleUI::PrintRunawayFail()
+{
+    PrintError("도망에 실패했습니다.");
+}
+
+// [추가] 전투 승리 출력 함수
+void ConsoleUI::PrintBattleVictory(const std::string& monsterName)
+{
+    PrintSuccess(monsterName + "을/를 쓰러뜨렸습니다.");
+}
+
+// [추가] 전투 패배 출력 함수
+void ConsoleUI::PrintBattleDefeat(const std::string& playerName)
+{
+    PrintError(playerName + "이/가 쓰러졌습니다.");
+}
+
+// [추가] 전투 중단 출력 함수
+void ConsoleUI::PrintBattleStopped()
+{
+    PrintMessage("전투를 중단했습니다.");
+}
+
+// [추가] 보상 출력 함수
+void ConsoleUI::PrintReward(int exp, int gold)
+{
+    PrintLine();
+    cout << "전투 보상" << endl;
+    cout << "경험치 +" << exp << endl;
+    cout << "골드 +" << gold << endl;
+    PrintLine();
+}
+
+// [추가] 레벨업 출력 함수
+void ConsoleUI::PrintLevelUp(const std::string& playerName, int level)
+{
+    PrintSuccess(playerName + "의 레벨이 올랐습니다.");
+    cout << "현재 레벨: " << level << endl;
+}
+
+
+void ConsoleUI::PrintAct1Cutscene()
+{
+    ShowCutScene1();
+}
+
+void ConsoleUI::PrintAct2Cutscene()
+{
+    ShowCutScene2();
+}
+
+void ConsoleUI::PrintAct3Cutscene()
+{
+    ShowCutScene3();
+}
+
+void ConsoleUI::PrintEnding()
+{
+    PrintLine();
+    PrintTitle("엔딩");
+    PrintLine();
+    PrintMessage("게임이 종료되었습니다.");
+    PrintLine();
+}
+
+void ConsoleUI::PrintPlayerStatus(GameContext& context)
+{
+    PrintPlayerStatusEveryTime(context);
+}
+
+//컷신 화면 나누기
+void ConsoleUI::PrintFixedWidthText(const std::string& text, int width)
+{
+    std::string output = text;
+
+    if ((int)output.length() > width)
+    {
+        output = output.substr(0, width);
+    }
+
+    std::cout << std::left << std::setw(width) << output;
+}
+
+void ConsoleUI::DrawCutSceneScreen(
+    const std::vector<std::string>& sceneLines,
+    const std::vector<std::string>& dialogueLines
+)
+{
+    ClearScreen();
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    int consoleWidth = 120;
+    int consoleHeight = 35;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    }
+
+    // 좌우 테두리 2칸을 제외한 실제 내용 폭
+    int screenWidth = consoleWidth - 2;
+
+    // 최소 크기 보정
+    if (screenWidth < 40)
+    {
+        screenWidth = 40;
+    }
+
+    if (consoleHeight < 20)
+    {
+        consoleHeight = 20;
+    }
+
+    // 전체 출력 줄 수 계산
+    // 위/중간/아래 테두리 3줄 + 대기 문구 공간 약 2줄을 제외
+    int usableHeight = consoleHeight - 5;
+
+    // 상단 컷신 영역 약 2/3
+    int sceneHeight = usableHeight * 2 / 3;
+
+    // 하단 대사 영역 약 1/3
+    int dialogueHeight = usableHeight - sceneHeight;
+
+    // 너무 작아지는 것 방지
+    if (sceneHeight < 10)
+    {
+        sceneHeight = 10;
+    }
+
+    if (dialogueHeight < 5)
+    {
+        dialogueHeight = 5;
+    }
+
+    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+
+    // 상단 컷신 영역
+    for (int i = 0; i < sceneHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i < static_cast<int>(sceneLines.size()))
+        {
+            PrintFixedWidthText(sceneLines[i], screenWidth);
+        }
+        else
+        {
+            PrintFixedWidthText("", screenWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+
+    // 하단 대사 영역
+    for (int i = 0; i < dialogueHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintFixedWidthText("[대사]", screenWidth);
+        }
+        else if (i - 1 < static_cast<int>(dialogueLines.size()))
+        {
+            PrintFixedWidthText(dialogueLines[i - 1], screenWidth);
+        }
+        else
+        {
+            PrintFixedWidthText("", screenWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+}
+
+void ConsoleUI::DrawGameScreen(
+    const std::vector<std::string>& cutSceneLines,
+    const std::vector<std::string>& logLines,
+    const std::vector<std::string>& statusLines,
+    const std::vector<std::string>& choiceLines
+)
+{
+    ClearScreen();
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    int consoleWidth = 120;
+    int consoleHeight = 35;
+
+    if (GetConsoleScreenBufferInfo(hConsole, &csbi))
+    {
+        consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+        consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
+    }
+
+    // 콘솔 끝까지 꽉 채우면 자동 줄바꿈이 생길 수 있으므로 여유를 둠
+    int totalWidth = consoleWidth - 6;
+    int totalHeight = consoleHeight - 4;
+
+    if (totalWidth < 80)
+    {
+        totalWidth = 80;
+    }
+
+    if (totalHeight < 24)
+    {
+        totalHeight = 24;
+    }
+
+    int leftWidth = totalWidth / 2;
+    int rightWidth = totalWidth - leftWidth - 1;
+
+    int topHeight = totalHeight * 2 / 3;
+    int bottomHeight = totalHeight - topHeight;
+
+    auto PrintCell = [](const std::string& text, int width)
+        {
+            std::string output = text;
+
+            if ((int)output.length() > width)
+            {
+                output = output.substr(0, width);
+            }
+
+            std::cout << output;
+
+            int padding = width - static_cast<int>(output.length());
+
+            if (padding < 0)
+            {
+                padding = 0;
+            }
+
+            std::cout << std::string(padding, ' ');
+        };
+
+    auto PrintBorder = [&]()
+        {
+            std::cout
+                << "+"
+                << std::string(leftWidth, '-')
+                << "+"
+                << std::string(rightWidth, '-')
+                << "+"
+                << std::endl;
+        };
+
+    PrintBorder();
+
+    // 상단 영역: 컷신 / 게임 로그
+    for (int i = 0; i < topHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[컷신 / 렌더링]", leftWidth);
+        }
+        else if (i - 1 < static_cast<int>(cutSceneLines.size()))
+        {
+            PrintCell(cutSceneLines[i - 1], leftWidth);
+        }
+        else
+        {
+            PrintCell("", leftWidth);
+        }
+
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[게임 로그]", rightWidth);
+        }
+        else if (i - 1 < static_cast<int>(logLines.size()))
+        {
+            PrintCell(logLines[i - 1], rightWidth);
+        }
+        else
+        {
+            PrintCell("", rightWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    PrintBorder();
+
+    // 하단 영역: 플레이어 상태 / 선택창
+    for (int i = 0; i < bottomHeight; i++)
+    {
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[플레이어 스테이터스]", leftWidth);
+        }
+        else if (i - 1 < static_cast<int>(statusLines.size()))
+        {
+            PrintCell(statusLines[i - 1], leftWidth);
+        }
+        else
+        {
+            PrintCell("", leftWidth);
+        }
+
+        std::cout << "|";
+
+        if (i == 0)
+        {
+            PrintCell("[선택창]", rightWidth);
+        }
+        else if (i - 1 < static_cast<int>(choiceLines.size()))
+        {
+            PrintCell(choiceLines[i - 1], rightWidth);
+        }
+        else
+        {
+            PrintCell("", rightWidth);
+        }
+
+        std::cout << "|" << std::endl;
+    }
+
+    PrintBorder();
+}
+
+void ConsoleUI::DrawGameScreen(
+    const std::vector<std::string>& cutSceneLines,
+    const std::vector<std::string>& logLines,
+    Player& player,
+    const std::vector<std::string>& choiceLines
+)
+{
+    std::vector<std::string> statusLines;
+
+    statusLines.push_back("이름 : " + player.GetName());
+    statusLines.push_back("레벨 : " + std::to_string(player.GetLevel()) + " / " + std::to_string(player.GetMaxLevel()));
+    statusLines.push_back("HP : " + std::to_string(player.GetHp()) + " / " + std::to_string(player.GetMaxHp()));
+    statusLines.push_back("MP : " + std::to_string(player.GetMp()) + " / " + std::to_string(player.GetMaxMp()));
+    statusLines.push_back("EXP : " + std::to_string(player.GetExp()) + " / " + std::to_string(player.GetMaxExp()));
+    statusLines.push_back("공격력 : " + std::to_string(player.GetAttack()));
+    statusLines.push_back("방어력 : " + std::to_string(player.GetDefense()));
+    statusLines.push_back("골드 : " + std::to_string(player.GetGold()));
+
+    statusLines.push_back(
+        "STR " + std::to_string(player.GetStr()) +
+        " / DEX " + std::to_string(player.GetDex()) +
+        " / INT " + std::to_string(player.GetIntel()) +
+        " / LUK " + std::to_string(player.GetLuk())
+    );
+
+    DrawGameScreen(
+        cutSceneLines,
+        logLines,
+        statusLines,
+        choiceLines
+    );
+}
+

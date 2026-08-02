@@ -3,146 +3,60 @@
 #include "Player.h"
 #include "Monster.h"
 #include "Inventory.h"
+#include "Item.h"
 
-// GameContext
-// 
-// ¿ªÇÒ:
-// - °ÔÀÓ ÀüÃ¼¿¡¼­ °øÀ¯ÇØ¾ß ÇÏ´Â °´Ã¼¿Í »óÅÂ¸¦ º¸°üÇÏ´Â Å¬·¡½º
-// - Player, Monster, Inventory °°Àº °øÅë °´Ã¼¸¦ °¡Áö°í ÀÖ½À´Ï´Ù.
-// - °¢ ½Ã½ºÅÛÀº GameContext& context¸¦ ¸Å°³º¯¼ö·Î ¹Ş¾Æ
-//   ÇÊ¿äÇÑ °´Ã¼¿¡ Á¢±Ù
-// 
-// ±ÔÄ¢:
-// 1. Player, Monster, Inventory °´Ã¼´Â °¢ ½Ã½ºÅÛ¿¡¼­ »õ·Î ¸¸µéÁö ¾Ê´Â´Ù
-// 2. °øÅëÀ¸·Î »ç¿ëÇØ¾ß ÇÏ´Â °´Ã¼´Â GameContext¿¡ ÀúÀå
-// 3. °¢ ½Ã½ºÅÛÀº GameContext& context¸¦ ¸Å°³º¯¼ö·Î ¹Ş´Â´Ù
-// 4. ÇÊ¿äÇÑ °´Ã¼´Â GetPlayer(), GetMonster(), GetInventory()·Î °¡Á®¿Â´Ù
-// 5. °ªÀ» ¼öÁ¤ÇØ¾ß ÇÏ¸é GameContext&¸¦ »ç¿ëÇÕ´Ï´Ù.
-// 6. °ª¸¸ ÀĞÀ¸¸é const GameContext&¸¦ »ç¿ëÇÕ´Ï´Ù.
 
 class GameContext
 {
 public:
-    GameContext()
-        : isRunning(true),
-        isGameOver(false),
-        player(),
-        monster(),
-        inventory()
-    {
-    }
+    GameContext();
 
+    
+    ~GameContext();
 
-    // [°øÅë / °ÔÀÓ ÁøÇà »óÅÂ] ¸â¹ö ÇÔ¼ö
+   
+    GameContext(const GameContext&) = delete;
+    GameContext& operator=(const GameContext&) = delete;
 
+    // [ê²Œì„ ì‹¤í–‰ / ì¢…ë£Œ ìƒíƒœ]
     bool IsGameRunning() const;
     void SetGameRunning(bool isRunning);
 
     bool IsGameOver() const;
     void SetGameOver(bool isGameOver);
 
-    // [Player] Á¢±Ù ÇÔ¼ö
-    
-    // ÇÃ·¹ÀÌ¾î °´Ã¼¸¦ °¡Á®¿Â´Ù
-    // HP, °ø°İ·Â, °ñµå, ÀÌ¸§, Á÷¾÷ µîÀº Player Å¬·¡½º¿¡¼­ °ü¸®
-
+    // [Player ì ‘ê·¼]
     Player& GetPlayer();
+    const Player& GetPlayer() const;
 
-    // [Monster] Á¢±Ù ÇÔ¼ö
-    
-    // ¸ó½ºÅÍ °´Ã¼¸¦ °¡Á®¿Â´Ù
-    // ¸ó½ºÅÍ HP, °ø°İ·Â, º¸»ó °ñµå µîÀº Monster Å¬·¡½º¿¡¼­ °ü¸®
 
+    void SetPlayer(Player* newPlayer);
+
+  
+    bool HasPlayer() const;
+
+    // [Monster ì ‘ê·¼]
     Monster& GetMonster();
+    const Monster& GetMonster() const;
 
-    // [Inventory] Á¢±Ù ÇÔ¼ö
- 
-    // ÀÎº¥Åä¸® °´Ã¼¸¦ °¡Á®¿Â´Ù.
-    // Æ÷¼Ç °³¼ö, ¾ÆÀÌÅÛ °³¼ö µîÀº Inventory Å¬·¡½º¿¡¼­ °ü¸®
+    void SetMonster(const Monster& newMonster);
 
-
+    // [Inventory ì ‘ê·¼]
     Inventory& GetInventory();
+    const Inventory& GetInventory() const;
+
+    // [Item ì ‘ê·¼]
+    Item& GetItem();
+    const Item& GetItem() const;
 
 private:
-
-    // [°øÅë / °ÔÀÓ ÁøÇà »óÅÂ] ¸â¹ö º¯¼ö
- 
-
     bool isRunning;
     bool isGameOver;
 
+  
+    Player* player;
 
-    // [°øÅë °´Ã¼] ¸â¹ö º¯¼ö
-
-    // °ÔÀÓ ÀüÃ¼¿¡¼­ °øÀ¯ÇÏ´Â ½ÇÁ¦ µ¥ÀÌÅÍ °´Ã¼
-    // °¢ ½Ã½ºÅÛÀº ÀÌ °´Ã¼µéÀ» Á÷Á¢ »õ·Î ¸¸µéÁö ¾Ê°í,
-    // GameContextÀÇ Get ÇÔ¼ö·Î Á¢±Ù
-
-
-    Player player;
     Monster monster;
     Inventory inventory;
+    Item item;
 };
-
-// GameContext »ç¿ë¹ı ¿¹½Ã
-
-// [1] Player »ç¿ë ¿¹½Ã
-
-// ÇÃ·¹ÀÌ¾î HP¸¦ 10 °¨¼Ò½ÃÅ°´Â ¿¹½Ã
-
-// void PlayerSystem::DamagePlayer(GameContext& context)
-// {
-//     Player& player = context.GetPlayer();
-//
-//     int damage = 10;
-//     player.SetHp(player.GetHp() - damage);
-// }
-//
-// [2] Monster »ç¿ë ¿¹½Ã
-
-// ¸ó½ºÅÍ HP¸¦ 20 °¨¼Ò½ÃÅ°´Â ¿¹½Ã
-//
-// void SomeSystem::DamageMonster(GameContext& context)
-// {
-//     Monster& monster = context.GetMonster();
-//
-//     int damage = 20;
-//     monster.SetHp(monster.GetHp() - damage);
-// }
-//
-// [3] Battle »ç¿ë ¿¹½Ã
-
-// ÇÃ·¹ÀÌ¾î°¡ ¸ó½ºÅÍ¸¦ °ø°İÇÏ´Â ÀüÅõ ¿¹½Ã
-//
-// void BattleSystem::PlayerAttack(GameContext& context)
-// {
-//     Player& player = context.GetPlayer();
-//     Monster& monster = context.GetMonster();
-//
-//     int damage = player.GetAttack();
-//     monster.SetHp(monster.GetHp() - damage);
-//
-//     if (monster.GetHp() <= 0)
-//     {
-//         player.SetGold(player.GetGold() + monster.GetRewardGold());
-//     }
-// }
-//
-// [4] Inventory »ç¿ë ¿¹½Ã
-
-// HP Æ÷¼ÇÀ» »ç¿ëÇØ¼­ ÇÃ·¹ÀÌ¾î Ã¼·ÂÀ» È¸º¹ÇÏ´Â ¿¹½ÃÀÔ´Ï´Ù.
-//
-// void InventorySystem::UseHpPotion(GameContext& context)
-// {
-//     Player& player = context.GetPlayer();
-//     Inventory& inventory = context.GetInventory();
-//
-//     if (inventory.GetHpPotionCount() <= 0)
-//     {
-//         return;
-//     }
-//
-//     inventory.SetHpPotionCount(inventory.GetHpPotionCount() - 1);
-//     player.SetHp(player.GetHp() + 30);
-// }
-
