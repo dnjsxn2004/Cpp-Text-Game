@@ -62,3 +62,8 @@ int Jin::GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonu
 
     return FinalDefense;
 }
+
+std::string Jin::GetDescription() const
+{
+    return "쉽게 감정을 드러내지 않는 남자. 경찰이 되기 위해 조직에 잠입했지만, 끝내 가장 소중한 것들을 지켜내지 못했다.";
+}

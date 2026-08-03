@@ -2,14 +2,28 @@
 #include "Monster.h"
 #include <ctime>
 #include <cstdlib>
+#include "ConsolUI.h"
+#include "ScreenBuffer.h"
+#include <locale>
 
 int main()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
+
+    system("mode con cols=280 lines=80");
+
+    std::locale::global(std::locale(""));
+
+    SetConsoleCP(CP_UTF8);
+    SetConsoleOutputCP(CP_UTF8);
+
+    system("mode con cols=220 lines=60");
+
+    HWND console = GetConsoleWindow();
+    ShowWindow(console, SW_MAXIMIZE);
+
     GameManager gameManager;
     gameManager.Run();
-
-    
 
     return 0;
 }

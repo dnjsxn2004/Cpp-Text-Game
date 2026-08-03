@@ -1,4 +1,4 @@
-#include "Ryu.h"
+﻿#include "Ryu.h"
 
 Ryu::Ryu()
 {
@@ -61,4 +61,9 @@ int Ryu::GetTrueDefense(const StatBonus& equipBonus, const StatBonus& potionBonu
     int FinalDefense = finalDef + (finalStr * 0.5) + (finalDex * 0.5);
 
     return FinalDefense;
+}
+
+std::string Ryu::GetDescription() const
+{
+    return "차가운 눈빛 뒤에 깊은 압박감을 숨긴 야쿠자 후계자. 성공에 집착할수록 점점 더 돌이킬 수 없는 길로 빠져든다.";
 }

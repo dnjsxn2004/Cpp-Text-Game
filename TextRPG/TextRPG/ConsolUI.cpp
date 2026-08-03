@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <iomanip>
-
+#include <sstream>
 
 #include "Jin.h"
 #include "Ryu.h"
@@ -26,7 +26,21 @@
 #include "InputManager.h"
 
 
+
 using namespace std;
+class Shop;
+
+ConsoleUI::ConsoleUI()
+{
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(hConsole, &cursorInfo);
+
+    cursorInfo.bVisible = FALSE;
+
+    SetConsoleCursorInfo(hConsole, &cursorInfo);
+}
 
 // ANSI 색상 이스케이프 코드 정의
 #define RESET   "\033[0m"
@@ -40,9 +54,46 @@ using namespace std;
 #define BOLD    "\033[1m"
 
 
+
+void ConsoleUI::PrintTitleLine()
+{
+    char lineChar = '=';
+
+    // TODO: 콘솔 너비 또는 원하는 출력 길이 값
+    int lineLength = 178;
+
+    // '=' 문자를 lineLength개 가진 문자열
+    string line(lineLength, lineChar);
+
+    // TODO: cout.write에 문자열 데이터와 길이 전달
+    cout.write(line.c_str(), lineLength);
+
+    // TODO: 줄바꿈 출력
+    cout << endl;
+
+    /*cout.flush();*/
+}
+std::vector<std::string>
+ConsoleUI::SplitLines(const std::string& text)
+{
+    std::vector<std::string> lines;
+
+    std::stringstream ss(text);
+
+    std::string line;
+
+    while (std::getline(ss, line))
+    {
+        lines.push_back(line);
+    }
+
+    return lines;
+
+}
+
 void ConsoleUI::PrintLine()
 {
-	cout << "============================================================================" << endl;
+    cout << "========================================================================================================" << endl;
 }
 
 void ConsoleUI::PrintTitle(const std::string& title)
@@ -103,7 +154,6 @@ void ConsoleUI::PrintPlayerStatus(Player& player)
 
     PrintLine();
 }
-
 
 void ConsoleUI::SwitchMainMenu()
 {
@@ -352,19 +402,23 @@ void ConsoleUI::PrintShopMenu()
     PrintLine();
 }
 
-void ConsoleUI::SwitchShopMenu()
+void ConsoleUI::SwitchShopMenu(GameContext& context, Shop& shop)
 {
     while (true)
     {
         PrintShopMenu();
+
+        PrintMessage("현재 골드 : " + to_string(context.GetPlayer().GetGold()) + "G");
         int choice = InputManager::InputInMassegeToRange("상점에서 선택하세요: ", 0, 2);
         switch (choice)
         {
         case 1:
-            // 아이템 구매
+            // 구매 카테고리 메뉴로 이동
+            SwitchPurchaseCategoryMenu(context, shop);
             break;
         case 2:
-            // 아이템 판매
+            // 판매 메뉴로 이동
+            SwitchSellMenu(context, shop);
             break;
         case 0:
             return;
@@ -392,6 +446,234 @@ void ConsoleUI::PrintPurchaseSuccess(const Item& item)
 	PrintItem(item);
 
     PrintMessage("상점에서 아이템 구매 했습니다.");
+}
+
+void ConsoleUI::SwitchPurchaseCategoryMenu(GameContext& context, Shop& shop)
+{
+    while (true)
+    {
+        PrintLine();
+        PrintTitle("아이템 구매");
+        PrintLine();
+
+        PrintMessage("1. 소비 아이템");
+        PrintMessage("2. 무기");
+        PrintMessage("3. 방어구");
+        PrintMessage("0. 뒤로가기");
+
+        PrintLine();
+
+        int choice =
+            InputManager::InputInMassegeToRange("구매할 종류를 선택하세요: ", 0, 3);
+
+        switch (choice)
+        {
+        case 1:
+            PurchaseByCategory(context, shop, ShopCategory::Consumable);
+            break;
+
+        case 2:
+            PurchaseByCategory(context, shop, ShopCategory::Weapon);
+            break;
+
+        case 3:
+            PurchaseByCategory(context, shop, ShopCategory::Armor);
+            break;
+
+        case 0:
+            return;
+        }
+    }
+}
+
+void ConsoleUI::PurchaseByCategory(GameContext& context, Shop& shop, ShopCategory category) {
+
+    //선택한 카테고리의 상품만 가져오기
+    std::vector<Item> shopItems = shop.GetProductsByCategory(category);
+
+    //카테고리 제목 출력
+    PrintLine();
+
+    switch (category) {
+    case ShopCategory::Consumable:
+        PrintTitle("소비 아이템 상점");
+        break;
+
+    case ShopCategory::Weapon:
+        PrintTitle("무기 상점");
+        break;
+
+    case ShopCategory::Armor:
+        PrintTitle("방어구 상점");
+        break;
+    }
+
+    PrintLine();
+
+    //상품이 없는 경우
+    if (shopItems.empty()) {
+        PrintMessage(
+            "상점에 판매 중인 아이템이 없습니다."
+        );
+        return;
+    }
+
+    //상품 목록 출력
+    for (int i = 0; i < static_cast<int>(shopItems.size()); i++) {
+        const Item& item = shopItems[i];
+        const StatBonus& bonus = item.GetStatBonus();
+
+        string message = to_string(i + 1) + ". " + item.GetName() + "/ 가격: " + to_string(item.GetPrice()) + "G";
+
+        if (bonus.hp != 0) {
+            message += " / HP " + to_string(bonus.hp);
+        }
+
+        if (bonus.mp != 0) {
+            message += " / MP " + to_string(bonus.mp);
+        }
+
+        if (bonus.att != 0) {
+            message += " / 공격력 " + to_string(bonus.att);
+        }
+
+        if (bonus.def != 0) {
+            message += " / 방어력 " + to_string(bonus.def);
+        }
+
+        if (bonus.str != 0) {
+            message += " / 힘 " + to_string(bonus.str);
+        }
+
+        if (bonus.dex != 0) {
+            message += " / 민첩 " + to_string(bonus.dex);
+        }
+
+        if (bonus.intel != 0) {
+            message += " / 지능 " + to_string(bonus.intel);
+        }
+
+        if (bonus.luk != 0) {
+            message += " / 행운 " + to_string(bonus.luk);
+        }
+
+        PrintMessage(message);
+    }
+
+    PrintMessage("0. 뒤로가기");
+    PrintLine();
+
+    int selectedNumber = InputManager::InputInMassegeToRange("구매할 아이템 번호를 선택하세요: ", 0, static_cast<int>(shopItems.size()));
+
+    if (selectedNumber == 0) {
+        return;
+    }
+    //UI번호는 1부터시작 벡터 인덱스는 0부터 시작
+    int categoryIndex = selectedNumber - 1;
+
+    int quantity = 1;
+
+    //소비 아이템은 여러 개 구매 가능
+    if (category == ShopCategory::Consumable) {
+        quantity = InputManager::InputInMassegeToRange("구매 수량을 입력하세요.", 1, 99);
+    }
+
+    bool success = shop.BuyItemByCategory(category, categoryIndex, quantity, context);
+
+    if (success) {
+        PrintPurchaseSuccess(shopItems[categoryIndex]);
+
+        PrintMessage("구매 수량: " + to_string(quantity));
+
+        PrintMessage("남은 골드: " + to_string(context.GetPlayer().GetGold()) + "G");
+    }
+
+    else {
+        PrintMessage("아이템 구매에 실패했습니다.");
+    }
+}
+
+void ConsoleUI::SwitchSellMenu(GameContext& context, Shop& shop)
+{
+
+    Inventory& inventory = context.GetInventory();
+
+    //전체 인벤토리 원본
+    const std::vector<Item>& allItems = inventory.GetItems();
+
+    //판매 가능한 아이템들의 실제 인덱스
+    std::vector<int> sellableIndices = inventory.GetSellableItemIndices();
+
+    PrintLine();
+    PrintTitle("아이템 판매");
+    PrintLine();
+
+    //현재 골드 출력
+    PrintMessage("현재 골드 : " + std::to_string(context.GetPlayer().GetGold()) + "G");
+
+    PrintLine();
+
+    if (sellableIndices.empty()) {
+        PrintMessage("판매할 수 있는 아이템이 없습니다.");
+        InputManager::Wait();
+        return;
+    }
+
+    //판매 가능한 아이템 출력
+    for (int i = 0; i < static_cast<int>(sellableIndices.size()); i++) {
+        int realIndex = sellableIndices[i];
+
+        const Item& item = allItems[realIndex];
+
+        string message = to_string(i + 1) + ". " + item.GetName() + " / 보유 수량: " + to_string(item.GetQuantity()) + " / 판매가: " + to_string(shop.GetSellPrice(item)) + "G";
+
+        PrintMessage(message);
+    }
+
+    PrintMessage("0. 뒤로가기");
+    PrintLine();
+
+    int selectedNumber = InputManager::InputInMassegeToRange("판매할 아이템 번호를 선택하세요: ", 0, static_cast<int>(sellableIndices.size()));
+
+    if (selectedNumber == 0) {
+        return;
+    }
+
+    //화면 번호를 실제 인벤토리 인덱스로 변환
+    int realIndex = sellableIndices[selectedNumber - 1];
+
+    const Item& selectedItem = allItems[realIndex];
+
+    int quantity = 1;
+
+    //소비 아이템은 수량 선택 가능
+    if (selectedItem.GetType() == ItemType::Consumable) {
+        quantity = InputManager::InputInMassegeToRange("판매 수량을 입력하세요: ", 1, selectedItem.GetQuantity());
+    }
+
+    //SellItem에서 벡터 아이템이 삭제될 수 있으므로 판매 전에 출력할 정보 저장
+    std::string itemName = selectedItem.GetName();
+
+    int totalSellPrice = shop.GetSellPrice(selectedItem) * quantity;
+
+    bool success = shop.SellItem(realIndex, quantity, context);
+
+    if (success) {
+        PrintMessage(itemName + "을(를) 판매했습니다.");
+
+        PrintMessage("판매 수량: " + to_string(quantity));
+
+        PrintMessage("획득 골드: " + to_string(totalSellPrice) + "G");
+
+        PrintMessage("현재 골드: " + to_string(context.GetPlayer().GetGold()) + "G");
+    }
+
+    else {
+        PrintMessage(
+            "아이템 판매에 실패했습니다"
+        );
+    }
+    InputManager::Wait();
 }
 
 
@@ -631,114 +913,249 @@ void ConsoleUI::MoveCursor(int x, int y)
 	SetConsoleCursorPosition(hConsole, coord);
 }
 
+// 입력 버퍼에 남아 있는 키 입력을 모두 제거하는 함수
+void ConsoleUI::ClearInputBuffer()
+{
+    while (_kbhit())
+    {
+        _getch();
+    }
+}
+
+// 시작 화면 출력 함수
 void ConsoleUI::PrintStartScreen()
 {
     int frame = 0;
 
-    // 키보드 입력이 들어올 때까지 계속 파도 애니메이션을 재생
     while (!_kbhit())
     {
+        system("cls");
 
-        MoveCursor(0, 0);
+        // TODO: 현재 프레임 번호 변수 선언
+        int currentFrame = frame % 5;
 
-        cout.flush(); // 화면 클리어
+        // 상단 구분선
+        
+        PrintTitleLine();
+        
 
+        // TODO: 현재 프레임에 사용할 색상 문자열 변수 선언
+        const char* waveColor = WHITE;
 
-
-        // 2. 파도 물결 모양 아스키 아트 (프레임별 애니메이션)
-        if (frame % 2 == 0)
+        // TODO: 프레임 번호에 따른 색상 선택 분기
+        switch (currentFrame)
         {
-            system("cls");
+        case 0:
+            waveColor = WHITE;
+            break;
 
-            // 1. 상단 구분선 (청록색)
-            cout << CYAN;
-            PrintLine();
-            cout << RESET;
+        case 1:
+            waveColor = MAGENTA;
+            break;
 
+        case 2:
+            waveColor = BLUE;
+            break;
 
-            // [프레임 A]
-            cout << CYAN << BOLD;
-            cout << R"(
-                .  :%=..                 .--..                 . ..
-            .@@@@@*@@@@-           :@@@@@@@@@@           .@@@@@@@@@@.
-            @@@-.@@. ..@@=        .@@@ =@+.  @@@        .@@@. @@.. %@@
-        .@@# .@@    .@@        @@@  @@     @@.       .@@. @@*    =@@
-        @@@ ..@@@             .@@..@ @@              @@@ @ @@
-    .@@. .@%-@@.           @@@  %@.@@*           -@@. .@ @@@
-    :@@@ . .@@.#@@@.      .@@@.   #@@.@@@.      .@@@:.  .@@.@@@*
-@@      ..@@@.@@@@@@@@@@-      .@@@.*@@@@@@@@@@.      :@@@.@@@@@@@@@@@.
-                .@@@@@@@@@.           .@@@@@@@@@*            @@@@@@@@@@
+        case 3:
+            waveColor = GREEN;
+            break;
 
-                )" << endl;
-
+        case 4:
+            waveColor = RED;
+            break;
         }
-        else
+
+       
+        cout << waveColor << BOLD;
+
+        // TODO: 프레임별 파도 ASCII ART 출력 분기
+        switch (currentFrame)
         {
-            system("cls");
-
-            // 1. 상단 구분선 (청록색)
-            cout << CYAN;
-            PrintLine();
-            cout << RESET;
-
-            // [프레임 B - 좌우 한 칸 이동 및 모양 변화]
-            cout << BLUE << BOLD;
+        case 0:
             cout << R"(
-                 .  :%=..                 .--..
-              .@@@@@*@@@@-           :@@@@@@@@@@           .@@@@@
-             @@@-.@@. ..@@=        .@@@ =@+.  @@@        .@@@. @@
-           .@@# .@@    .@@        @@@  @@     @@.       .@@. @@*
-          @@@ ..@@@             .@@..@ @@              @@@ @ @@
-         @@. .@%-@@.           @@@  %@.@@*           -@@. .@ @@@
-      .@@.#@@@.              .@@@.   #@@.@@@.      .@@@:.  .@@.@@@*
-    .@@@            @@@.@@@@@@@@@@-      .@@@.*@@@@@@@@@@.      
-:@@@.@@@@@@@@@@
-    @@@@@    @@@@@@@@@.           .@@@@@@@@@*            @@@@@@@@@@
-                )" << endl;
+                                                                                                    
+                                                                                                    
+                                                                          .--..                     
+                                                                         :#**++=-::.                
+                                                                        :#*=-=++++=-:..             
+                                                                       -#*-...+++++++=-::.          
+                                                                      -#*+=::=+++++++++==--:.       
+                                                                     :#*++++++++++=-:.:=====--:.    
+                                                                    :#**++++=-:-===:..:====------:  
+                                                                   :**+==++=: ..====--====:.:-----  
+                                                                  .**=...=+==::==+++++===-.:-----   
+                                                                  +*+=..:=+++====++++===--------.   
+                                                                  =++++=+++++==-:-=====---:.---.    
+                                                                   .:-========: ..====---:.:--.     
+                                                                      .:-=====-::====--------.      
+                                                                          .:-=======-----:.:.       
+                                                                             ..-==-------.:.        
+                                                                                 ..::-----.         
+                                                                                      ...                                                                                                               
+                                                                                                    
+                                                                                                    
+
+            )" << endl;
+            break;
+
+        case 1:
+            cout << R"(
+                                                     
+                                               
+                                                                           .:---::.                 
+                                                                         -*#=:-######*+=-:.         
+                                                                      .=#%##***###########*=.       
+                                                                    .=%%#####+:.+########**+=:      
+                                                                   =%%########**########*+=--=      
+                                                                  *@%##########=::*###*+==-..=.     
+                                                                 :%#****########****++====-.-=:     
+                                                                 -#*+++++++++****++========-==-     
+                                                                 .#+++=======--=======-=---====     
+                                                                  **++=======. .-=====-=- .====.    
+                                                                  =*++===--===--========-.-====.    
+                                                                  :*++===: .-===========--====-     
+                                                                   *+=:-==--=================:      
+                                                                   :*-  :==================-.       
+                                                                    .==-=================-:         
+                                                                      .::--=========----:           
+                                                                             ..::---::.             
+                                                                                                    
+                                                                                                    
+
+            )" << endl;
+            break;
+
+        case 2:
+            cout << R"(                                                                     
+                                                                                                    
+                                                                                                    
+                                                                          -===-:.                   
+                                                                        +%%@@@@%%%#+-.              
+                                                                      .#*-#@@@@%%%*++==-.           
+                                                                     :%%*%@@@%%%%*+=---===:.        
+                                                                    :%@%%*#%@@%%*+=-.  -=====:      
+                                                                   -%@%%=-#@@@%*+==-...--======-.   
+                                                                  -%@%%%%%%%@%*+==-----------:-==.  
+                                                                 :%%%@%%%++%%*+==-----------  .-=:  
+                                                                .%%%%%%%+-#%*+=------.  :---..:-=.  
+                                                                :%%%%%%%%%#*==-. .---:..:-------.   
+                                                                 -****###*+=--:. .-------------.    
+                                                                  .:::----==------------------.     
+                                                                     .:--:::----------:  .---.      
+                                                                        .::::---------:..:--.       
+                                                                           ..::-::---------.        
+                                                                              ...:.::----:          
+                                                                                                    
+                                                                                   
+               
+                                                                                                    
+            )" << endl;
+            break;
+
+        case 3:
+            cout << R"(
+                                                                                                                                                                                                        
+                                 
+                                                                      .+**+++===---::...            
+                                                                      #%%#**##############+=:       
+                                                                     -@%=   +#######+--*##*++=:     
+                                                                     #%#=..=*######=  :=#**+-=+=.   
+                                                                    -@%#######**###*=-+##**= :=++:  
+                                                                    #%%#####*:  -########*+-.-====  
+                                                                   .@%######+  :=#######**+=-=====  
+                                                                   +%%#+=*###*+*########*+===:===:  
+                                                                   %%#: ..*######+-:-*#**+==- -==.  
+                                                                  -%%#=.:+######*: .:+#**===:.==-   
+                                                                  =%%############+--*#**+====-==:   
+                                                                  :***++***************+=====-:=.   
+                                                                    :==:.::-----=============:.-    
+                                                                      :==----::..::-:::---===:::    
+                                                                        :==----:::::::::::--=--     
+                                                                               ..........:::      
+                                                                                                    
+                                                                                  
+                  
+                                                                                                    
+            )" << endl;
+            break;
+
+        case 4:
+            cout << R"(
+                                                                                                    
+                                                                                                    
+                                                                              .=**=+##*++=-:.       
+                                                                            :+%##+=*##########*=.   
+                                                                          :*%%####*=-*########*+=:  
+                                                                        :*%#######*=+#######**+===. 
+                                                                       -%%##########+-=####*+==: -: 
+                                                                      .%############==*#**+====..-- 
+                                                                      :#*++++++*******+++======--== 
+                                                                      .#*++=========+======-=---===.
+                                                                       **++=======  .=====---: -===:
+                                                                       =*++====-==-:-=======-..-===:
+                                                                       .*++===. .-===========--===-.
+                                                                        ++=-===:-================-. 
+                                                                        :*-  -==================:.  
+                                                                         :+---================-.    
+                                                                           .:--==========-=--.      
+                                                                                ..::------:.        
+                                                                                                    
+                                                                                  
+                  
+
+            )" << endl;
+            break;
         }
+
+        cout << RESET; // 파도 색상 초기화
 
         // 3. 타이틀 로고 ASCII ART : 파도 (중앙 정렬)
-        cout << CYAN << BOLD;
+        cout << RED << BOLD;
 
         cout << R"(
-                      ____   _    ____   ___  
-                     |  _ \ / \  |  _ \ / _ \ 
-                     | |_) / _ \ | | | | | | |
-                     |  __/ ___ \| |_| | |_| |
-                     |_| /_/   \_\____/ \___/ 
-                
-                )" << endl;
+                                                                                                                        
+                                                ~?]}{11[<.            .|xtx              <(uXXu(i           [rrrxrrrx                    
+                                                [//|frvcXY{           'YUJ1            <YOmwZwbbp}          nkhkbkkkc                    
+                                                }/f(  `-vYJj          `zYU{           +LQL{`    :]:         rkk                       
+                                                [|/f    ?vcUl         ,vzz[           vJLt                  jdpZCLLx                     
+                                                ?1)|    -rnv,         .xuv?           tYUu                  jppLuuux                     
+                                                -}{<    /tj-          .jxxx           ;vXU>     x(+         rmZ               
+                                                _->]1)))(}l            ffj+            :|zYUJCCJU}          )LLLLLLQt                    
+                                                :I!!iiiI`              ><~I              ,~]1{]<'           !--------                    
+                                                                                                                        
+         )" << endl;
 
         cout << RESET;
 
         // 구분선
-        cout << CYAN;
-        PrintLine();
-        cout << RESET;
+        
+        PrintTitleLine();
+        
 
         // 4. 게임 서사 문구
-        cout << MAGENTA << BOLD << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n" << RESET;
+        cout << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n";
 
         // 구분선
-        cout << CYAN;
-        PrintLine();
-        cout << RESET;
+        
+        PrintTitleLine();
+        
 
         // 5. 시작 안내 문구
-        cout << WHITE << BOLD << "                   >> 아무 키나 누르면 시작됩니다 <<\n" << RESET;
+        cout << "                   >> 아무 키나 누르면 시작됩니다 <<\n";
 
         // 하단 구분선
-        cout << CYAN;
-        PrintLine();
-        cout << RESET;
+        
+        PrintTitleLine();
+        
 
         // 프레임 증가 및 대기 (300ms 간격으로 파도가 출렁거림)
         frame++;
         this_thread::sleep_for(chrono::milliseconds(300));
     }
 
-    // 버퍼에 남아있는 키 입력 소모 (다음 화면에 영향 없도록 버퍼 삭제)
-    _getch();
+    ClearInputBuffer();
+    system("cls");
 }
 /*
 // 시스템 담당자 사용예시
@@ -754,9 +1171,13 @@ int main()
 }
 */
 
-void ConsoleUI::PrintJinBlackImage()
+
+
+
+std::vector<std::string>
+ConsoleUI::PrintJinBlackImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
                   .                                         
                 .:.            ..          .                
                .-:.            .......      .               
@@ -791,12 +1212,13 @@ void ConsoleUI::PrintJinBlackImage()
                    .     .........::::::......... ....      
                           ...... ..::::..... ...            
 
-)" << endl;
+)" );
 }
 
-void ConsoleUI::PrintJinWhiteImage()
+std::vector<std::string>
+ConsoleUI::PrintJinWhiteImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
 @@@@@@@@@@@@@@@@#-.                        .+@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@%+:..           ......         :%@@@@@@@@@@@@@
 @@@@@@@@@@@@@%=:.              ............   :#@@@@@@@@@@@@
@@ -832,8 +1254,9 @@ void ConsoleUI::PrintJinWhiteImage()
                  .       ...  .....::::::...............    
                   .      ..........:::--:...............    
 
-)" << endl;
+)");
 }
+
 
 
 void ConsoleUI::PrintKangBlackImage()
@@ -916,9 +1339,11 @@ void ConsoleUI::PrintKangWhiteImage()
 }
 
 
-void ConsoleUI::PrintRyuBlackImage()
+
+std::vector<std::string>
+ConsoleUI::PrintRyuBlackImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
                           .. ...:.   ...                    
                    ..    .     ....::. ..                   
                   ..                 ... ..                 
@@ -952,12 +1377,13 @@ void ConsoleUI::PrintRyuBlackImage()
        . .           .++--##*+==+###=.:..:::.::.:. : .:::.  
   .    . .            :++=+***+-=**+:. .....:::...  :.::..  
 
-)" << endl;
+)" );
 }
 
-void ConsoleUI::PrintRyuWhiteImage()
+std::vector<std::string>
+ConsoleUI::PrintRyuWhiteImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
 %%%%%%%%%%%%%%%%%%%+::    ..  ...::......-%%%%%%%%%%%%%%%%%%
 @@@@@@@@@@@@@@@@@@*..           .. ..::....-*@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@#=.                   ... .:+@@@@@@@@@@@@@@
@@ -993,8 +1419,26 @@ void ConsoleUI::PrintRyuWhiteImage()
       ...            .==::+#+====+*##*- :..::..::..:  . ....
 .     . .             -*+=+%%#*+=+#%%*:.....::.:-: :. .:.::-
 
-)" << endl;
+)");
 }
+
+//캐릭터 소개 애니메이션
+void ConsoleUI::ShowJinRyuIntroAnimation()
+{
+    PrintJinBlackImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    ClearScreen();
+    PrintJinWhiteImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    ClearScreen();
+    PrintRyuBlackImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    ClearScreen();
+    PrintRyuWhiteImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+	ClearScreen();
+}
+
 
 
 void ConsoleUI::PrintJinLogo()
@@ -1171,14 +1615,15 @@ void ConsoleUI::ShowRyuIntro()
     PrintLine();
 }
 
+// 캐릭터 소개 화면
 void ConsoleUI::ShowCharacterIntro()
 {
     PrintLine();
-    PrintTitle("캐릭터 소개");
+    PrintTitle("캐릭터 선택");
     PrintLine();
     cout << "1. 진태식: 유도 선수 출신, 강력한 근접 공격과 방어 능력을 가진 캐릭터." << endl;
-    cout << "2. 강사라: 태권도 선수 출신, 빠른 속도와 다양한 기술을 가진 캐릭터." << endl;
-    cout << "3. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << endl;
+    cout << "2. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << endl;
+    cout << "0. 게임 종료" << endl;
     PrintLine();
 }
 
@@ -3005,40 +3450,32 @@ void ConsoleUI::PrintNewCutScene24Image()
 
 
 // 주사위
-void ConsoleUI::PrintDice1()
+std::vector<std::string>
+ConsoleUI::PrintDice1()
 {
-    cout << R"(
-                                                            
-                                                            
-                                                            
-                                                            
-                  .........................                 
-                 .:::..................   ..                
-                 ::....                   ..                
-                 ::..                     ..                
-                 :..                      ..                
-                 :.                       ..                
-                 :.         .:::.         ..                
-                 :.         *####.        ..                
-                 :.         :###:         ..                
-                 :.                       ..                
-                 :.                       ..                
-                 :.                       ..                
-                 :.                       ..                
-                 :.                       ..                
-                  .........................                 
-                                                            
-                                                            
-                                                            
-                                                            
-                                                            
-
-    )" << endl;
+    return SplitLines(R"(
+                          .........................                 
+                         .:::..................   ..                
+                         ::....                   ..                
+                         ::..                     ..                
+                         :..                      ..                
+                         :.                       ..                
+                         :.         .:::.         ..                
+                         :.         *####.        ..                
+                         :.         :###:         ..                
+                         :.                       ..                
+                         :.                       ..                
+                         :.                       ..                
+                         :.                       ..                
+                         :.                       ..                
+                          .........................                 
+)");
 }
 
-void ConsoleUI::PrintDice2()
+std::vector<std::string>
+ConsoleUI::PrintDice2()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3064,13 +3501,13 @@ void ConsoleUI::PrintDice2()
                                                             
                                                             
                                                             
-
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice3()
+std::vector<std::string>
+ConsoleUI::PrintDice3()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3096,12 +3533,13 @@ void ConsoleUI::PrintDice3()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice4()
+std::vector<std::string>
+ConsoleUI::PrintDice4()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3126,12 +3564,13 @@ void ConsoleUI::PrintDice4()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice5()
+std::vector<std::string>
+ConsoleUI::PrintDice5()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3158,12 +3597,13 @@ void ConsoleUI::PrintDice5()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice6()
+std::vector<std::string>
+ConsoleUI::PrintDice6()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3190,8 +3630,39 @@ void ConsoleUI::PrintDice6()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
+
+std::vector<std::string>
+ConsoleUI::PrintDiceResult(int diceValue)
+{
+    switch (diceValue)
+    {
+    case 1:
+        return PrintDice1();
+
+    case 2:
+        return PrintDice2();
+
+    case 3:
+        return PrintDice3();
+
+    case 4:
+        return PrintDice4();
+
+    case 5:
+        return PrintDice5();
+
+    case 6:
+        return PrintDice6();
+
+    default:
+        return SplitLines(R"(
+잘못된 주사위 값
+)");
+    }
+}
+
 
 
 
@@ -3413,154 +3884,6 @@ void ConsoleUI::PrintBattleStart(GameContext& context)
     PrintLine();
 }
 
-// [추가] 주사위 결과 출력 함수
-void ConsoleUI::PrintDiceResult(int diceValue)
-{
-    cout << "주사위 결과: " << diceValue << endl;
-
-    switch (diceValue)
-    {
-    case 1:
-        PrintDice1();
-        break;
-
-    case 2:
-        PrintDice2();
-        break;
-
-    case 3:
-        PrintDice3();
-        break;
-
-    case 4:
-        PrintDice4();
-        break;
-
-    case 5:
-        PrintDice5();
-        break;
-
-    case 6:
-        PrintDice6();
-        break;
-
-    default:
-        PrintError("잘못된 주사위 값입니다.");
-        break;
-    }
-}
-
-// [추가] 플레이어 일반 공격 결과 출력 함수
-void ConsoleUI::PrintPlayerMeleeAttackResultMessage(
-    const std::string& playerName,
-    const std::string& monsterName,
-    int damage
-)
-{
-    cout << playerName << "의 일반 공격!" << endl;
-    cout << monsterName << "에게 " << damage << " 데미지를 입혔습니다." << endl;
-}
-
-// [추가] 플레이어 스킬 공격 결과 출력 함수
-void ConsoleUI::PrintPlayerSkillAttackResultMessage(
-    const std::string& playerName,
-    const std::string& monsterName,
-    int damage
-)
-{
-    cout << playerName << "의 스킬 공격!" << endl;
-    cout << monsterName << "에게 " << damage << " 데미지를 입혔습니다." << endl;
-}
-
-// [추가] 공격 실패 출력 함수
-void ConsoleUI::PrintAttackMiss()
-{
-    PrintMessage("공격이 빗나갔습니다.");
-}
-
-// [추가] 스킬 실패 출력 함수
-void ConsoleUI::PrintSkillMiss()
-{
-    PrintMessage("스킬 사용에 실패했습니다.");
-}
-
-// [추가] MP 부족 출력 함수
-void ConsoleUI::PrintNotEnoughMp()
-{
-    PrintError("MP가 부족합니다.");
-}
-
-// [추가] 스턴 성공 출력 함수
-void ConsoleUI::PrintStunSuccess(const std::string& monsterName)
-{
-    cout << "치명타!" << endl;
-    cout << monsterName << "이/가 스턴 상태가 되었습니다." << endl;
-}
-
-// [추가] 몬스터 스턴 상태 출력 함수
-void ConsoleUI::PrintMonsterStunned(const std::string& monsterName)
-{
-    cout << monsterName << "은/는 스턴 상태로 행동하지 못했습니다." << endl;
-}
-
-// [추가] 몬스터 공격 결과 출력 함수
-void ConsoleUI::PrintMonsterAttackResult(
-    const std::string& monsterName,
-    const std::string& playerName,
-    int damage
-)
-{
-    cout << monsterName << "의 공격!" << endl;
-    cout << playerName << "이/가 " << damage << " 데미지를 받았습니다." << endl;
-}
-
-// [추가] 도망 성공 출력 함수
-void ConsoleUI::PrintRunawaySuccess()
-{
-    PrintSuccess("도망에 성공했습니다.");
-}
-
-// [추가] 도망 실패 출력 함수
-void ConsoleUI::PrintRunawayFail()
-{
-    PrintError("도망에 실패했습니다.");
-}
-
-// [추가] 전투 승리 출력 함수
-void ConsoleUI::PrintBattleVictory(const std::string& monsterName)
-{
-    PrintSuccess(monsterName + "을/를 쓰러뜨렸습니다.");
-}
-
-// [추가] 전투 패배 출력 함수
-void ConsoleUI::PrintBattleDefeat(const std::string& playerName)
-{
-    PrintError(playerName + "이/가 쓰러졌습니다.");
-}
-
-// [추가] 전투 중단 출력 함수
-void ConsoleUI::PrintBattleStopped()
-{
-    PrintMessage("전투를 중단했습니다.");
-}
-
-// [추가] 보상 출력 함수
-void ConsoleUI::PrintReward(int exp, int gold)
-{
-    PrintLine();
-    cout << "전투 보상" << endl;
-    cout << "경험치 +" << exp << endl;
-    cout << "골드 +" << gold << endl;
-    PrintLine();
-}
-
-// [추가] 레벨업 출력 함수
-void ConsoleUI::PrintLevelUp(const std::string& playerName, int level)
-{
-    PrintSuccess(playerName + "의 레벨이 올랐습니다.");
-    cout << "현재 레벨: " << level << endl;
-}
-
 
 void ConsoleUI::PrintAct1Cutscene()
 {
@@ -3606,111 +3929,105 @@ void ConsoleUI::PrintFixedWidthText(const std::string& text, int width)
 
 void ConsoleUI::DrawCutSceneScreen(
     const std::vector<std::string>& sceneLines,
-    const std::vector<std::string>& dialogueLines
-)
+    const std::vector<std::string>& dialogueLines)
 {
     ClearScreen();
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-    int consoleWidth = 120;
-    int consoleHeight = 35;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
 
-    if (GetConsoleScreenBufferInfo(hConsole, &csbi))
-    {
-        consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-        consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    }
+    int width =
+        csbi.srWindow.Right -
+        csbi.srWindow.Left + 1;
 
-    // 좌우 테두리 2칸을 제외한 실제 내용 폭
-    int screenWidth = consoleWidth - 2;
+    int height =
+        csbi.srWindow.Bottom -
+        csbi.srWindow.Top + 1;
 
-    // 최소 크기 보정
-    if (screenWidth < 40)
-    {
-        screenWidth = 40;
-    }
+    width -= 2;
+    height -= 2;
 
-    if (consoleHeight < 20)
-    {
-        consoleHeight = 20;
-    }
+    int sceneHeight = height * 3 / 4;
+    int dialogueHeight = height - sceneHeight - 2;
 
-    // 전체 출력 줄 수 계산
-    // 위/중간/아래 테두리 3줄 + 대기 문구 공간 약 2줄을 제외
-    int usableHeight = consoleHeight - 5;
+    // 상단
+    std::cout
+        << "┌"
+        << Repeat("─", width - 2)
+        << "┐\n";
 
-    // 상단 컷신 영역 약 2/3
-    int sceneHeight = usableHeight * 2 / 3;
-
-    // 하단 대사 영역 약 1/3
-    int dialogueHeight = usableHeight - sceneHeight;
-
-    // 너무 작아지는 것 방지
-    if (sceneHeight < 10)
-    {
-        sceneHeight = 10;
-    }
-
-    if (dialogueHeight < 5)
-    {
-        dialogueHeight = 5;
-    }
-
-    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
-
-    // 상단 컷신 영역
+    // 컷신 영역
     for (int i = 0; i < sceneHeight; i++)
     {
-        std::cout << "|";
+        std::string line =
+            (i < sceneLines.size()) ?
+            sceneLines[i] : "";
 
-        if (i < static_cast<int>(sceneLines.size()))
+        if ((int)line.length() > width - 4)
         {
-            PrintFixedWidthText(sceneLines[i], screenWidth);
-        }
-        else
-        {
-            PrintFixedWidthText("", screenWidth);
+            line = line.substr(0, width - 4);
         }
 
-        std::cout << "|" << std::endl;
+        std::cout
+            << "│ "
+            << line
+            << std::string(width - 3 - line.length(), ' ')
+            << "│\n";
     }
 
-    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+    // 중간선
+    std::cout
+        << "├"
+        << Repeat("─", width - 2)
+        << "┤\n";
 
-    // 하단 대사 영역
+    // 대사 영역
     for (int i = 0; i < dialogueHeight; i++)
     {
-        std::cout << "|";
+        std::string line =
+            (i < dialogueLines.size()) ?
+            dialogueLines[i] : "";
 
-        if (i == 0)
+        std::string message =
+            "계속하려면 Enter를 누르세요...";
+
+        if ((int)line.length() > width - 4)
         {
-            PrintFixedWidthText("[대사]", screenWidth);
-        }
-        else if (i - 1 < static_cast<int>(dialogueLines.size()))
-        {
-            PrintFixedWidthText(dialogueLines[i - 1], screenWidth);
-        }
-        else
-        {
-            PrintFixedWidthText("", screenWidth);
+            line = line.substr(0, width - 4);
         }
 
-        std::cout << "|" << std::endl;
+        std::cout
+            << "│ "
+            << line
+            << std::string(width - 3 - line.length(), ' ')
+            << "│\n";
     }
 
-    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+    // 하단
+    std::cout
+        << "└"
+        << Repeat("─", width - 2)
+        << "┘\n";
 }
+
+
+
+
+
+    
 
 void ConsoleUI::DrawGameScreen(
     const std::vector<std::string>& cutSceneLines,
     const std::vector<std::string>& logLines,
     const std::vector<std::string>& statusLines,
+    const std::vector<std::string>& monsterstatus,
     const std::vector<std::string>& choiceLines
 )
 {
-    ClearScreen();
+    MoveCursor(0, 0);
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -3769,9 +4086,9 @@ void ConsoleUI::DrawGameScreen(
         {
             std::cout
                 << "+"
-                << std::string(leftWidth, '-')
+                << Repeat("─", leftWidth)
                 << "+"
-                << std::string(rightWidth, '-')
+                << Repeat("─", rightWidth)
                 << "+"
                 << std::endl;
         };
@@ -3796,7 +4113,7 @@ void ConsoleUI::DrawGameScreen(
             PrintCell("", leftWidth);
         }
 
-        std::cout << "|";
+        std::cout << "||";
 
         if (i == 0)
         {
@@ -3816,75 +4133,429 @@ void ConsoleUI::DrawGameScreen(
 
     PrintBorder();
 
-    // 하단 영역: 플레이어 상태 / 선택창
+    // 하단 영역: 선택창 / 플레이어 상태 + 몬스터 상태
+    int playerStatusWidth = rightWidth / 2;
+    int monsterStatusWidth = rightWidth - playerStatusWidth - 1;
+
     for (int i = 0; i < bottomHeight; i++)
     {
         std::cout << "|";
 
+        // 왼쪽 하단: 선택창
         if (i == 0)
         {
-            PrintCell("[플레이어 스테이터스]", leftWidth);
+            PrintCell("[선택창]", leftWidth);
         }
-        else if (i - 1 < static_cast<int>(statusLines.size()))
+        else if (i - 1 < static_cast<int>(choiceLines.size()))
         {
-            PrintCell(statusLines[i - 1], leftWidth);
+            PrintCell(choiceLines[i - 1], leftWidth);
         }
         else
         {
             PrintCell("", leftWidth);
         }
 
-        std::cout << "|";
+        std::cout << "||";
 
+        // 오른쪽 하단 내부 왼쪽: 플레이어 스테이터스
         if (i == 0)
         {
-            PrintCell("[선택창]", rightWidth);
+            PrintCell("[플레이어]", playerStatusWidth);
         }
-        else if (i - 1 < static_cast<int>(choiceLines.size()))
+        else if (i - 1 < static_cast<int>(statusLines.size()))
         {
-            PrintCell(choiceLines[i - 1], rightWidth);
+            PrintCell(statusLines[i - 1], playerStatusWidth);
         }
         else
         {
-            PrintCell("", rightWidth);
+            PrintCell("", playerStatusWidth);
+        }
+
+        std::cout << "|";
+
+        // 오른쪽 하단 내부 오른쪽: 몬스터 스테이터스
+        if (i == 0)
+        {
+            PrintCell("[몬스터]", monsterStatusWidth);
+        }
+        else if (i - 1 < static_cast<int>(monsterstatus.size()))
+        {
+            PrintCell(monsterstatus[i - 1], monsterStatusWidth);
+        }
+        else
+        {
+            PrintCell("", monsterStatusWidth);
         }
 
         std::cout << "|" << std::endl;
     }
 
     PrintBorder();
+
+    
+
 }
 
-void ConsoleUI::DrawGameScreen(
-    const std::vector<std::string>& cutSceneLines,
-    const std::vector<std::string>& logLines,
-    Player& player,
-    const std::vector<std::string>& choiceLines
-)
+void ConsoleUI::Render(const ScreenBuffer& buffer)
 {
-    std::vector<std::string> statusLines;
+    int width = buffer.GetWidth();
+    int height = buffer.GetHeight();
 
-    statusLines.push_back("이름 : " + player.GetName());
-    statusLines.push_back("레벨 : " + std::to_string(player.GetLevel()) + " / " + std::to_string(player.GetMaxLevel()));
-    statusLines.push_back("HP : " + std::to_string(player.GetHp()) + " / " + std::to_string(player.GetMaxHp()));
-    statusLines.push_back("MP : " + std::to_string(player.GetMp()) + " / " + std::to_string(player.GetMaxMp()));
-    statusLines.push_back("EXP : " + std::to_string(player.GetExp()) + " / " + std::to_string(player.GetMaxExp()));
-    statusLines.push_back("공격력 : " + std::to_string(player.GetAttack()));
-    statusLines.push_back("방어력 : " + std::to_string(player.GetDefense()));
-    statusLines.push_back("골드 : " + std::to_string(player.GetGold()));
+    std::vector<CHAR_INFO> consoleBuffer(width * height);
 
-    statusLines.push_back(
-        "STR " + std::to_string(player.GetStr()) +
-        " / DEX " + std::to_string(player.GetDex()) +
-        " / INT " + std::to_string(player.GetIntel()) +
-        " / LUK " + std::to_string(player.GetLuk())
-    );
+    const auto& cells = buffer.GetBuffer();
 
-    DrawGameScreen(
-        cutSceneLines,
-        logLines,
-        statusLines,
-        choiceLines
-    );
+    for (int i = 0; i < cells.size(); i++)
+    {
+        consoleBuffer[i].Char.UnicodeChar = cells[i].ch;
+        consoleBuffer[i].Attributes = cells[i].color;
+    }
+
+    COORD bufferSize =
+    {
+        (SHORT)width,
+        (SHORT)height
+    };
+
+    COORD bufferCoord = { 0,0 };
+
+    SMALL_RECT writeRegion =
+    {
+        0,
+        0,
+        (SHORT)(width - 1),
+        (SHORT)(height - 1)
+    };
+
+    WriteConsoleOutputW(
+        hConsole,
+        consoleBuffer.data(),
+        bufferSize,
+        bufferCoord,
+        &writeRegion);
+}
+
+
+// 게임 로그 반환
+
+// 전투 로그 총괄
+void ConsoleUI::AddLog(
+    std::vector<std::string>& logs,
+    const std::string& text)
+{
+    logs.push_back(text);
+
+    if (logs.size() > 12)
+    {
+        logs.erase(logs.begin());
+    }
+}
+
+
+// 일반 공격 로그
+std::string
+ConsoleUI::PrintPlayerMeleeAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage)
+{
+    return playerName +
+        "의 공격! " +
+        monsterName +
+        "에게 " +
+        std::to_string(damage) +
+        " 데미지!";
+}
+
+
+// 스킬 공격 로그
+std::string
+ConsoleUI::PrintPlayerSkillAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage)
+{
+    return playerName +
+        "의 스킬 공격! " +
+        monsterName +
+        "에게 " +
+        std::to_string(damage) +
+        " 데미지!";
+}
+
+// mp 부족
+std::string
+ConsoleUI::PrintNotEnoughMp()
+{
+    return "MP가 부족합니다.";
+}
+
+
+// 스턴 성공
+std::string
+ConsoleUI::PrintStunSuccess(
+    const std::string& monsterName)
+{
+    return monsterName +
+        " 스턴 성공!";
+}
+
+// 몬스터 스턴 상태 출력
+std::string
+ConsoleUI::PrintMonsterStunned(
+    const std::string& monsterName)
+{
+    return monsterName +
+        "은(는) 기절 상태입니다.";
+}
+
+
+// 받은 데미지 로그
+std::string
+ConsoleUI::PrintMonsterAttackResult(
+    const std::string& monsterName,
+    const std::string& playerName,
+    int damage)
+{
+    return monsterName +
+        "의 공격! " +
+        playerName +
+        "에게 " +
+        std::to_string(damage) +
+        " 데미지!";
+}
+
+
+// 도망 성공
+std::string
+ConsoleUI::PrintRunawaySuccess()
+{
+    return "도망에 성공했습니다.";
+}
+
+
+// 도망 실패
+std::string
+ConsoleUI::PrintRunawayFail()
+{
+    return "도망에 실패했습니다.";
+}
+
+// 승리
+std::string
+ConsoleUI::PrintBattleVictory(
+    const std::string& monsterName)
+{
+    return monsterName +
+        " 처치 성공!";
+}
+
+// 패배
+std::string
+ConsoleUI::PrintBattleDefeat(
+    const std::string& playerName)
+{
+    return playerName +
+        "이(가) 쓰러졌습니다.";
+}
+
+// 리워드
+std::string
+ConsoleUI::PrintReward(
+    int exp,
+    int gold)
+{
+    return "EXP +" +
+        std::to_string(exp) +
+        " / GOLD +" +
+        std::to_string(gold);
+}
+
+// 렙업
+std::string
+ConsoleUI::PrintLevelUp(
+    const std::string& playerName,
+    int level)
+{
+    return playerName +
+        " Level Up! Lv." +
+        std::to_string(level);
+}
+
+//감나빗
+std::string
+ConsoleUI::PrintAttackMiss()
+{
+    return "공격이 빗나갔습니다.";
+}
+
+void ConsoleUI::DrawFrame(
+    int width,
+    int height)
+{
+    // 상단
+    std::cout << "┌";
+
+    for (int i = 0; i < width - 2; ++i)
+    {
+        std::cout << "─";
+    }
+
+    std::cout << "┐\n";
+
+    // 내부
+    for (int y = 0; y < height - 2; ++y)
+    {
+        std::cout << "│";
+
+        for (int x = 0; x < width - 2; ++x)
+        {
+            std::cout << " ";
+        }
+
+        std::cout << "│\n";
+    }
+
+    // 하단
+    std::cout << "└";
+
+    for (int i = 0; i < width - 2; ++i)
+    {
+        std::cout << "─";
+    }
+
+    std::cout << "┘\n";
+}
+
+
+
+void ConsoleUI::DrawFullLayout(const UIScreen& screen)
+{
+    ClearScreen();
+    MoveCursor(0, 0);
+
+    HANDLE hConsole =
+        GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    GetConsoleScreenBufferInfo(
+        hConsole,
+        &csbi);
+
+   
+    int consoleWidth =
+        csbi.srWindow.Right -
+        csbi.srWindow.Left + 1;
+
+    int consoleHeight =
+        csbi.srWindow.Bottom -
+        csbi.srWindow.Top + 1;
+
+   
+    int totalWidth = consoleWidth - 4;
+    int totalHeight = consoleHeight - 4;
+
+    int leftWidth = totalWidth / 2;
+    int rightWidth = totalWidth - leftWidth - 1;
+
+    int topHeight = totalHeight * 2 / 3;
+    int bottomHeight = totalHeight - topHeight - 1;
+
+    auto FitText =
+        [](const std::string& text, int width)
+        {
+            std::string output = text;
+
+            if ((int)output.size() > width)
+            {
+                output = output.substr(0, width);
+            }
+
+            output +=
+                std::string(
+                    width - output.size(),
+                    ' '
+                );
+
+            return output;
+        };
+
+    // 데이터 연결
+    const auto& leftTop = screen.a;
+    const auto& rightTop = screen.b;
+    const auto& leftBottom = screen.c;
+    const auto& rightBottom = screen.d;
+
+ 
+    std::cout
+        << "┌"
+        << Repeat("─", leftWidth)
+        << "┬"
+        << Repeat("─", rightWidth)
+        << "┐\n";
+
+    for (int i = 0; i < topHeight; i++)
+    {
+        std::string left =
+            (i < leftTop.size()) ?
+            leftTop[i] : "";
+
+        std::string right =
+            (i < rightTop.size()) ?
+            rightTop[i] : "";
+
+        std::cout
+            << "│"
+            << FitText(left, leftWidth)
+            << "│"
+            << FitText(right, rightWidth)
+            << "│\n";
+    }
+
+    std::cout
+        << "├"
+        << Repeat("─", leftWidth)
+        << "┼"
+        << Repeat("─", rightWidth)
+        << "┤\n";
+
+    for (int i = 0; i < bottomHeight; i++)
+    {
+        std::string left =
+            (i < leftBottom.size()) ?
+            leftBottom[i] : "";
+
+        std::string right =
+            (i < rightBottom.size()) ?
+            rightBottom[i] : "";
+
+        std::cout
+            << "│"
+            << FitText(left, leftWidth)
+            << "│"
+            << FitText(right, rightWidth)
+            << "│\n";
+    }
+
+    std::cout
+        << "└"
+        << Repeat("─", leftWidth)
+        << "┴"
+        << Repeat("─", rightWidth)
+        << "┘\n";
+}
+
+
+std::string ConsoleUI::Repeat(const std::string& text, int count)
+{
+    std::string result;
+
+    for (int i = 0; i < count; i++)
+    {
+        result += text;
+    }
+
+    return result;
 }
 
