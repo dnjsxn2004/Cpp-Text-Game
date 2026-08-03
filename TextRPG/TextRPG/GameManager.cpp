@@ -183,7 +183,7 @@ void GameManager::RenderMainMenu()
 {
     UIScreen screen;
 
-    playerStatus.clear();
+    std::vector<std::string> playerStatus;
 
     if (context.HasPlayer())
     {

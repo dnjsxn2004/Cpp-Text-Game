@@ -53,6 +53,25 @@ ConsoleUI::ConsoleUI()
 #define BOLD    "\033[1m"
 
 
+
+void ConsoleUI::PrintTitleLine()
+{
+    char lineChar = '=';
+
+    // TODO: 콘솔 너비 또는 원하는 출력 길이 값
+    int lineLength = 178;
+
+    // '=' 문자를 lineLength개 가진 문자열
+    string line(lineLength, lineChar);
+
+    // TODO: cout.write에 문자열 데이터와 길이 전달
+    cout.write(line.c_str(), lineLength);
+
+    // TODO: 줄바꿈 출력
+    cout << endl;
+
+    /*cout.flush();*/
+}
 std::vector<std::string>
 ConsoleUI::SplitLines(const std::string& text)
 {
@@ -68,11 +87,12 @@ ConsoleUI::SplitLines(const std::string& text)
     }
 
     return lines;
+
 }
 
 void ConsoleUI::PrintLine()
 {
-	cout << "============================================================================" << endl;
+    cout << "========================================================================================================" << endl;
 }
 
 void ConsoleUI::PrintTitle(const std::string& title)
@@ -133,7 +153,6 @@ void ConsoleUI::PrintPlayerStatus(Player& player)
 
     PrintLine();
 }
-
 
 void ConsoleUI::SwitchMainMenu()
 {
@@ -382,19 +401,23 @@ void ConsoleUI::PrintShopMenu()
     PrintLine();
 }
 
-void ConsoleUI::SwitchShopMenu()
+void ConsoleUI::SwitchShopMenu(GameContext& context, Shop& shop)
 {
     while (true)
     {
         PrintShopMenu();
+
+        PrintMessage("현재 골드 : " + to_string(context.GetPlayer().GetGold()) + "G");
         int choice = InputManager::InputInMassegeToRange("상점에서 선택하세요: ", 0, 2);
         switch (choice)
         {
         case 1:
-            // 아이템 구매
+            // 구매 카테고리 메뉴로 이동
+            SwitchPurchaseCategoryMenu(context, shop);
             break;
         case 2:
-            // 아이템 판매
+            // 판매 메뉴로 이동
+            SwitchSellMenu(context, shop);
             break;
         case 0:
             return;
@@ -422,6 +445,233 @@ void ConsoleUI::PrintPurchaseSuccess(const Item& item)
 	PrintItem(item);
 
     PrintMessage("상점에서 아이템 구매 했습니다.");
+}
+
+void ConsoleUI::SwitchPurchaseCategoryMenu(GameContext& context, Shop& shop)
+{
+    while (true)
+    {
+        PrintLine();
+        PrintTitle("아이템 구매");
+        PrintLine();
+
+        PrintMessage("1. 소비 아이템");
+        PrintMessage("2. 무기");
+        PrintMessage("3. 방어구");
+        PrintMessage("0. 뒤로가기");
+
+        PrintLine();
+
+        int choice =
+            InputManager::InputInMassegeToRange("구매할 종류를 선택하세요: ", 0, 3);
+
+        switch (choice)
+        {
+        case 1:
+            PurchaseByCategory(context, ShopCategory::Consumable);
+            break;
+
+        case 2:
+            PurchaseByCategory(context, ShopCategory::Weapon);
+            break;
+
+        case 3:
+            PurchaseByCategory(context, ShopCategory::Armor);
+            break;
+
+        case 0:
+            return;
+        }
+    }
+}
+
+void ConsoleUI::PurchaseByCategory(GameContext& context, Shop& shop, ShopCategory category) {
+
+    //선택한 카테고리의 상품만 가져오기
+    std::vector<Item> shopItems = shop.GetProductsByCategory(category);
+
+    //카테고리 제목 출력
+    PrintLine();
+
+    switch (category) {
+    case ShopCategory::Consumable:
+        PrintTitle("소비 아이템 상점");
+        break;
+
+    case ShopCategory::Weapon:
+        PrintTitle("무기 상점");
+        break;
+
+    case ShopCategory::Armor:
+        PrintTitle("방어구 상점");
+        break;
+    }
+
+    PrintLine();
+
+    //상품이 없는 경우
+    if (shopItems.empty()) {
+        PrintMessage(
+            "상점에 판매 중인 아이템이 없습니다."
+        );
+        return;
+    }
+
+    //상품 목록 출력
+    for (int i = 0; i < static_cast<int>(shopItems.size()); i++) {
+        const Item& item = shopItems[i];
+        const StatBonus& bonus = item.GetStatBonus();
+
+        string message = to_string(i + 1) + ". " + item.GetName() + "/ 가격: " + to_string(item.GetPrice()) + "G";
+
+        if (bonus.hp != 0) {
+            message += " / HP " + to_string(bonus.hp);
+        }
+
+        if (bonus.mp != 0) {
+            message += " / MP " + to_string(bonus.mp);
+        }
+
+        if (bonus.att != 0) {
+            message += " / 공격력 " + to_string(bonus.att);
+        }
+
+        if (bonus.def != 0) {
+            message += " / 방어력 " + to_string(bonus.def);
+        }
+
+        if (bonus.str != 0) {
+            message += " / 힘 " + to_string(bonus.str);
+        }
+
+        if (bonus.dex != 0) {
+            message += " / 민첩 " + to_string(bonus.dex);
+        }
+
+        if (bonus.intel != 0) {
+            message += " / 지능 " + to_string(bonus.intel);
+        }
+
+        if (bonus.luk != 0) {
+            message += " / 행운 " + to_string(bonus.luk);
+        }
+
+        PrintMessage(message);
+    }
+
+    PrintMessage("0. 뒤로가기");
+    PrintLine();
+
+    int selectedNumber = InputManager::InputInMassegeToRange("구매할 아이템 번호를 선택하세요: ", 0, static_cast<int>(shopItems.size()));
+
+    if (selectedNumber == 0) {
+        return;
+    }
+    //UI번호는 1부터시작 벡터 인덱스는 0부터 시작
+    int categoryIndex = selectedNumber - 1;
+
+    int quantity = 1;
+
+    //소비 아이템은 여러 개 구매 가능
+    if (category == ShopCategory::Consumable) {
+        quantity = InputManager::InputInMassegeToRange("구매 수량을 입력하세요.", 1, 99);
+    }
+
+    bool success = shop.BuyItemByCategory(category, categoryIndex, quantity, context);
+
+    if (success) {
+        PrintPurchaseSuccess(shopItems[categoryIndex]);
+
+        PrintMessage("구매 수량: " + to_string(quantity));
+
+        PrintMessage("남은 골드: " + to_string(context.GetPlayer().GetGold()) + "G");
+    }
+
+    else {
+        PrintMessage("아이템 구매에 실패했습니다.");
+    }
+}
+
+void ConsoleUI::SwitchSellMenu(GameContext& context, Shop& shop) {
+
+    Inventory& inventory = context.GetInventory();
+
+    //전체 인벤토리 원본
+    const std::vector<Item>& allItems = inventory.GetItems();
+
+    //판매 가능한 아이템들의 실제 인덱스
+    std::vector<int> sellableIndices = inventory.GetSellableItemIndices();
+
+    PrintLine();
+    PrintTitle("아이템 판매");
+    PrintLine();
+
+    //현재 골드 출력
+    PrintMessage("현재 골드 : " + std::to_string(context.GetPlayer().GetGold()) + "G");
+
+    PrintLine();
+
+    if (sellableIndices.empty()) {
+        PrintMessage("판매할 수 있는 아이템이 없습니다.");
+        InputManager::Wait();
+        return;
+    }
+
+    //판매 가능한 아이템 출력
+    for (int i = 0; i < static_cast<int>(sellableIndices.size()); i++) {
+        int realIndex = sellableIndices[i];
+
+        const Item& item = allItems[realIndex];
+
+        string message = to_string(i + 1) + ". " + item.GetName() + " / 보유 수량: " + to_string(item.GetQuantity()) + " / 판매가: " + to_string(shop.GetSellPrice(item)) + "G";
+
+        PrintMessage(message);
+    }
+
+    PrintMessage("0. 뒤로가기");
+    PrintLine();
+
+    int selectedNumber = InputManager::InputInMassegeToRange("판매할 아이템 번호를 선택하세요: ", 0, static_cast<int>(sellableIndices.size()));
+
+    if (selectedNumber == 0) {
+        return;
+    }
+
+    //화면 번호를 실제 인벤토리 인덱스로 변환
+    int realIndex = sellableIndices[selectedNumber - 1];
+
+    const Item& selectedItem = allItems[realIndex];
+
+    int quantity = 1;
+
+    //소비 아이템은 수량 선택 가능
+    if (selectedItem.GetType() == ItemType::Consumable) {
+        quantity = InputManager::InputInMassegeToRange("판매 수량을 입력하세요: ", 1, selectedItem.GetQuantity());
+    }
+
+    //SellItem에서 벡터 아이템이 삭제될 수 있으므로 판매 전에 출력할 정보 저장
+    std::string itemName = selectedItem.GetName();
+
+    int totalSellPrice = shop.GetSellPrice(selectedItem) * quantity;
+
+    bool success = shop.SellItem(realIndex, quantity, context);
+
+    if (success) {
+        PrintMessage(itemName + "을(를) 판매했습니다.");
+
+        PrintMessage("판매 수량: " + to_string(quantity));
+
+        PrintMessage("획득 골드: " + to_string(totalSellPrice) + "G");
+
+        PrintMessage("현재 골드: " + to_string(context.GetPlayer().GetGold()) + "G");
+    }
+
+    else {
+        PrintMessage(
+            "아이템 판매에 실패했습니다"
+        );
+    }
+    InputManager::Wait();
 }
 
 
@@ -661,114 +911,249 @@ void ConsoleUI::MoveCursor(int x, int y)
 	SetConsoleCursorPosition(hConsole, coord);
 }
 
+// 입력 버퍼에 남아 있는 키 입력을 모두 제거하는 함수
+void ConsoleUI::ClearInputBuffer()
+{
+    while (_kbhit())
+    {
+        _getch();
+    }
+}
+
+// 시작 화면 출력 함수
 void ConsoleUI::PrintStartScreen()
 {
     int frame = 0;
 
-    // 키보드 입력이 들어올 때까지 계속 파도 애니메이션을 재생
     while (!_kbhit())
     {
+        system("cls");
 
-        MoveCursor(0, 0);
+        // TODO: 현재 프레임 번호 변수 선언
+        int currentFrame = frame % 5;
 
-        cout.flush(); // 화면 클리어
+        // 상단 구분선
+        
+        PrintTitleLine();
+        
 
+        // TODO: 현재 프레임에 사용할 색상 문자열 변수 선언
+        const char* waveColor = WHITE;
 
-
-        // 2. 파도 물결 모양 아스키 아트 (프레임별 애니메이션)
-        if (frame % 2 == 0)
+        // TODO: 프레임 번호에 따른 색상 선택 분기
+        switch (currentFrame)
         {
-            system("cls");
+        case 0:
+            waveColor = WHITE;
+            break;
 
-            // 1. 상단 구분선 (청록색)
-            cout << CYAN;
-            PrintLine();
-            cout << RESET;
+        case 1:
+            waveColor = MAGENTA;
+            break;
 
+        case 2:
+            waveColor = BLUE;
+            break;
 
-            // [프레임 A]
-            cout << CYAN << BOLD;
-            cout << R"(
-                .  :%=..                 .--..                 . ..
-            .@@@@@*@@@@-           :@@@@@@@@@@           .@@@@@@@@@@.
-            @@@-.@@. ..@@=        .@@@ =@+.  @@@        .@@@. @@.. %@@
-        .@@# .@@    .@@        @@@  @@     @@.       .@@. @@*    =@@
-        @@@ ..@@@             .@@..@ @@              @@@ @ @@
-    .@@. .@%-@@.           @@@  %@.@@*           -@@. .@ @@@
-    :@@@ . .@@.#@@@.      .@@@.   #@@.@@@.      .@@@:.  .@@.@@@*
-@@      ..@@@.@@@@@@@@@@-      .@@@.*@@@@@@@@@@.      :@@@.@@@@@@@@@@@.
-                .@@@@@@@@@.           .@@@@@@@@@*            @@@@@@@@@@
+        case 3:
+            waveColor = GREEN;
+            break;
 
-                )" << endl;
-
+        case 4:
+            waveColor = RED;
+            break;
         }
-        else
+
+       
+        cout << waveColor << BOLD;
+
+        // TODO: 프레임별 파도 ASCII ART 출력 분기
+        switch (currentFrame)
         {
-            system("cls");
-
-            // 1. 상단 구분선 (청록색)
-            cout << CYAN;
-            PrintLine();
-            cout << RESET;
-
-            // [프레임 B - 좌우 한 칸 이동 및 모양 변화]
-            cout << BLUE << BOLD;
+        case 0:
             cout << R"(
-                 .  :%=..                 .--..
-              .@@@@@*@@@@-           :@@@@@@@@@@           .@@@@@
-             @@@-.@@. ..@@=        .@@@ =@+.  @@@        .@@@. @@
-           .@@# .@@    .@@        @@@  @@     @@.       .@@. @@*
-          @@@ ..@@@             .@@..@ @@              @@@ @ @@
-         @@. .@%-@@.           @@@  %@.@@*           -@@. .@ @@@
-      .@@.#@@@.              .@@@.   #@@.@@@.      .@@@:.  .@@.@@@*
-    .@@@            @@@.@@@@@@@@@@-      .@@@.*@@@@@@@@@@.      
-:@@@.@@@@@@@@@@
-    @@@@@    @@@@@@@@@.           .@@@@@@@@@*            @@@@@@@@@@
-                )" << endl;
+                                                                                                    
+                                                                                                    
+                                                                          .--..                     
+                                                                         :#**++=-::.                
+                                                                        :#*=-=++++=-:..             
+                                                                       -#*-...+++++++=-::.          
+                                                                      -#*+=::=+++++++++==--:.       
+                                                                     :#*++++++++++=-:.:=====--:.    
+                                                                    :#**++++=-:-===:..:====------:  
+                                                                   :**+==++=: ..====--====:.:-----  
+                                                                  .**=...=+==::==+++++===-.:-----   
+                                                                  +*+=..:=+++====++++===--------.   
+                                                                  =++++=+++++==-:-=====---:.---.    
+                                                                   .:-========: ..====---:.:--.     
+                                                                      .:-=====-::====--------.      
+                                                                          .:-=======-----:.:.       
+                                                                             ..-==-------.:.        
+                                                                                 ..::-----.         
+                                                                                      ...                                                                                                               
+                                                                                                    
+                                                                                                    
+
+            )" << endl;
+            break;
+
+        case 1:
+            cout << R"(
+                                                     
+                                               
+                                                                           .:---::.                 
+                                                                         -*#=:-######*+=-:.         
+                                                                      .=#%##***###########*=.       
+                                                                    .=%%#####+:.+########**+=:      
+                                                                   =%%########**########*+=--=      
+                                                                  *@%##########=::*###*+==-..=.     
+                                                                 :%#****########****++====-.-=:     
+                                                                 -#*+++++++++****++========-==-     
+                                                                 .#+++=======--=======-=---====     
+                                                                  **++=======. .-=====-=- .====.    
+                                                                  =*++===--===--========-.-====.    
+                                                                  :*++===: .-===========--====-     
+                                                                   *+=:-==--=================:      
+                                                                   :*-  :==================-.       
+                                                                    .==-=================-:         
+                                                                      .::--=========----:           
+                                                                             ..::---::.             
+                                                                                                    
+                                                                                                    
+
+            )" << endl;
+            break;
+
+        case 2:
+            cout << R"(                                                                     
+                                                                                                    
+                                                                                                    
+                                                                          -===-:.                   
+                                                                        +%%@@@@%%%#+-.              
+                                                                      .#*-#@@@@%%%*++==-.           
+                                                                     :%%*%@@@%%%%*+=---===:.        
+                                                                    :%@%%*#%@@%%*+=-.  -=====:      
+                                                                   -%@%%=-#@@@%*+==-...--======-.   
+                                                                  -%@%%%%%%%@%*+==-----------:-==.  
+                                                                 :%%%@%%%++%%*+==-----------  .-=:  
+                                                                .%%%%%%%+-#%*+=------.  :---..:-=.  
+                                                                :%%%%%%%%%#*==-. .---:..:-------.   
+                                                                 -****###*+=--:. .-------------.    
+                                                                  .:::----==------------------.     
+                                                                     .:--:::----------:  .---.      
+                                                                        .::::---------:..:--.       
+                                                                           ..::-::---------.        
+                                                                              ...:.::----:          
+                                                                                                    
+                                                                                   
+               
+                                                                                                    
+            )" << endl;
+            break;
+
+        case 3:
+            cout << R"(
+                                                                                                                                                                                                        
+                                 
+                                                                      .+**+++===---::...            
+                                                                      #%%#**##############+=:       
+                                                                     -@%=   +#######+--*##*++=:     
+                                                                     #%#=..=*######=  :=#**+-=+=.   
+                                                                    -@%#######**###*=-+##**= :=++:  
+                                                                    #%%#####*:  -########*+-.-====  
+                                                                   .@%######+  :=#######**+=-=====  
+                                                                   +%%#+=*###*+*########*+===:===:  
+                                                                   %%#: ..*######+-:-*#**+==- -==.  
+                                                                  -%%#=.:+######*: .:+#**===:.==-   
+                                                                  =%%############+--*#**+====-==:   
+                                                                  :***++***************+=====-:=.   
+                                                                    :==:.::-----=============:.-    
+                                                                      :==----::..::-:::---===:::    
+                                                                        :==----:::::::::::--=--     
+                                                                               ..........:::      
+                                                                                                    
+                                                                                  
+                  
+                                                                                                    
+            )" << endl;
+            break;
+
+        case 4:
+            cout << R"(
+                                                                                                    
+                                                                                                    
+                                                                              .=**=+##*++=-:.       
+                                                                            :+%##+=*##########*=.   
+                                                                          :*%%####*=-*########*+=:  
+                                                                        :*%#######*=+#######**+===. 
+                                                                       -%%##########+-=####*+==: -: 
+                                                                      .%############==*#**+====..-- 
+                                                                      :#*++++++*******+++======--== 
+                                                                      .#*++=========+======-=---===.
+                                                                       **++=======  .=====---: -===:
+                                                                       =*++====-==-:-=======-..-===:
+                                                                       .*++===. .-===========--===-.
+                                                                        ++=-===:-================-. 
+                                                                        :*-  -==================:.  
+                                                                         :+---================-.    
+                                                                           .:--==========-=--.      
+                                                                                ..::------:.        
+                                                                                                    
+                                                                                  
+                  
+
+            )" << endl;
+            break;
         }
+
+        cout << RESET; // 파도 색상 초기화
 
         // 3. 타이틀 로고 ASCII ART : 파도 (중앙 정렬)
-        cout << CYAN << BOLD;
+        cout << RED << BOLD;
 
         cout << R"(
-                      ____   _    ____   ___  
-                     |  _ \ / \  |  _ \ / _ \ 
-                     | |_) / _ \ | | | | | | |
-                     |  __/ ___ \| |_| | |_| |
-                     |_| /_/   \_\____/ \___/ 
-                
-                )" << endl;
+                                                                                                                        
+                                                ~?]}{11[<.            .|xtx              <(uXXu(i           [rrrxrrrx                    
+                                                [//|frvcXY{           'YUJ1            <YOmwZwbbp}          nkhkbkkkc                    
+                                                }/f(  `-vYJj          `zYU{           +LQL{`    :]:         rkk                       
+                                                [|/f    ?vcUl         ,vzz[           vJLt                  jdpZCLLx                     
+                                                ?1)|    -rnv,         .xuv?           tYUu                  jppLuuux                     
+                                                -}{<    /tj-          .jxxx           ;vXU>     x(+         rmZ               
+                                                _->]1)))(}l            ffj+            :|zYUJCCJU}          )LLLLLLQt                    
+                                                :I!!iiiI`              ><~I              ,~]1{]<'           !--------                    
+                                                                                                                        
+         )" << endl;
 
         cout << RESET;
 
         // 구분선
-        cout << CYAN;
-        PrintLine();
-        cout << RESET;
+        
+        PrintTitleLine();
+        
 
         // 4. 게임 서사 문구
-        cout << MAGENTA << BOLD << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n" << RESET;
+        cout << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n";
 
         // 구분선
-        cout << CYAN;
-        PrintLine();
-        cout << RESET;
+        
+        PrintTitleLine();
+        
 
         // 5. 시작 안내 문구
-        cout << WHITE << BOLD << "                   >> 아무 키나 누르면 시작됩니다 <<\n" << RESET;
+        cout << "                   >> 아무 키나 누르면 시작됩니다 <<\n";
 
         // 하단 구분선
-        cout << CYAN;
-        PrintLine();
-        cout << RESET;
+        
+        PrintTitleLine();
+        
 
         // 프레임 증가 및 대기 (300ms 간격으로 파도가 출렁거림)
         frame++;
         this_thread::sleep_for(chrono::milliseconds(300));
     }
 
-    // 버퍼에 남아있는 키 입력 소모 (다음 화면에 영향 없도록 버퍼 삭제)
-    _getch();
+    ClearInputBuffer();
+    system("cls");
 }
 /*
 // 시스템 담당자 사용예시
@@ -783,6 +1168,9 @@ int main()
     return 0;
 }
 */
+
+
+
 
 void ConsoleUI::PrintJinBlackImage()
 {
@@ -866,6 +1254,7 @@ void ConsoleUI::PrintJinWhiteImage()
 }
 
 
+
 void ConsoleUI::PrintKangBlackImage()
 {
     cout << R"( 
@@ -944,6 +1333,7 @@ void ConsoleUI::PrintKangWhiteImage()
 
 )" << endl;
 }
+
 
 
 void ConsoleUI::PrintRyuBlackImage()
@@ -1025,6 +1415,24 @@ void ConsoleUI::PrintRyuWhiteImage()
 
 )" << endl;
 }
+
+//캐릭터 소개 애니메이션
+void ConsoleUI::ShowJinRyuIntroAnimation()
+{
+    PrintJinBlackImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    ClearScreen();
+    PrintJinWhiteImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    ClearScreen();
+    PrintRyuBlackImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    ClearScreen();
+    PrintRyuWhiteImage();
+    this_thread::sleep_for(chrono::milliseconds(1000));
+	ClearScreen();
+}
+
 
 
 void ConsoleUI::PrintJinLogo()
@@ -1201,14 +1609,15 @@ void ConsoleUI::ShowRyuIntro()
     PrintLine();
 }
 
+// 캐릭터 소개 화면
 void ConsoleUI::ShowCharacterIntro()
 {
     PrintLine();
-    PrintTitle("캐릭터 소개");
+    PrintTitle("캐릭터 선택");
     PrintLine();
     cout << "1. 진태식: 유도 선수 출신, 강력한 근접 공격과 방어 능력을 가진 캐릭터." << endl;
-    cout << "2. 강사라: 태권도 선수 출신, 빠른 속도와 다양한 기술을 가진 캐릭터." << endl;
-    cout << "3. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << endl;
+    cout << "2. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << endl;
+    cout << "0. 게임 종료" << endl;
     PrintLine();
 }
 
