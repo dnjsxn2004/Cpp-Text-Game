@@ -34,196 +34,332 @@ Battle::Battle(GameContext& context)
 }
 
 // [추가] 전투 전체 실행 함수
-bool Battle::RunBattle()
+void Battle::RunBattle(GameContext& context)
 {
 	Player& player = context.GetPlayer();
 	Monster& monster = context.GetMonster();
 
-	StatBonus equipBonus;
-	StatBonus potionBonus;
+	std::vector<std::string> diceLines;
+	std::vector<std::string> logLines;
+	std::vector<std::string> actionLines;
+	std::vector<std::string> statusLines;
 
-	ConsoleUI::PrintBattleStart(context);
+	bool isBattleRunning = true;
 
-	while (player.GetHp() > 0 && monster.GetHp() > 0)
+	actionLines =
 	{
-		ConsoleUI::PrintNormalBattleMenu(context);
-		ConsoleUI::PrintBattleActionMenu();
+		"1. 일반 공격",
+		"2. 스킬 사용",
+		"3. 아이템 사용",
+		"4. 도망"
+	};
 
-		// [수정] 현재 전투 메뉴 기준
-		// 1. 일반 공격
-		// 2. 스킬 사용
-		// 3. 아이템 사용
-		// 4/ 도망가기
-		int choice = InputManager::InputInMassegeToRange("행동 선택: ", 1, 4);
+	ConsoleUI::AddLog(
+		logLines,
+		monster.GetName() + " 등장!"
+	);
 
+	while (isBattleRunning)
+	{
+		statusLines.clear();
+
+		statusLines.push_back(
+			"PLAYER : " + player.GetName());
+
+		statusLines.push_back(
+			"HP : " +
+			std::to_string(player.GetHp()) +
+			" / " +
+			std::to_string(player.GetMaxHp()));
+
+		statusLines.push_back(
+			"MP : " +
+			std::to_string(player.GetMp()) +
+			" / " +
+			std::to_string(player.GetMaxMp()));
+
+		statusLines.push_back("");
+
+		statusLines.push_back(
+			"MONSTER : " + monster.GetName());
+
+		statusLines.push_back(
+			"HP : " +
+			std::to_string(monster.GetHp()) +
+			" / " +
+			std::to_string(monster.GetMaxHp()));
+
+		UIScreen screen;
+
+		screen.a = diceLines;
+		screen.b = logLines;
+		screen.c = actionLines;
+		screen.d = statusLines;
+
+		ConsoleUI::DrawFullLayout(screen);
+
+		int choice =
+			InputManager::InputInMassegeToRange(
+				"선택 : ",
+				1,
+				4
+			);
+
+		// 일반 공격
 		if (choice == 1)
 		{
-			int damage = PlayerDiceMeleeDamage(context, context, equipBonus, potionBonus);
-			int diceValue = GetLastDiceValue();
+			StatBonus equipBonus;
+			StatBonus potionBonus;
 
-			ConsoleUI::PrintDiceResult(diceValue);
+			int damage =
+				this->PlayerDiceMeleeDamage(
+					context,
+					context,
+					equipBonus,
+					potionBonus
+				);
 
-			if (damage <= 0)
-			{
-				ConsoleUI::PrintAttackMiss();
-			}
-			else
-			{
-				monster.TakeDamage(damage);
+			diceLines =
+				ConsoleUI::PrintDiceResult(
+					this->GetLastDiceValue());
 
-				ConsoleUI::PrintPlayerMeleeAttackResultMessage(
+			monster.SetHp(
+				monster.GetHp() - damage
+			);
+
+			ConsoleUI::AddLog(
+				logLines,
+				ConsoleUI::
+				PrintPlayerMeleeAttackResultMessage(
 					player.GetName(),
 					monster.GetName(),
 					damage
+				)
+			);
+
+			if (monster.GetHp() <= 0)
+			{
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintBattleVictory(
+						monster.GetName()
+					)
 				);
+
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintReward(
+						monster.GetExpReward(),
+						monster.GetGoldReward()
+					)
+				);
+
+				player.SetExp(
+					player.GetExp() + monster.GetExpReward()
+				);
+
+				player.SetGold(
+					player.GetGold() + monster.GetGoldReward()
+				);
+
+				break;
 			}
 
-			PlayerTurnCount();
+			int monsterDamage =
+				monster.GetAttack();
+
+			player.SetHp(
+				player.GetHp() - monsterDamage
+			);
+
+			ConsoleUI::AddLog(
+				logLines,
+				ConsoleUI::PrintMonsterAttackResult(
+					monster.GetName(),
+					player.GetName(),
+					monsterDamage
+				)
+			);
+
+			if (player.GetHp() <= 0)
+			{
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintBattleDefeat(
+						player.GetName()
+					)
+				);
+
+				break;
+			}
 		}
+
+		// 스킬 공격
 		else if (choice == 2)
 		{
-			// [추가] 기본 스킬 MP 비용
-			const int skillCost = 20;
+			const int skillMpCost = 10;
 
-			if (player.GetMp() < skillCost)
+			if (player.GetMp() < skillMpCost)
 			{
-				ConsoleUI::PrintNotEnoughMp();
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintNotEnoughMp()
+				);
+
 				continue;
 			}
 
-			player.SetMp(player.GetMp() - skillCost);
+			player.SetMp(
+				player.GetMp() - skillMpCost
+			);
 
-			int damage = PlayerDiceSkillDamage(context, context, equipBonus, potionBonus);
-			int diceValue = GetLastDiceValue();
+			StatBonus equipBonus;
+			StatBonus potionBonus;
 
-			ConsoleUI::PrintDiceResult(diceValue);
+			int damage =
+				this->PlayerDiceSkillDamage(
+					context,
+					context,
+					equipBonus,
+					potionBonus
+				);
 
-			if (damage <= 0)
+			diceLines =
+				ConsoleUI::PrintDiceResult(
+					this->GetLastDiceValue());
+
+			ConsoleUI::AddLog(
+				logLines,
+				ConsoleUI::
+				PrintPlayerSkillAttackResultMessage(
+					player.GetName(),
+					monster.GetName(),
+					damage
+				)
+			);
+
+			if (monster.GetHp() <= 0)
 			{
-				ConsoleUI::PrintSkillMiss();
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintBattleVictory(
+						monster.GetName()
+					)
+				);
+
+				break;
 			}
-			else
-			{
-				monster.TakeDamage(damage);
 
+			int monsterDamage =
+				monster.GetAttack();
+
+			monster.SetHp(
+				monster.GetHp() - damage
+			);
+
+			ConsoleUI::AddLog(
+				logLines,
 				ConsoleUI::PrintPlayerSkillAttackResultMessage(
 					player.GetName(),
 					monster.GetName(),
 					damage
-				);
-			}
+				)
+			);
 
-			PlayerTurnCount();
-		}
-		else if (choice == 3)
-		{			
-			Inventory& inventory = context.GetInventory();
-			const std::vector<Item>& items = inventory.GetItems();
-
-			std::vector<int> consumableIndices;
-
-			for (int i = 0; i < static_cast<int>(items.size()); i++)
+			if (monster.GetHp() <= 0)
 			{
-				if (items[i].GetType() == ItemType::Consumable)
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintBattleVictory(
+						monster.GetName()
+					)
+				);
+
+				break;
+			}
+		}
+
+		// 아이템
+		else if (choice == 3)
+		{
+			ConsoleUI::AddLog(
+				logLines,
+				"아이템 기능 준비 중"
+			);
+		}
+
+		// 도망
+		else if (choice == 4)
+		{
+			int diceValue =
+				this->RollDice();
+
+			diceLines =
+				ConsoleUI::PrintDiceResult(
+					diceValue);
+
+			bool success =
+				(diceValue >= 4);
+
+			if (success)
+			{
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintRunawaySuccess()
+				);
+
+				break;
+			}
+			else
+			{
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintRunawayFail()
+				);
+
+				int monsterDamage = monster.GetAttack();
+
+				player.SetHp(
+					player.GetHp() - monsterDamage
+				);
+
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintMonsterAttackResult(
+						monster.GetName(),
+						player.GetName(),
+						monsterDamage
+					)
+				);
+
+				if (player.GetHp() <= 0)
 				{
-					consumableIndices.push_back(i);
+					ConsoleUI::AddLog(
+						logLines,
+						ConsoleUI::PrintBattleDefeat(
+							player.GetName()
+						)
+					);
+
+					break;
 				}
 			}
 
-			if (consumableIndices.empty())
-			{
-				ConsoleUI::PrintMessage("사용 가능한 소비 아이템이 없습니다.");
-				continue;
-			}
-
-			ConsoleUI::PrintLine();
-			ConsoleUI::PrintTitle("소비 아이템 사용");
-			ConsoleUI::PrintLine();
-
-			for (int i = 0; i < static_cast<int>(consumableIndices.size()); i++)
-			{
-				const Item& item = items[consumableIndices[i]];
-
-				std::cout << i + 1 << ". "
-					<< item.GetName()
-					<< " x" << item.GetQuantity()
-					<< std::endl;
-			}
-
-			ConsoleUI::PrintLine();
-
-			int itemChoice = InputManager::InputInMassegeToRange("사용할 아이템 번호를 선택하세요: ",1,static_cast<int>(consumableIndices.size()));
-
-			int realItemIndex = consumableIndices[itemChoice - 1];
-
-			if (inventory.UseItem(realItemIndex, context))
-			{
-				ConsoleUI::PrintSuccess("아이템을 사용했습니다.");
-
-				PlayerTurnCount();
-			}
-			else
-			{
-				ConsoleUI::PrintError("아이템을 사용할 수 없습니다.");
-
-				continue;
-			}
-		}
-
-		else if (choice == 4)
-		{
-			if (PlayerRunaway())
-			{
-				ConsoleUI::PrintRunawaySuccess();
-
-				ConsoleUI::PrintBattleStopped();
-				return true;
-			}
-			else
-			{
-				ConsoleUI::PrintRunawayFail();
-				PlayerTurnCount();
-			}
-			}
-
-		if (CheckBattleResult(context, context))
-		{
-			ConsoleUI::PrintBattleVictory(monster.GetName());
-			return true;
-		}
-
-		if (player.GetHp() <= 0)
-		{
-			ConsoleUI::PrintBattleDefeat(player.GetName());
-			return false;
-		}
-
-		if (IsMonsterStunned)
-		{
-			ConsoleUI::PrintMonsterStunned(monster.GetName());
-			IsMonsterStunned = false;
-			continue;
-		}
-
-		int monsterDamage = MiddleBossMonsterDamage(context, context, equipBonus, potionBonus);
-
-		player.SetHp(player.GetHp() - monsterDamage);
-
-		ConsoleUI::PrintMonsterAttackResult(
-			monster.GetName(),
-			player.GetName(),
-			monsterDamage
-		);
-
-		if (player.GetHp() <= 0)
-		{
-			ConsoleUI::PrintBattleDefeat(player.GetName());
-			return false;
 		}
 	}
 
-	return CheckBattleResult(context, context);
+	UIScreen screen;
+
+	screen.a = diceLines;
+	screen.b = logLines;
+	screen.c = actionLines;
+	screen.d = statusLines;
+
+	ConsoleUI::DrawFullLayout(screen);
+
+	system("pause");
 }
+
 
 // 확률생성
 int Battle::CheckChance()
@@ -272,7 +408,7 @@ int Battle::RollLuckyDice()
 	// else
 	// {
 	// 	return RollDice();
-	// }
+	//
 
 	// [수정] RollDice를 여러 번 호출하지 않도록 수정
 	int DiceValue = RollDice();
@@ -336,6 +472,8 @@ int Battle::PlayerDiceMeleeDamage(GameContext& context1, GameContext& context2, 
 		break;
 
 	case 3:
+		Damage = (player.GetSkillDamage(equipBonus, potionBonus) - monster.GetDefense());
+		break;
 	case 4:
 		Damage = (player.GetMeleeDamage(equipBonus, potionBonus) - monster.GetDefense());
 		break;
@@ -361,7 +499,6 @@ int Battle::PlayerDiceMeleeDamage(GameContext& context1, GameContext& context2, 
 		if (CheckChance() > 50)
 		{
 			IsMonsterStunned = true;
-			ConsoleUI::PrintStunSuccess(monster.GetName());
 		}
 		else
 		{
@@ -404,6 +541,8 @@ int Battle::PlayerDiceSkillDamage(GameContext& context1, GameContext& context2, 
 		break;
 
 	case 3:
+		Damage = (player.GetSkillDamage(equipBonus, potionBonus) - monster.GetDefense());
+		break;
 	case 4:
 		Damage = (player.GetSkillDamage(equipBonus, potionBonus) - monster.GetDefense());
 		break;
@@ -423,8 +562,7 @@ int Battle::PlayerDiceSkillDamage(GameContext& context1, GameContext& context2, 
 			// [기존 코드 주석]
 			// ConsoleUI::PrintMessage("상대가 스턴에 걸렸습니다.");
 
-			// [수정] 전투 전용 출력 함수 사용
-			ConsoleUI::PrintStunSuccess(monster.GetName());
+			
 		}
 		else
 		{
@@ -603,8 +741,6 @@ void Battle::BattleReward(GameContext& context1, GameContext& context2)
 	player.SetExp(player.GetExp() + monster.GetExpReward());
 	player.SetGold(player.GetGold() + monster.GetGoldReward());
 
-	// [추가] 보상 출력
-	ConsoleUI::PrintReward(monster.GetExpReward(), monster.GetGoldReward());
 
 	// [추가] 기본 레벨업 처리
 	while (player.GetLevel() < player.GetMaxLevel() && player.GetExp() >= player.GetMaxExp())
@@ -621,7 +757,6 @@ void Battle::BattleReward(GameContext& context1, GameContext& context2)
 		player.SetHp(player.GetMaxHp());
 		player.SetMp(player.GetMaxMp());
 
-		ConsoleUI::PrintLevelUp(player.GetName(), player.GetLevel());
 	}
 }
 

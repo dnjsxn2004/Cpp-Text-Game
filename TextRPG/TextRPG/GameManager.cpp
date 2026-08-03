@@ -10,6 +10,9 @@
 #include "Ryu.h"
 #include "Gang.h"
 #include "Monster.h"
+#include "Player.h"
+#include "GameState.h"
+
 
 using namespace std;
 
@@ -19,7 +22,8 @@ GameManager::GameManager()
     shop(),
     loadSuccess(false),
     isWin(false),
-    playerLevelUp(false)
+    playerLevelUp(false),
+    selectedCharacterIndex(0)
 {
 }
 
@@ -34,51 +38,84 @@ void GameManager::Run()
 
     while (context.IsGameRunning())
     {
-        ConsoleUI::PrintStartScreen();
-        TitleFlow();
-
-        if (context.IsGameOver())
+        switch (currentState)
         {
-            GameOver();
+        case GameState::Title:
+            ConsoleUI::PrintStartScreen();
+            InputManager::Wait();
+            currentState = GameState::CutScene;
+            break;
 
+        case GameState::CutScene:
+            PlayOpeningCutscenes();
+            currentState = GameState::CharacterSelect;
+            break;
 
-            Initialize();
+        case GameState::CharacterSelect:
+            RenderCharacterSelect();
+            HandleCharacterSelectInput();
+            break;
+
+        case GameState::MainMenu:
+            RenderMainMenu();
+            HandleMainMenuInput();
+            break;
+
+        case GameState::Battle:
+
+            StartNormalBattle();
+
+            if (context.IsGameRunning())
+            {
+                currentState = GameState::MainMenu;
+            }
+
+            break;
+
+        case GameState::Shop:
+            RenderShop();
+            HandleShopInput();
+            break;
+
+        case GameState::Inventory:
+            RenderInventory();
+            HandleInventoryInput();
+            break;
+
+        case GameState::Status:
+            RenderStatus();
+            HandleStatusInput();
+            break;
+
+        case GameState::Story:
+            RenderStory();
+            HandleStoryInput();
+            break;
+
+        case GameState::Exit:
+            context.SetGameRunning(false);
+            break;
         }
     }
 }
 
 
+
 void GameManager::Initialize()
 {
+    logs.clear();
+    AddLog("게임 시작");
+
     context.SetGameRunning(true);
     context.SetGameOver(false);
+
+    currentState = GameState::Title;
 
     loadSuccess = false;
     isWin = false;
     playerLevelUp = false;
 }
 
-
-void GameManager::TitleFlow()
-{
-    PlayOpeningCutscenes();
-
-    SelectCharacter();
-
-    if (!context.IsGameRunning())
-    {
-        return;
-    }
-
-    if (!context.HasPlayer())
-    {
-        ConsoleUI::PrintMessage("플레이어 생성에 실패했습니다.");
-        context.SetGameOver(true);
-        return;
-    }
-
-    MainLoop();
-}
 
 void GameManager::PlayOpeningCutscenes()
 {
@@ -142,366 +179,129 @@ void GameManager::PlayOpeningCutscenes()
 }
 
 
-void GameManager::SelectCharacter()
+void GameManager::RenderMainMenu()
 {
-    ConsoleUI::ClearScreen();
+    UIScreen screen;
 
-    while (context.IsGameRunning())
+    playerStatus.clear();
+
+    if (context.HasPlayer())
     {
-        ConsoleUI::PrintLine();
-        std::cout << "캐릭터를 선택하세요." << endl;
-        ConsoleUI::PrintLine();
+        Player& player = context.GetPlayer();
 
-        std::cout << "1. 진태식" << endl;
-        std::cout << "2. 류노스케" << endl;
-        std::cout << "0. 게임 종료" << endl;
-
-        ConsoleUI::PrintLine();
-
-        int choice = InputManager::InputInMassegeToRange("선택: ", 0, 2);
-
-        switch (choice)
-        {
-        case 1:
-            context.SetPlayer(new Jin());
-            ConsoleUI::PrintMessage("진태식을 선택했습니다.");
-            InputManager::Wait();
-            return;
-
-        case 2:
-            context.SetPlayer(new Ryu());
-            ConsoleUI::PrintMessage("류노스케를 선택했습니다.");
-            InputManager::Wait();
-            return;
-
-        case 0:
-            context.SetGameRunning(false);
-            return;
-
-        default:
-            ConsoleUI::PrintMessage("잘못된 입력입니다.");
-            break;
-        }
-    }
-}
-
-
-
-void GameManager::MainLoop()
-{
-    while (context.IsGameRunning() && !context.IsGameOver())
-    {
-        std::vector<std::string> cutSceneLines = {
-            "",
-            "",
-            "                 [ 거점 ]",
-            "",
-            "        아직 렌더링 이미지가 없습니다.",
-            "",
-            "        이후 이 영역에는",
-            "        아스키 렌더링 컷신이 들어갑니다."
-        };
-
-        std::vector<std::string> logLines = {
-            "메인 메뉴에 진입했습니다.",
-            "행동을 선택하세요."
-        };
-
-        std::vector<std::string> choiceLines = {
-            "1. 전투",
-            "2. 상점",
-            "3. 인벤토리",
-            "4. 상태 보기",
-            "5. 스토리 진행",
-            "0. 게임 종료"
-        };
-
-        ConsoleUI::DrawGameScreen(
-            cutSceneLines,
-            logLines,
-            context.GetPlayer(),
-            choiceLines
+        playerStatus.push_back(
+            "이름 : " + player.GetName()
         );
 
-        int choice = InputManager::InputInMassegeToRange("선택: ", 0, 5);
+        playerStatus.push_back(
+            "HP : " +
+            std::to_string(player.GetHp())
+        );
 
-        ProcessMainMenu(choice);
-
-        if (isWin)
-        {
-            return;
-        }
+        playerStatus.push_back(
+            "MP : " +
+            std::to_string(player.GetMp())
+        );
     }
+
+    screen.a =
+    {
+        "",
+        "   [ 거점 ]",
+        "",
+        "   메인 화면"
+    };
+
+    screen.b = logs;
+
+    screen.c =
+    {
+        "1. 전투",
+        "2. 상점",
+        "3. 인벤토리",
+        "4. 상태 보기",
+        "5. 스토리 진행",
+        "0. 게임 종료"
+    };
+
+    screen.d = playerStatus;
+
+    ConsoleUI::DrawFullLayout(screen);
 }
 
 
-void GameManager::ProcessMainMenu(int choice)
+void GameManager::HandleMainMenuInput()
 {
+
+    int choice = InputManager::InputInMassegeToRange("선택: ", 0, 5);
+
     switch (choice)
     {
     case 1:
-        StartNormalBattle();
+        currentState = GameState::Battle;
         break;
 
     case 2:
-        OpenShop();
+        currentState = GameState::Shop;
         break;
 
     case 3:
-        OpenInventory();
+        currentState = GameState::Inventory;
         break;
 
     case 4:
-        ShowPlayerStatus();
+        currentState = GameState::Status;
         break;
 
     case 5:
-        StartStoryBattleFlow();
+        currentState = GameState::Story;
         break;
 
     case 0:
-        context.SetGameRunning(false);
-        break;
-
-    default:
-        ConsoleUI::PrintMessage("잘못된 입력입니다.");
+        currentState = GameState::Exit;
         break;
     }
 }
-
 
 
 void GameManager::StartNormalBattle()
 {
+    ConsoleUI::ClearScreen();
+
     if (!context.HasPlayer())
     {
-        ConsoleUI::PrintMessage("플레이어가 없습니다. 전투를 시작할 수 없습니다.");
+        AddLog("플레이어가 없습니다.");
         context.SetGameOver(true);
         return;
     }
 
     Monster monster = SpawnRandomMonster(context);
+
     context.SetMonster(monster);
 
-    Battle battle(context);
-    bool battleResult = battle.RunBattle();
+    logs.clear();
 
-    if (!battleResult)
+    AddLog("전투 시작!");
+    AddLog(monster.GetName() + " 등장!");
+
+    Battle battle(context);
+
+    battle.RunBattle(context);
+
+    if (context.GetPlayer().GetHp() > 0)
     {
+        AddLog("전투 종료");
+    }
+    else
+    {
+        AddLog("전투 패배...");
         context.SetGameOver(true);
         context.SetGameRunning(false);
     }
+
     InputManager::Wait();
+    ConsoleUI::ClearScreen();
 }
-
-void GameManager::OpenShop()
-{
-    while (context.IsGameRunning() && !context.IsGameOver())
-    {
-        ConsoleUI::PrintLine();
-        cout << "상점" << endl;
-        ConsoleUI::PrintLine();
-
-        cout << "1. 구매" << endl;
-        cout << "2. 판매" << endl;
-        cout << "0. 나가기" << endl;
-
-        ConsoleUI::PrintLine();
-
-        int choice = InputManager::InputInMassegeToRange("선택: ", 0, 2);
-
-        if (choice == 0)
-        {
-            return;
-        }
-
-        if (choice == 1)
-        {
-            const vector<Item>& products = shop.GetProducts();
-
-            if (products.empty())
-            {
-                ConsoleUI::PrintMessage("상점에 상품이 없습니다.");
-                InputManager::Wait();
-                continue;
-            }
-
-            ConsoleUI::PrintShopItems(products);
-            std::cout << "0. 취소" << endl;
-
-            int itemChoice = InputManager::InputInMassegeToRange(
-                "구매할 상품 번호: ",
-                0,
-                static_cast<int>(products.size())
-            );
-
-            if (itemChoice == 0)
-            {
-                continue;
-            }
-
-            int quantity = InputManager::InputInMassegeToRange("구매 수량: ", 1, 99);
-
-            bool success = shop.BuyItem(itemChoice - 1, quantity, context);
-
-            if (success)
-            {
-                ConsoleUI::PrintPurchaseSuccess(products[itemChoice - 1]);
-            }
-            else
-            {
-                ConsoleUI::PrintMessage("구매에 실패했습니다. 골드가 부족하거나 잘못된 상품입니다.");
-            }
-
-            InputManager::Wait();
-        }
-        else if (choice == 2)
-        {
-            vector<int> sellableIndices = context.GetInventory().GetSellableItemIndices();
-
-            if (sellableIndices.empty())
-            {
-                ConsoleUI::PrintMessage("판매 가능한 아이템이 없습니다.");
-                InputManager::Wait();
-                continue;
-            }
-
-            const vector<Item>& items = context.GetInventory().GetItems();
-
-            ConsoleUI::PrintLine();
-            cout << "판매 가능 아이템" << endl;
-            ConsoleUI::PrintLine();
-
-            for (int i = 0; i < static_cast<int>(sellableIndices.size()); ++i)
-            {
-                int realIndex = sellableIndices[i];
-                const Item& item = items[realIndex];
-
-                cout << i + 1 << ". "
-                    << item.GetName()
-                    << " x" << item.GetQuantity()
-                    << " / 판매가: " << shop.GetSellPrice(item)
-                    << endl;
-            }
-
-            cout << "0. 취소" << endl;
-
-            int itemChoice = InputManager::InputInMassegeToRange(
-                "판매할 아이템 번호: ",
-                0,
-                static_cast<int>(sellableIndices.size())
-            );
-
-            if (itemChoice == 0)
-            {
-                continue;
-            }
-
-            int realIndex = sellableIndices[itemChoice - 1];
-            int maxQuantity = items[realIndex].GetQuantity();
-
-            int quantity = InputManager::InputInMassegeToRange("판매 수량: ", 1, maxQuantity);
-
-            bool success = shop.SellItem(realIndex, quantity, context);
-
-            if (success)
-            {
-                ConsoleUI::PrintMessage("아이템을 판매했습니다.");
-            }
-            else
-            {
-                ConsoleUI::PrintMessage("판매에 실패했습니다.");
-            }
-
-            InputManager::Wait();
-        }
-    }
-}
-
-void GameManager::OpenInventory()
-{
-    while (context.IsGameRunning() && !context.IsGameOver())
-    {
-        const vector<Item>& items = context.GetInventory().GetItems();
-
-        ConsoleUI::PrintLine();
-        cout << "인벤토리" << endl;
-        ConsoleUI::PrintLine();
-
-        if (items.empty())
-        {
-            cout << "아이템이 없습니다." << endl;
-            ConsoleUI::PrintLine();
-            InputManager::Wait();
-            return;
-        }
-
-        ConsoleUI::PrintItemListWithIndex(items);
-        cout << "0. 나가기" << endl;
-
-        int itemChoice = InputManager::InputInMassegeToRange(
-            "아이템 선택: ",
-            0,
-            static_cast<int>(items.size())
-        );
-
-        if (itemChoice == 0)
-        {
-            return;
-        }
-
-        int itemIndex = itemChoice - 1;
-        const Item& selectedItem = items[itemIndex];
-
-        if (selectedItem.GetType() == ItemType::Consumable)
-        {
-            bool success = context.GetInventory().UseItem(itemIndex, context);
-
-            if (success)
-            {
-                ConsoleUI::PrintMessage("아이템을 사용했습니다.");
-            }
-            else
-            {
-                ConsoleUI::PrintMessage("아이템 사용에 실패했습니다.");
-            }
-        }
-        else if (selectedItem.GetType() == ItemType::Equipment)
-        {
-            bool success = context.GetInventory().EquipItem(itemIndex, context);
-
-            if (success)
-            {
-                ConsoleUI::PrintMessage("장비를 장착했습니다.");
-            }
-            else
-            {
-                ConsoleUI::PrintMessage("장비 장착에 실패했습니다.");
-            }
-        }
-        else
-        {
-            ConsoleUI::PrintMessage("퀘스트 아이템은 여기서 사용할 수 없습니다.");
-        }
-
-        InputManager::Wait();
-    }
-}
-
-
-void GameManager::ShowPlayerStatus()
-{
-    if (!context.HasPlayer())
-    {
-        ConsoleUI::PrintMessage("플레이어 정보가 없습니다.");
-        InputManager::Wait();
-        return;
-    }
-
-    ConsoleUI::PrintPlayerStatus(context.GetPlayer());
-    InputManager::Wait();
-}
-
 
 void GameManager::StartStoryBattleFlow()
 {
@@ -544,10 +344,12 @@ bool GameManager::StartMiddleBossBattle()
     context.SetMonster(middleBoss);
 
     Battle battle(context);
-    bool result = battle.RunBattle();
+
+    battle.RunBattle(context);
 
     InputManager::Wait();
-    return result;
+
+    return context.GetPlayer().GetHp() > 0;
 }
 
 bool GameManager::StartFinalBossBattle()
@@ -559,11 +361,12 @@ bool GameManager::StartFinalBossBattle()
     context.SetMonster(finalBoss);
 
     Battle battle(context);
-    bool result = battle.RunBattle();
 
+    battle.RunBattle(context);
 
     InputManager::Wait();
-    return result;
+
+    return context.GetPlayer().GetHp() > 0;
 }
 
 void GameManager::Ending()
@@ -577,3 +380,449 @@ void GameManager::GameOver()
     ConsoleUI::PrintGameOver();
     InputManager::Wait();
 }
+
+void GameManager::AddLog(const std::string& text)
+{
+    logs.push_back(text);
+
+    if (logs.size() > 8)
+    {
+        logs.erase(logs.begin());
+    }
+}
+
+void GameManager::HandleCharacterSelectInput()
+{
+    int choice =
+        InputManager::InputInMassegeToRange(
+            "선택: ",
+            0,
+            2
+        );
+
+    switch (choice)
+    {
+    case 1:
+        selectedCharacterIndex = 0;
+        break;
+
+    case 2:
+        selectedCharacterIndex = 1;
+        break;
+
+    case 0:
+        currentState = GameState::Exit;
+        return;
+    }
+
+    if (selectedCharacterIndex == 0)
+    {
+        context.SetPlayer(new Jin());
+        AddLog("진태식을 선택했습니다.");
+    }
+    else
+    {
+        context.SetPlayer(new Ryu());
+        AddLog("류노스케를 선택했습니다.");
+    }
+
+    currentState = GameState::MainMenu;
+}
+
+
+void GameManager::RenderCharacterSelect()
+{
+    UIScreen screen;
+
+    Jin jin;
+    Ryu ryu;
+
+    if (selectedCharacterIndex == 0)
+    {
+        ConsoleUI::PrintJinBlackImage();
+    }
+    else
+    {
+        ConsoleUI::PrintRyuBlackImage();
+    }
+
+    Player* preview =
+        (selectedCharacterIndex == 0)
+        ? static_cast<Player*>(&jin)
+        : static_cast<Player*>(&ryu);
+
+    
+    screen.b =
+    {
+        "[ 캐릭터 선택 ]",
+        "",
+        (selectedCharacterIndex == 0)
+        ? jin.GetDescription()
+        : ryu.GetDescription()
+    };
+
+    
+    screen.c =
+    {
+        (selectedCharacterIndex == 0 ? "> 진태식" : "  진태식"),
+        (selectedCharacterIndex == 1 ? "> 류노스케" : "  류노스케"),
+        
+    };
+
+    screen.d =
+    {
+        "HP  : " + std::to_string(preview->GetHp()),
+        "MP  : " + std::to_string(preview->GetMp()),
+        "ATK : " + std::to_string(preview->GetAttack())
+    };
+
+    ConsoleUI::DrawFullLayout(screen);
+}
+
+void GameManager::RenderShop()
+{
+    UIScreen screen;
+
+    Player& player = context.GetPlayer();
+
+    std::vector<std::string> productLines;
+
+    const std::vector<Item>& products = shop.GetProducts();
+
+    for (int i = 0; i < static_cast<int>(products.size()); i++)
+    {
+        const Item& item = products[i];
+
+        std::string line =
+            std::to_string(i + 1) + ". " +
+            item.GetName() +
+            " - " +
+            std::to_string(item.GetPrice()) + "G";
+
+        productLines.push_back(line);
+    }
+
+    screen.a =
+    {
+        "      [ 암시장 ]",
+        "",
+        "   어둠 속 상인이 웃는다."
+    };
+
+    screen.b = productLines;
+
+    screen.c =
+    {
+        "1. 아이템 구매",
+        "2. 아이템 판매",
+        "0. 뒤로가기"
+    };
+
+    screen.d =
+    {
+        "이름 : " + player.GetName(),
+        "Gold : " + std::to_string(player.GetGold()),
+        "",
+        "소지품 수 : " +
+        std::to_string(
+            context.GetInventory().GetItems().size()
+        )
+    };
+
+    ConsoleUI::DrawFullLayout(screen);
+}
+
+
+void GameManager::HandleShopInput()
+{
+    int choice =
+        InputManager::InputInMassegeToRange(
+            "선택: ",
+            0,
+            2
+        );
+
+    switch (choice)
+    {
+    case 1:
+    {
+        const std::vector<Item>& products =
+            shop.GetProducts();
+
+        int itemIndex =
+            InputManager::InputInMassegeToRange(
+                "구매할 상품 번호: ",
+                1,
+                products.size()
+            ) - 1;
+
+        int quantity =
+            InputManager::InputInMassegeToRange(
+                "수량: ",
+                1,
+                99
+            );
+
+        if (shop.BuyItem(itemIndex, quantity, context))
+        {
+            AddLog("구매 완료");
+        }
+        else
+        {
+            AddLog("구매 실패");
+        }
+
+        break;
+    }
+
+    case 2:
+    {
+        Inventory& inventory =
+            context.GetInventory();
+
+        std::vector<int> sellable =
+            inventory.GetSellableItemIndices();
+
+        if (sellable.empty())
+        {
+            AddLog("판매 가능한 아이템이 없습니다.");
+            break;
+        }
+
+        int sellIndex =
+            InputManager::InputInMassegeToRange(
+                "판매할 아이템 번호: ",
+                1,
+                sellable.size()
+            ) - 1;
+
+        int realIndex = sellable[sellIndex];
+
+        int quantity =
+            InputManager::InputInMassegeToRange(
+                "판매 수량: ",
+                1,
+                99
+            );
+
+        if (shop.SellItem(realIndex, quantity, context))
+        {
+            AddLog("판매 완료");
+        }
+        else
+        {
+            AddLog("판매 실패");
+        }
+
+        break;
+    }
+
+    case 0:
+        currentState = GameState::MainMenu;
+        break;
+    }
+}
+
+
+void GameManager::RenderStatus()
+{
+    UIScreen screen;
+
+    Player& player = context.GetPlayer();
+    Inventory& inventory = context.GetInventory();
+
+    screen.a =
+    {
+        "      [ 상태 ]",
+        "",
+        "   거울 속의 자신을 바라본다."
+    };
+
+    screen.b =
+    {
+        "이름 : " + player.GetName(),
+        "",
+        "HP  : " + std::to_string(player.GetHp()),
+        "MP  : " + std::to_string(player.GetMp()),
+        "",
+        "ATK : " + std::to_string(player.GetAttack()),
+        "",
+        "Gold : " + std::to_string(player.GetGold())
+    };
+
+    screen.c =
+    {
+        "0. 뒤로가기"
+    };
+
+    screen.d =
+    {
+        "무기 : " + inventory.GetEquippedWeaponName(),
+        "방어구 : " + inventory.GetEquippedArmorName()
+    };
+
+    ConsoleUI::DrawFullLayout(screen);
+}
+
+
+void GameManager::HandleStatusInput()
+{
+    InputManager::InputInMassegeToRange(
+        "0. 뒤로가기: ",
+        0,
+        0
+    );
+
+    currentState = GameState::MainMenu;
+}
+
+
+
+void GameManager::RenderStory()
+{
+    UIScreen screen;
+
+    Player& player = context.GetPlayer();
+
+    screen.a =
+    {
+        "     [ 폐쇄된 진료소 ]",
+        "",
+        "   비가 창문을 두드린다."
+    };
+
+    screen.b =
+    {
+        "강사라가 죽은 뒤,",
+        "진료소엔 무거운 침묵만 남아있다.",
+        "",
+        "희미한 담배 냄새가 공기 속에 남아 있다.",
+        "",
+        "아직 끝난 건 아니다."
+    };
+
+    screen.c =
+    {
+        "ENTER : 메인 메뉴로"
+    };
+
+    screen.d =
+    {
+        player.GetName(),
+        "HP : " + std::to_string(player.GetHp()),
+        "MP : " + std::to_string(player.GetMp())
+    };
+
+    ConsoleUI::DrawFullLayout(screen);
+}
+
+
+void GameManager::HandleStoryInput()
+{
+    InputManager::Wait();
+
+    currentState = GameState::MainMenu;
+}
+
+void GameManager::RenderInventory()
+{
+    Inventory& inventory = context.GetInventory();
+    Player& player = context.GetPlayer();
+
+    std::vector<std::string> leftTop;
+    std::vector<std::string> rightTop;
+    std::vector<std::string> leftBottom;
+    std::vector<std::string> rightBottom;
+
+    leftTop.push_back("=== 인벤토리 ===");
+    leftTop.push_back("");
+
+    const auto& items = inventory.GetItems();
+
+    if (items.empty())
+    {
+        leftTop.push_back("아이템이 없습니다.");
+    }
+    else
+    {
+        for (int i = 0; i < items.size(); i++)
+        {
+            leftTop.push_back(
+                std::to_string(i + 1) +
+                ". " +
+                items[i].GetName()
+            );
+        }
+    }
+
+    rightTop.push_back("=== 플레이어 정보 ===");
+    rightTop.push_back("");
+    rightTop.push_back("이름 : " + player.GetName());
+
+    rightTop.push_back(
+        "HP : " +
+        std::to_string(player.GetHp()) +
+        "/" +
+        std::to_string(player.GetMaxHp())
+    );
+
+    rightTop.push_back(
+        "MP : " +
+        std::to_string(player.GetMp()) +
+        "/" +
+        std::to_string(player.GetMaxMp())
+    );
+
+    leftBottom.push_back("1 ~ N : 아이템 선택");
+    leftBottom.push_back("0 : 뒤로가기");
+
+    rightBottom.push_back("인벤토리 메뉴");
+
+    UIScreen screen;
+
+    screen.a = leftTop;
+    screen.b = rightTop;
+    screen.c = leftBottom;
+    screen.d = rightBottom;
+
+    ConsoleUI::DrawFullLayout(screen);
+}
+
+
+void GameManager::HandleInventoryInput()
+{
+    Inventory& inventory = context.GetInventory();
+
+    int itemCount =
+        static_cast<int>(
+            inventory.GetItems().size()
+            );
+
+    int choice =
+        InputManager::InputInMassegeToRange(
+            "선택 : ",
+            0,
+            itemCount
+        );
+
+    // 뒤로가기
+    if (choice == 0)
+    {
+        currentState = GameState::MainMenu;
+        return;
+    }
+
+    int index = choice - 1;
+
+    auto& items = inventory.GetItems();
+
+    if (index >= 0 && index < items.size())
+    {
+        ConsoleUI::PrintMessage(
+            items[index].GetName() +
+            " 선택됨"
+        );
+    }
+}
+
+

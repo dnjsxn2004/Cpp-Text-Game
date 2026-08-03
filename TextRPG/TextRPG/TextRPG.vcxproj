@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Battle.cpp" />
+    <ClCompile Include="Cell.cpp" />
     <ClCompile Include="ConsolUI.cpp" />
     <ClCompile Include="GameContext.cpp" />
     <ClCompile Include="GameManager.cpp" />
@@ -140,14 +141,18 @@
     <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Ryu.cpp" />
+    <ClCompile Include="ScreenBuffer.cpp" />
     <ClCompile Include="Shop.cpp" />
     <ClCompile Include="TextRPG.cpp" />
+    <ClCompile Include="UIScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Battle.h" />
+    <ClInclude Include="Cell.h" />
     <ClInclude Include="ConsolUI.h" />
     <ClInclude Include="GameContext.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="GameState.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="Jin.h" />
     <ClInclude Include="Gang.h" />
@@ -157,8 +162,10 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="ItemFactory.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="ScreenBuffer.h" />
     <ClInclude Include="Shop.h" />
     <ClInclude Include="StatBonus.h" />
+    <ClInclude Include="UIScreen.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

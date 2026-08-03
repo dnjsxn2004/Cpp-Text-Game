@@ -49,6 +49,9 @@
     <Filter Include="헤더 파일\UI">
       <UniqueIdentifier>{6ff7b6bd-8fc4-48b6-b47e-6057e14572c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="헤더 파일\UI\Renderer">
+      <UniqueIdentifier>{b3e96b4e-9aea-40d9-a85b-a9a9fc83ccdd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="GameContext.cpp">
@@ -96,11 +99,17 @@
     <ClCompile Include="Shop.cpp">
       <Filter>소스 파일\Inventory</Filter>
     </ClCompile>
+    <ClCompile Include="Cell.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="ScreenBuffer.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="UIScreen.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ConsolUI.h">
-      <Filter>헤더 파일\UI</Filter>
-    </ClInclude>
     <ClInclude Include="GameContext.h">
       <Filter>헤더 파일\Core</Filter>
     </ClInclude>
@@ -142,6 +151,21 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>헤더 파일\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="ConsolUI.h">
+      <Filter>헤더 파일\UI</Filter>
+    </ClInclude>
+    <ClInclude Include="Cell.h">
+      <Filter>헤더 파일\UI\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="ScreenBuffer.h">
+      <Filter>헤더 파일\UI\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="UIScreen.h">
+      <Filter>헤더 파일\UI\Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="GameState.h">
+      <Filter>헤더 파일\Core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
