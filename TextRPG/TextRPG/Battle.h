@@ -43,7 +43,7 @@ public:
 	Battle(GameContext& context);
 
 	// [추가] 전투 전체 진행을 담당
-	bool RunBattle();
+	void RunBattle(GameContext& context);
 
 	// 확률생성
 	int CheckChance();

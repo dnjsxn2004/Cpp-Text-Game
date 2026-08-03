@@ -2,14 +2,19 @@
 #include "Monster.h"
 #include <ctime>
 #include <cstdlib>
+#include "ConsolUI.h"
+#include "ScreenBuffer.h"
+
 
 int main()
 {
     srand(static_cast<unsigned int>(time(nullptr)));
-    GameManager gameManager;
-    gameManager.Run();
 
-    
+    system("mode con cols=160 lines=45");
+
+    GameManager gameManager;
+    1
+    gameManager.Run();
 
     return 0;
 }

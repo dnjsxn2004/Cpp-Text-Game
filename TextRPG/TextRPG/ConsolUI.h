@@ -37,6 +37,8 @@
 #include "GameContext.h"
 #include "StatBonus.h"
 #include "Player.h"
+#include "ScreenBuffer.h"
+#include "UIScreen.h"
 
 // [추가] 전방 선언
 class Battle;
@@ -46,6 +48,28 @@ class Item;
 class ConsoleUI
 {
 public:
+    ConsoleUI();
+
+    HANDLE hConsole;
+
+    static const int SCREEN_WIDTH = 120;
+    static const int SCREEN_HEIGHT = 40;
+
+    static const int LEFT_WIDTH = 58;
+    static const int RIGHT_WIDTH = 58;
+
+    static const int TOP_HEIGHT = 22;
+    static const int BOTTOM_HEIGHT = 12;
+
+
+
+    // 아스키 렌더링 벡터 스트링 변환 함수
+    static std::vector<std::string>
+        SplitLines(const std::string& text);
+
+    // 버퍼 테스트 함수
+    void Render(const ScreenBuffer& buffer);
+
     // 오류떠서 추가 플레이서 스테이터스 & 버전
     static void PrintPlayerStatus(Player& player);
 
@@ -223,68 +247,7 @@ public:
 
 
     //[추가] 주사위 결과 출력 함수
-    static void PrintDiceResult(int diceValue);
-
-    //[추가] 플레이어 일반 공격 결과 출력 함수
-    static void PrintPlayerMeleeAttackResultMessage(
-        const std::string& playerName,
-        const std::string& monsterName,
-        int damage
-    );
-
-    //[추가] 플레이어 스킬 공격 결과 출력 함수
-    static void PrintPlayerSkillAttackResultMessage(
-        const std::string& playerName,
-        const std::string& monsterName,
-        int damage
-    );
-
-    //[추가] 공격 실패 출력 함수
-    static void PrintAttackMiss();
-
-    //[추가] 스킬 실패 출력 함수
-    static void PrintSkillMiss();
-
-    //[추가] MP 부족 출력 함수
-    static void PrintNotEnoughMp();
-
-    //[추가] 스턴 성공 출력 함수
-    static void PrintStunSuccess(const std::string& monsterName);
-
-    //[추가] 몬스터 스턴 상태 출력 함수
-    static void PrintMonsterStunned(const std::string& monsterName);
-
-    //[추가] 몬스터 공격 결과 출력 함수
-    static void PrintMonsterAttackResult(
-        const std::string& monsterName,
-        const std::string& playerName,
-        int damage
-    );
-
-    //[추가] 도망 성공 출력 함수
-    static void PrintRunawaySuccess();
-
-    //[추가] 도망 실패 출력 함수
-    static void PrintRunawayFail();
-
-    //[추가] 전투 승리 출력 함수
-    static void PrintBattleVictory(const std::string& monsterName);
-
-    //[추가] 전투 패배 출력 함수
-    static void PrintBattleDefeat(const std::string& playerName);
-
-    //[추가] 전투 중단 출력 함수
-    static void PrintBattleStopped();
-
-    // [추가] 보상 출력 함수
-    static void PrintReward(int exp, int gold);
-
-    //[추가] 레벨업 출력 함수
-    static void PrintLevelUp(const std::string& playerName, int level);
-
-
-
-
+    static std::vector<std::string> PrintDiceResult(int diceValue);
 
 
     // 게임종료 메세지 출력 함수
@@ -499,12 +462,12 @@ public:
 
 
     // 주사위 눈금별 아스키 이미지 출력 함수 선언
-    static void PrintDice1();  // 주사위 눈금 1 출력
-    static void PrintDice2();  // 주사위 눈금 2 출력
-    static void PrintDice3();  // 주사위 눈금 3 출력
-    static void PrintDice4();  // 주사위 눈금 4 출력
-    static void PrintDice5();  // 주사위 눈금 5 출력
-    static void PrintDice6();  // 주사위 눈금 6 출력
+    static std::vector<std::string> PrintDice1();  // 주사위 눈금 1 출력
+    static std::vector<std::string> PrintDice2();  // 주사위 눈금 2 출력
+    static std::vector<std::string> PrintDice3();  // 주사위 눈금 3 출력
+    static std::vector<std::string> PrintDice4();  // 주사위 눈금 4 출력
+    static std::vector<std::string> PrintDice5();  // 주사위 눈금 5 출력
+    static std::vector<std::string> PrintDice6();  // 주사위 눈금 6 출력
 
     //래퍼 함수 컷신 출력하는건데 게임매니저 더 건들 자신이없어서 여기다 추가함 // 기존의 showcutscene 별명 붙여주는 겁니다.
     static void PrintAct1Cutscene();
@@ -525,21 +488,104 @@ public:
 
     static void PrintFixedWidthText(const std::string& text, int width);
     
-    //게임 화면 나누기
-    static void DrawGameScreen(
-        const std::vector<std::string>& cutSceneLines,
-        const std::vector<std::string>& logLines,
-        Player& player,
-        const std::vector<std::string>& choiceLines
-    );
-
+    // 게임 ui
     static void DrawGameScreen(
         const std::vector<std::string>& cutSceneLines,
         const std::vector<std::string>& logLines,
         const std::vector<std::string>& statusLines,
+        const std::vector<std::string>& monsterstatus,
         const std::vector<std::string>& choiceLines
     );
 
+    // 전투 로그 관리
+    static void AddLog(
+        std::vector<std::string>& logs,
+        const std::string& text
+    );
 
+    // 공격 로그
+    static std::string
+        PrintPlayerMeleeAttackResultMessage(
+            const std::string& playerName,
+            const std::string& monsterName,
+            int damage
+        );
+
+    // 스킬 로그
+    static std::string
+        PrintPlayerSkillAttackResultMessage(
+            const std::string& playerName,
+            const std::string& monsterName,
+            int damage
+        );
+
+    // 공격 실패
+    static std::string PrintAttackMiss();
+
+    // MP 부족
+    static std::string PrintNotEnoughMp();
+
+    // 스턴 성공
+    static std::string
+        PrintStunSuccess(
+            const std::string& monsterName
+        );
+
+    // 몬스터 기절
+    static std::string
+        PrintMonsterStunned(
+            const std::string& monsterName
+        );
+
+    // 몬스터 공격
+    static std::string
+        PrintMonsterAttackResult(
+            const std::string& monsterName,
+            const std::string& playerName,
+            int damage
+        );
+
+    // 도망 성공
+    static std::string PrintRunawaySuccess();
+
+    // 도망 실패
+    static std::string PrintRunawayFail();
+
+    // 전투 승리
+    static std::string
+        PrintBattleVictory(
+            const std::string& monsterName
+        );
+
+    // 전투 패배
+    static std::string
+        PrintBattleDefeat(
+            const std::string& playerName
+        );
+
+    // 보상
+    static std::string
+        PrintReward(
+            int exp,
+            int gold
+        );
+
+    // 레벨업
+    static std::string
+        PrintLevelUp(
+            const std::string& playerName,
+            int level
+        );
+    // 박스 크기 고정 함수
+    static void DrawFrame(
+        int width,
+        int height);
+    
+    // 전체 프레임 출력
+    static void DrawFullLayout(
+        const UIScreen& screen
+    );
+
+    static std::string Repeat(const std::string& text, int count);
 
 };
