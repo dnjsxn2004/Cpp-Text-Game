@@ -39,11 +39,14 @@
 #include "Player.h"
 #include "ScreenBuffer.h"
 #include "UIScreen.h"
+#include "Shop.h"
 
 // [추가] 전방 선언
 class Battle;
 class GameContext;
 class Item;
+class Shop;
+
 
 class ConsoleUI
 {
@@ -51,7 +54,8 @@ public:
     ConsoleUI();
 
     HANDLE hConsole;
-
+    
+    // 화면 출력
     static const int SCREEN_WIDTH = 120;
     static const int SCREEN_HEIGHT = 40;
 
@@ -60,8 +64,6 @@ public:
 
     static const int TOP_HEIGHT = 22;
     static const int BOTTOM_HEIGHT = 12;
-
-
 
     // 아스키 렌더링 벡터 스트링 변환 함수
     static std::vector<std::string>
@@ -277,10 +279,10 @@ public:
 
 
     // 진태식 캐릭터 흑색 이미지 출력 함수
-    static void PrintJinBlackImage();
+    static std::vector<std::string>  PrintJinBlackImage();
 
     // 진태식 캐릭터 백색 이미지 출력 함수
-    static void PrintJinWhiteImage();
+    static std::vector<std::string> PrintJinWhiteImage();
 
 
     // 강사라 캐릭터 흑색 이미지 출력 함수
@@ -291,10 +293,10 @@ public:
 
 
     // 류노스케 캐릭터 흑색 이미지 출력 함수
-    static void PrintRyuBlackImage();
+    static std::vector<std::string> PrintRyuBlackImage();
 
     // 류노스케 캐릭터 백색 이미지 출력 함수
-    static void PrintRyuWhiteImage();
+    static std::vector<std::string> PrintRyuWhiteImage();
 
 
     // 진태식 캐릭터 로고(간단한 이미지, 픽토그래픽) 출력 함수

@@ -205,7 +205,6 @@ void Battle::RunBattle(GameContext& context)
 					logLines,
 					ConsoleUI::PrintNotEnoughMp()
 				);
-
 				continue;
 			}
 
@@ -226,7 +225,13 @@ void Battle::RunBattle(GameContext& context)
 
 			diceLines =
 				ConsoleUI::PrintDiceResult(
-					this->GetLastDiceValue());
+					this->GetLastDiceValue()
+				);
+
+			monster.SetHp(
+				monster.GetHp() - damage
+			);
+
 
 			ConsoleUI::AddLog(
 				logLines,
@@ -246,35 +251,33 @@ void Battle::RunBattle(GameContext& context)
 						monster.GetName()
 					)
 				);
-
 				break;
 			}
 
 			int monsterDamage =
 				monster.GetAttack();
 
-			monster.SetHp(
-				monster.GetHp() - damage
+			player.SetHp(
+				player.GetHp() - monsterDamage
 			);
 
 			ConsoleUI::AddLog(
 				logLines,
-				ConsoleUI::PrintPlayerSkillAttackResultMessage(
-					player.GetName(),
+				ConsoleUI::PrintMonsterAttackResult(
 					monster.GetName(),
-					damage
+					player.GetName(),
+					monsterDamage
 				)
 			);
 
-			if (monster.GetHp() <= 0)
+			if (player.GetHp() <= 0)
 			{
 				ConsoleUI::AddLog(
 					logLines,
-					ConsoleUI::PrintBattleVictory(
-						monster.GetName()
+					ConsoleUI::PrintBattleDefeat(
+						player.GetName()
 					)
 				);
-
 				break;
 			}
 		}

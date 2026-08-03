@@ -80,6 +80,9 @@ private:
 
     bool StartFinalBossBattle();
 
+    bool ShowCharacterPreview(int choice);
+
+
     // Á¾·á
 
     void Ending();

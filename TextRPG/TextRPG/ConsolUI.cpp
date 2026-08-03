@@ -28,6 +28,7 @@
 
 
 using namespace std;
+class Shop;
 
 ConsoleUI::ConsoleUI()
 {
@@ -468,15 +469,15 @@ void ConsoleUI::SwitchPurchaseCategoryMenu(GameContext& context, Shop& shop)
         switch (choice)
         {
         case 1:
-            PurchaseByCategory(context, ShopCategory::Consumable);
+            PurchaseByCategory(context, shop, ShopCategory::Consumable);
             break;
 
         case 2:
-            PurchaseByCategory(context, ShopCategory::Weapon);
+            PurchaseByCategory(context, shop, ShopCategory::Weapon);
             break;
 
         case 3:
-            PurchaseByCategory(context, ShopCategory::Armor);
+            PurchaseByCategory(context, shop, ShopCategory::Armor);
             break;
 
         case 0:
@@ -592,7 +593,8 @@ void ConsoleUI::PurchaseByCategory(GameContext& context, Shop& shop, ShopCategor
     }
 }
 
-void ConsoleUI::SwitchSellMenu(GameContext& context, Shop& shop) {
+void ConsoleUI::SwitchSellMenu(GameContext& context, Shop& shop)
+{
 
     Inventory& inventory = context.GetInventory();
 
@@ -1172,9 +1174,10 @@ int main()
 
 
 
-void ConsoleUI::PrintJinBlackImage()
+std::vector<std::string>
+ConsoleUI::PrintJinBlackImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
                   .                                         
                 .:.            ..          .                
                .-:.            .......      .               
@@ -1209,12 +1212,13 @@ void ConsoleUI::PrintJinBlackImage()
                    .     .........::::::......... ....      
                           ...... ..::::..... ...            
 
-)" << endl;
+)" );
 }
 
-void ConsoleUI::PrintJinWhiteImage()
+std::vector<std::string>
+ConsoleUI::PrintJinWhiteImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
 @@@@@@@@@@@@@@@@#-.                        .+@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@%+:..           ......         :%@@@@@@@@@@@@@
 @@@@@@@@@@@@@%=:.              ............   :#@@@@@@@@@@@@
@@ -1250,7 +1254,7 @@ void ConsoleUI::PrintJinWhiteImage()
                  .       ...  .....::::::...............    
                   .      ..........:::--:...............    
 
-)" << endl;
+)");
 }
 
 
@@ -1336,9 +1340,10 @@ void ConsoleUI::PrintKangWhiteImage()
 
 
 
-void ConsoleUI::PrintRyuBlackImage()
+std::vector<std::string>
+ConsoleUI::PrintRyuBlackImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
                           .. ...:.   ...                    
                    ..    .     ....::. ..                   
                   ..                 ... ..                 
@@ -1372,12 +1377,13 @@ void ConsoleUI::PrintRyuBlackImage()
        . .           .++--##*+==+###=.:..:::.::.:. : .:::.  
   .    . .            :++=+***+-=**+:. .....:::...  :.::..  
 
-)" << endl;
+)" );
 }
 
-void ConsoleUI::PrintRyuWhiteImage()
+std::vector<std::string>
+ConsoleUI::PrintRyuWhiteImage()
 {
-    cout << R"( 
+    return SplitLines(R"( 
 %%%%%%%%%%%%%%%%%%%+::    ..  ...::......-%%%%%%%%%%%%%%%%%%
 @@@@@@@@@@@@@@@@@@*..           .. ..::....-*@@@@@@@@@@@@@@@
 @@@@@@@@@@@@@@@@@#=.                   ... .:+@@@@@@@@@@@@@@
@@ -1413,7 +1419,7 @@ void ConsoleUI::PrintRyuWhiteImage()
       ...            .==::+#+====+*##*- :..::..::..:  . ....
 .     . .             -*+=+%%#*+=+#%%*:.....::.:-: :. .:.::-
 
-)" << endl;
+)");
 }
 
 //캐릭터 소개 애니메이션
@@ -3923,102 +3929,91 @@ void ConsoleUI::PrintFixedWidthText(const std::string& text, int width)
 
 void ConsoleUI::DrawCutSceneScreen(
     const std::vector<std::string>& sceneLines,
-    const std::vector<std::string>& dialogueLines
-)
+    const std::vector<std::string>& dialogueLines)
 {
     ClearScreen();
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
     CONSOLE_SCREEN_BUFFER_INFO csbi;
 
-    int consoleWidth = 120;
-    int consoleHeight = 35;
+    GetConsoleScreenBufferInfo(hConsole, &csbi);
 
-    if (GetConsoleScreenBufferInfo(hConsole, &csbi))
-    {
-        consoleWidth = csbi.srWindow.Right - csbi.srWindow.Left + 1;
-        consoleHeight = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
-    }
+    int width =
+        csbi.srWindow.Right -
+        csbi.srWindow.Left + 1;
 
-    // 좌우 테두리 2칸을 제외한 실제 내용 폭
-    int screenWidth = consoleWidth - 2;
+    int height =
+        csbi.srWindow.Bottom -
+        csbi.srWindow.Top + 1;
 
-    // 최소 크기 보정
-    if (screenWidth < 40)
-    {
-        screenWidth = 40;
-    }
+    width -= 2;
+    height -= 2;
 
-    if (consoleHeight < 20)
-    {
-        consoleHeight = 20;
-    }
+    int sceneHeight = height * 3 / 4;
+    int dialogueHeight = height - sceneHeight - 2;
 
-    // 전체 출력 줄 수 계산
-    // 위/중간/아래 테두리 3줄 + 대기 문구 공간 약 2줄을 제외
-    int usableHeight = consoleHeight - 5;
+    // 상단
+    std::cout
+        << "┌"
+        << Repeat("─", width - 2)
+        << "┐\n";
 
-    // 상단 컷신 영역 약 2/3
-    int sceneHeight = usableHeight * 2 / 3;
-
-    // 하단 대사 영역 약 1/3
-    int dialogueHeight = usableHeight - sceneHeight;
-
-    // 너무 작아지는 것 방지
-    if (sceneHeight < 10)
-    {
-        sceneHeight = 10;
-    }
-
-    if (dialogueHeight < 5)
-    {
-        dialogueHeight = 5;
-    }
-
-    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
-
-    // 상단 컷신 영역
+    // 컷신 영역
     for (int i = 0; i < sceneHeight; i++)
     {
-        std::cout << "|";
+        std::string line =
+            (i < sceneLines.size()) ?
+            sceneLines[i] : "";
 
-        if (i < static_cast<int>(sceneLines.size()))
+        if ((int)line.length() > width - 4)
         {
-            PrintFixedWidthText(sceneLines[i], screenWidth);
-        }
-        else
-        {
-            PrintFixedWidthText("", screenWidth);
+            line = line.substr(0, width - 4);
         }
 
-        std::cout << "|" << std::endl;
+        std::cout
+            << "│ "
+            << line
+            << std::string(width - 3 - line.length(), ' ')
+            << "│\n";
     }
 
-    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+    // 중간선
+    std::cout
+        << "├"
+        << Repeat("─", width - 2)
+        << "┤\n";
 
-    // 하단 대사 영역
+    // 대사 영역
     for (int i = 0; i < dialogueHeight; i++)
     {
-        std::cout << "|";
+        std::string line =
+            (i < dialogueLines.size()) ?
+            dialogueLines[i] : "";
 
-        if (i == 0)
+        std::string message =
+            "계속하려면 Enter를 누르세요...";
+
+        if ((int)line.length() > width - 4)
         {
-            PrintFixedWidthText("[대사]", screenWidth);
-        }
-        else if (i - 1 < static_cast<int>(dialogueLines.size()))
-        {
-            PrintFixedWidthText(dialogueLines[i - 1], screenWidth);
-        }
-        else
-        {
-            PrintFixedWidthText("", screenWidth);
+            line = line.substr(0, width - 4);
         }
 
-        std::cout << "|" << std::endl;
+        std::cout
+            << "│ "
+            << line
+            << std::string(width - 3 - line.length(), ' ')
+            << "│\n";
     }
 
-    std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
+    // 하단
+    std::cout
+        << "└"
+        << Repeat("─", width - 2)
+        << "┘\n";
 }
+
+
 
 
 
@@ -4091,9 +4086,9 @@ void ConsoleUI::DrawGameScreen(
         {
             std::cout
                 << "+"
-                << std::string(leftWidth, '=')
+                << Repeat("─", leftWidth)
                 << "+"
-                << std::string(rightWidth, '=')
+                << Repeat("─", rightWidth)
                 << "+"
                 << std::endl;
         };
@@ -4394,11 +4389,11 @@ ConsoleUI::PrintAttackMiss()
     return "공격이 빗나갔습니다.";
 }
 
-// 박스 크기 고정
 void ConsoleUI::DrawFrame(
     int width,
     int height)
 {
+    // 상단
     std::cout << "┌";
 
     for (int i = 0; i < width - 2; ++i)
@@ -4408,6 +4403,7 @@ void ConsoleUI::DrawFrame(
 
     std::cout << "┐\n";
 
+    // 내부
     for (int y = 0; y < height - 2; ++y)
     {
         std::cout << "│";
@@ -4420,6 +4416,7 @@ void ConsoleUI::DrawFrame(
         std::cout << "│\n";
     }
 
+    // 하단
     std::cout << "└";
 
     for (int i = 0; i < width - 2; ++i)
@@ -4431,16 +4428,39 @@ void ConsoleUI::DrawFrame(
 }
 
 
+
 void ConsoleUI::DrawFullLayout(const UIScreen& screen)
 {
     ClearScreen();
     MoveCursor(0, 0);
 
-    const int leftWidth = 75;
-    const int rightWidth = 75;
+    HANDLE hConsole =
+        GetStdHandle(STD_OUTPUT_HANDLE);
 
-    const int topHeight = 22;
-    const int bottomHeight = 14;
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+    GetConsoleScreenBufferInfo(
+        hConsole,
+        &csbi);
+
+   
+    int consoleWidth =
+        csbi.srWindow.Right -
+        csbi.srWindow.Left + 1;
+
+    int consoleHeight =
+        csbi.srWindow.Bottom -
+        csbi.srWindow.Top + 1;
+
+   
+    int totalWidth = consoleWidth - 4;
+    int totalHeight = consoleHeight - 4;
+
+    int leftWidth = totalWidth / 2;
+    int rightWidth = totalWidth - leftWidth - 1;
+
+    int topHeight = totalHeight * 2 / 3;
+    int bottomHeight = totalHeight - topHeight - 1;
 
     auto FitText =
         [](const std::string& text, int width)
@@ -4461,13 +4481,13 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
             return output;
         };
 
-    // ✅ screen 기준으로 연결
+    // 데이터 연결
     const auto& leftTop = screen.a;
     const auto& rightTop = screen.b;
     const auto& leftBottom = screen.c;
     const auto& rightBottom = screen.d;
 
-    // 상단 프레임
+ 
     std::cout
         << "┌"
         << Repeat("─", leftWidth)
@@ -4475,7 +4495,6 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
         << Repeat("─", rightWidth)
         << "┐\n";
 
-    // 상단 내용
     for (int i = 0; i < topHeight; i++)
     {
         std::string left =
@@ -4494,7 +4513,6 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
             << "│\n";
     }
 
-    // 중간 프레임
     std::cout
         << "├"
         << Repeat("─", leftWidth)
@@ -4502,7 +4520,6 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
         << Repeat("─", rightWidth)
         << "┤\n";
 
-    // 하단 내용
     for (int i = 0; i < bottomHeight; i++)
     {
         std::string left =
@@ -4521,7 +4538,6 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
             << "│\n";
     }
 
-    // 하단 프레임
     std::cout
         << "└"
         << Repeat("─", leftWidth)
@@ -4529,6 +4545,7 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
         << Repeat("─", rightWidth)
         << "┘\n";
 }
+
 
 std::string ConsoleUI::Repeat(const std::string& text, int count)
 {

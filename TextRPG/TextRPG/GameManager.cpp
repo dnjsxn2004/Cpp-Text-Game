@@ -393,29 +393,22 @@ void GameManager::AddLog(const std::string& text)
 
 void GameManager::HandleCharacterSelectInput()
 {
-    int choice =
-        InputManager::InputInMassegeToRange(
-            "선택: ",
-            0,
-            2
-        );
+    int choice = InputManager::InputInMassegeToRange("선택: ", 0, 2);
 
-    switch (choice)
+    if (choice == 0)
     {
-    case 1:
-        selectedCharacterIndex = 0;
-        break;
-
-    case 2:
-        selectedCharacterIndex = 1;
-        break;
-
-    case 0:
         currentState = GameState::Exit;
         return;
     }
 
-    if (selectedCharacterIndex == 0)
+    bool confirm = ShowCharacterPreview(choice);
+
+    if (!confirm)
+    {
+        return; // 다시 선택 화면으로
+    }
+
+    if (choice == 1)
     {
         context.SetPlayer(new Jin());
         AddLog("진태식을 선택했습니다.");
@@ -429,6 +422,65 @@ void GameManager::HandleCharacterSelectInput()
     currentState = GameState::MainMenu;
 }
 
+bool GameManager::ShowCharacterPreview(int choice)
+{
+    UIScreen screen;
+
+    if (choice == 1)
+    {
+        screen.a = ConsoleUI::PrintJinWhiteImage();
+
+        screen.b =
+        {
+            "[ 진태식 ]",
+            "",
+            "무술: 유도",
+            "",
+            "마약유통을 잡기위해 두식이파에 잠입한 비밀경찰",
+            "의리와 책임을 중시한다.",
+            "",
+ 
+        };
+    }
+    else
+    {
+        screen.a = ConsoleUI::PrintRyuWhiteImage();
+
+        screen.b =
+        {
+            "[ 류노스케 ]",
+            "",
+            "무술: 가라데",
+            "",
+            "냉철한 야쿠자 후계자.",
+            "",
+   
+        };
+    }
+
+    screen.c =
+    {
+        "",
+        "이 캐릭터를 선택하시겠습니까?",
+        "",
+        "1. 예",
+        "2. 아니오"
+    };
+
+    screen.d =
+    {
+        "선택: "
+    };
+
+    ConsoleUI::DrawFullLayout(screen);
+
+    int confirm = InputManager::InputInMassegeToRange("", 1, 2);
+
+    return confirm == 1;
+}
+
+
+
 
 void GameManager::RenderCharacterSelect()
 {
@@ -439,11 +491,11 @@ void GameManager::RenderCharacterSelect()
 
     if (selectedCharacterIndex == 0)
     {
-        ConsoleUI::PrintJinBlackImage();
+        screen.a = ConsoleUI::PrintJinBlackImage();
     }
     else
     {
-        ConsoleUI::PrintRyuBlackImage();
+        screen.a = ConsoleUI::PrintRyuBlackImage();
     }
 
     Player* preview =
