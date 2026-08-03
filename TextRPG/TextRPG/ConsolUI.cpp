@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <iomanip>
-
+#include <sstream>
 
 #include "Jin.h"
 #include "Ryu.h"
@@ -26,7 +26,20 @@
 #include "InputManager.h"
 
 
+
 using namespace std;
+
+ConsoleUI::ConsoleUI()
+{
+    hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+
+    CONSOLE_CURSOR_INFO cursorInfo;
+    GetConsoleCursorInfo(hConsole, &cursorInfo);
+
+    cursorInfo.bVisible = FALSE;
+
+    SetConsoleCursorInfo(hConsole, &cursorInfo);
+}
 
 // ANSI 색상 이스케이프 코드 정의
 #define RESET   "\033[0m"
@@ -39,6 +52,23 @@ using namespace std;
 #define WHITE   "\033[37m"
 #define BOLD    "\033[1m"
 
+
+std::vector<std::string>
+ConsoleUI::SplitLines(const std::string& text)
+{
+    std::vector<std::string> lines;
+
+    std::stringstream ss(text);
+
+    std::string line;
+
+    while (std::getline(ss, line))
+    {
+        lines.push_back(line);
+    }
+
+    return lines;
+}
 
 void ConsoleUI::PrintLine()
 {
@@ -3005,40 +3035,32 @@ void ConsoleUI::PrintNewCutScene24Image()
 
 
 // 주사위
-void ConsoleUI::PrintDice1()
+std::vector<std::string>
+ConsoleUI::PrintDice1()
 {
-    cout << R"(
-                                                            
-                                                            
-                                                            
-                                                            
-                  .........................                 
-                 .:::..................   ..                
-                 ::....                   ..                
-                 ::..                     ..                
-                 :..                      ..                
-                 :.                       ..                
-                 :.         .:::.         ..                
-                 :.         *####.        ..                
-                 :.         :###:         ..                
-                 :.                       ..                
-                 :.                       ..                
-                 :.                       ..                
-                 :.                       ..                
-                 :.                       ..                
-                  .........................                 
-                                                            
-                                                            
-                                                            
-                                                            
-                                                            
-
-    )" << endl;
+    return SplitLines(R"(
+                          .........................                 
+                         .:::..................   ..                
+                         ::....                   ..                
+                         ::..                     ..                
+                         :..                      ..                
+                         :.                       ..                
+                         :.         .:::.         ..                
+                         :.         *####.        ..                
+                         :.         :###:         ..                
+                         :.                       ..                
+                         :.                       ..                
+                         :.                       ..                
+                         :.                       ..                
+                         :.                       ..                
+                          .........................                 
+)");
 }
 
-void ConsoleUI::PrintDice2()
+std::vector<std::string>
+ConsoleUI::PrintDice2()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3064,13 +3086,13 @@ void ConsoleUI::PrintDice2()
                                                             
                                                             
                                                             
-
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice3()
+std::vector<std::string>
+ConsoleUI::PrintDice3()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3096,12 +3118,13 @@ void ConsoleUI::PrintDice3()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice4()
+std::vector<std::string>
+ConsoleUI::PrintDice4()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3126,12 +3149,13 @@ void ConsoleUI::PrintDice4()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice5()
+std::vector<std::string>
+ConsoleUI::PrintDice5()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3158,12 +3182,13 @@ void ConsoleUI::PrintDice5()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
 
-void ConsoleUI::PrintDice6()
+std::vector<std::string>
+ConsoleUI::PrintDice6()
 {
-    cout << R"(
+    return SplitLines(R"(
                                                             
                                                             
                                                             
@@ -3190,8 +3215,39 @@ void ConsoleUI::PrintDice6()
                                                             
                                                             
 
-    )" << endl;
+)");
 }
+
+std::vector<std::string>
+ConsoleUI::PrintDiceResult(int diceValue)
+{
+    switch (diceValue)
+    {
+    case 1:
+        return PrintDice1();
+
+    case 2:
+        return PrintDice2();
+
+    case 3:
+        return PrintDice3();
+
+    case 4:
+        return PrintDice4();
+
+    case 5:
+        return PrintDice5();
+
+    case 6:
+        return PrintDice6();
+
+    default:
+        return SplitLines(R"(
+잘못된 주사위 값
+)");
+    }
+}
+
 
 
 
@@ -3413,154 +3469,6 @@ void ConsoleUI::PrintBattleStart(GameContext& context)
     PrintLine();
 }
 
-// [추가] 주사위 결과 출력 함수
-void ConsoleUI::PrintDiceResult(int diceValue)
-{
-    cout << "주사위 결과: " << diceValue << endl;
-
-    switch (diceValue)
-    {
-    case 1:
-        PrintDice1();
-        break;
-
-    case 2:
-        PrintDice2();
-        break;
-
-    case 3:
-        PrintDice3();
-        break;
-
-    case 4:
-        PrintDice4();
-        break;
-
-    case 5:
-        PrintDice5();
-        break;
-
-    case 6:
-        PrintDice6();
-        break;
-
-    default:
-        PrintError("잘못된 주사위 값입니다.");
-        break;
-    }
-}
-
-// [추가] 플레이어 일반 공격 결과 출력 함수
-void ConsoleUI::PrintPlayerMeleeAttackResultMessage(
-    const std::string& playerName,
-    const std::string& monsterName,
-    int damage
-)
-{
-    cout << playerName << "의 일반 공격!" << endl;
-    cout << monsterName << "에게 " << damage << " 데미지를 입혔습니다." << endl;
-}
-
-// [추가] 플레이어 스킬 공격 결과 출력 함수
-void ConsoleUI::PrintPlayerSkillAttackResultMessage(
-    const std::string& playerName,
-    const std::string& monsterName,
-    int damage
-)
-{
-    cout << playerName << "의 스킬 공격!" << endl;
-    cout << monsterName << "에게 " << damage << " 데미지를 입혔습니다." << endl;
-}
-
-// [추가] 공격 실패 출력 함수
-void ConsoleUI::PrintAttackMiss()
-{
-    PrintMessage("공격이 빗나갔습니다.");
-}
-
-// [추가] 스킬 실패 출력 함수
-void ConsoleUI::PrintSkillMiss()
-{
-    PrintMessage("스킬 사용에 실패했습니다.");
-}
-
-// [추가] MP 부족 출력 함수
-void ConsoleUI::PrintNotEnoughMp()
-{
-    PrintError("MP가 부족합니다.");
-}
-
-// [추가] 스턴 성공 출력 함수
-void ConsoleUI::PrintStunSuccess(const std::string& monsterName)
-{
-    cout << "치명타!" << endl;
-    cout << monsterName << "이/가 스턴 상태가 되었습니다." << endl;
-}
-
-// [추가] 몬스터 스턴 상태 출력 함수
-void ConsoleUI::PrintMonsterStunned(const std::string& monsterName)
-{
-    cout << monsterName << "은/는 스턴 상태로 행동하지 못했습니다." << endl;
-}
-
-// [추가] 몬스터 공격 결과 출력 함수
-void ConsoleUI::PrintMonsterAttackResult(
-    const std::string& monsterName,
-    const std::string& playerName,
-    int damage
-)
-{
-    cout << monsterName << "의 공격!" << endl;
-    cout << playerName << "이/가 " << damage << " 데미지를 받았습니다." << endl;
-}
-
-// [추가] 도망 성공 출력 함수
-void ConsoleUI::PrintRunawaySuccess()
-{
-    PrintSuccess("도망에 성공했습니다.");
-}
-
-// [추가] 도망 실패 출력 함수
-void ConsoleUI::PrintRunawayFail()
-{
-    PrintError("도망에 실패했습니다.");
-}
-
-// [추가] 전투 승리 출력 함수
-void ConsoleUI::PrintBattleVictory(const std::string& monsterName)
-{
-    PrintSuccess(monsterName + "을/를 쓰러뜨렸습니다.");
-}
-
-// [추가] 전투 패배 출력 함수
-void ConsoleUI::PrintBattleDefeat(const std::string& playerName)
-{
-    PrintError(playerName + "이/가 쓰러졌습니다.");
-}
-
-// [추가] 전투 중단 출력 함수
-void ConsoleUI::PrintBattleStopped()
-{
-    PrintMessage("전투를 중단했습니다.");
-}
-
-// [추가] 보상 출력 함수
-void ConsoleUI::PrintReward(int exp, int gold)
-{
-    PrintLine();
-    cout << "전투 보상" << endl;
-    cout << "경험치 +" << exp << endl;
-    cout << "골드 +" << gold << endl;
-    PrintLine();
-}
-
-// [추가] 레벨업 출력 함수
-void ConsoleUI::PrintLevelUp(const std::string& playerName, int level)
-{
-    PrintSuccess(playerName + "의 레벨이 올랐습니다.");
-    cout << "현재 레벨: " << level << endl;
-}
-
 
 void ConsoleUI::PrintAct1Cutscene()
 {
@@ -3703,14 +3611,19 @@ void ConsoleUI::DrawCutSceneScreen(
     std::cout << "+" << std::string(screenWidth, '-') << "+" << std::endl;
 }
 
+
+
+    
+
 void ConsoleUI::DrawGameScreen(
     const std::vector<std::string>& cutSceneLines,
     const std::vector<std::string>& logLines,
     const std::vector<std::string>& statusLines,
+    const std::vector<std::string>& monsterstatus,
     const std::vector<std::string>& choiceLines
 )
 {
-    ClearScreen();
+    MoveCursor(0, 0);
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
     CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -3769,9 +3682,9 @@ void ConsoleUI::DrawGameScreen(
         {
             std::cout
                 << "+"
-                << std::string(leftWidth, '-')
+                << std::string(leftWidth, '=')
                 << "+"
-                << std::string(rightWidth, '-')
+                << std::string(rightWidth, '=')
                 << "+"
                 << std::endl;
         };
@@ -3796,7 +3709,7 @@ void ConsoleUI::DrawGameScreen(
             PrintCell("", leftWidth);
         }
 
-        std::cout << "|";
+        std::cout << "||";
 
         if (i == 0)
         {
@@ -3816,75 +3729,407 @@ void ConsoleUI::DrawGameScreen(
 
     PrintBorder();
 
-    // 하단 영역: 플레이어 상태 / 선택창
+    // 하단 영역: 선택창 / 플레이어 상태 + 몬스터 상태
+    int playerStatusWidth = rightWidth / 2;
+    int monsterStatusWidth = rightWidth - playerStatusWidth - 1;
+
     for (int i = 0; i < bottomHeight; i++)
     {
         std::cout << "|";
 
+        // 왼쪽 하단: 선택창
         if (i == 0)
         {
-            PrintCell("[플레이어 스테이터스]", leftWidth);
+            PrintCell("[선택창]", leftWidth);
         }
-        else if (i - 1 < static_cast<int>(statusLines.size()))
+        else if (i - 1 < static_cast<int>(choiceLines.size()))
         {
-            PrintCell(statusLines[i - 1], leftWidth);
+            PrintCell(choiceLines[i - 1], leftWidth);
         }
         else
         {
             PrintCell("", leftWidth);
         }
 
-        std::cout << "|";
+        std::cout << "||";
 
+        // 오른쪽 하단 내부 왼쪽: 플레이어 스테이터스
         if (i == 0)
         {
-            PrintCell("[선택창]", rightWidth);
+            PrintCell("[플레이어]", playerStatusWidth);
         }
-        else if (i - 1 < static_cast<int>(choiceLines.size()))
+        else if (i - 1 < static_cast<int>(statusLines.size()))
         {
-            PrintCell(choiceLines[i - 1], rightWidth);
+            PrintCell(statusLines[i - 1], playerStatusWidth);
         }
         else
         {
-            PrintCell("", rightWidth);
+            PrintCell("", playerStatusWidth);
+        }
+
+        std::cout << "|";
+
+        // 오른쪽 하단 내부 오른쪽: 몬스터 스테이터스
+        if (i == 0)
+        {
+            PrintCell("[몬스터]", monsterStatusWidth);
+        }
+        else if (i - 1 < static_cast<int>(monsterstatus.size()))
+        {
+            PrintCell(monsterstatus[i - 1], monsterStatusWidth);
+        }
+        else
+        {
+            PrintCell("", monsterStatusWidth);
         }
 
         std::cout << "|" << std::endl;
     }
 
     PrintBorder();
+
+    
+
 }
 
-void ConsoleUI::DrawGameScreen(
-    const std::vector<std::string>& cutSceneLines,
-    const std::vector<std::string>& logLines,
-    Player& player,
-    const std::vector<std::string>& choiceLines
-)
+void ConsoleUI::Render(const ScreenBuffer& buffer)
 {
-    std::vector<std::string> statusLines;
+    int width = buffer.GetWidth();
+    int height = buffer.GetHeight();
 
-    statusLines.push_back("이름 : " + player.GetName());
-    statusLines.push_back("레벨 : " + std::to_string(player.GetLevel()) + " / " + std::to_string(player.GetMaxLevel()));
-    statusLines.push_back("HP : " + std::to_string(player.GetHp()) + " / " + std::to_string(player.GetMaxHp()));
-    statusLines.push_back("MP : " + std::to_string(player.GetMp()) + " / " + std::to_string(player.GetMaxMp()));
-    statusLines.push_back("EXP : " + std::to_string(player.GetExp()) + " / " + std::to_string(player.GetMaxExp()));
-    statusLines.push_back("공격력 : " + std::to_string(player.GetAttack()));
-    statusLines.push_back("방어력 : " + std::to_string(player.GetDefense()));
-    statusLines.push_back("골드 : " + std::to_string(player.GetGold()));
+    std::vector<CHAR_INFO> consoleBuffer(width * height);
 
-    statusLines.push_back(
-        "STR " + std::to_string(player.GetStr()) +
-        " / DEX " + std::to_string(player.GetDex()) +
-        " / INT " + std::to_string(player.GetIntel()) +
-        " / LUK " + std::to_string(player.GetLuk())
-    );
+    const auto& cells = buffer.GetBuffer();
 
-    DrawGameScreen(
-        cutSceneLines,
-        logLines,
-        statusLines,
-        choiceLines
-    );
+    for (int i = 0; i < cells.size(); i++)
+    {
+        consoleBuffer[i].Char.UnicodeChar = cells[i].ch;
+        consoleBuffer[i].Attributes = cells[i].color;
+    }
+
+    COORD bufferSize =
+    {
+        (SHORT)width,
+        (SHORT)height
+    };
+
+    COORD bufferCoord = { 0,0 };
+
+    SMALL_RECT writeRegion =
+    {
+        0,
+        0,
+        (SHORT)(width - 1),
+        (SHORT)(height - 1)
+    };
+
+    WriteConsoleOutputW(
+        hConsole,
+        consoleBuffer.data(),
+        bufferSize,
+        bufferCoord,
+        &writeRegion);
+}
+
+
+// 게임 로그 반환
+
+// 전투 로그 총괄
+void ConsoleUI::AddLog(
+    std::vector<std::string>& logs,
+    const std::string& text)
+{
+    logs.push_back(text);
+
+    if (logs.size() > 12)
+    {
+        logs.erase(logs.begin());
+    }
+}
+
+
+// 일반 공격 로그
+std::string
+ConsoleUI::PrintPlayerMeleeAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage)
+{
+    return playerName +
+        "의 공격! " +
+        monsterName +
+        "에게 " +
+        std::to_string(damage) +
+        " 데미지!";
+}
+
+
+// 스킬 공격 로그
+std::string
+ConsoleUI::PrintPlayerSkillAttackResultMessage(
+    const std::string& playerName,
+    const std::string& monsterName,
+    int damage)
+{
+    return playerName +
+        "의 스킬 공격! " +
+        monsterName +
+        "에게 " +
+        std::to_string(damage) +
+        " 데미지!";
+}
+
+// mp 부족
+std::string
+ConsoleUI::PrintNotEnoughMp()
+{
+    return "MP가 부족합니다.";
+}
+
+
+// 스턴 성공
+std::string
+ConsoleUI::PrintStunSuccess(
+    const std::string& monsterName)
+{
+    return monsterName +
+        " 스턴 성공!";
+}
+
+// 몬스터 스턴 상태 출력
+std::string
+ConsoleUI::PrintMonsterStunned(
+    const std::string& monsterName)
+{
+    return monsterName +
+        "은(는) 기절 상태입니다.";
+}
+
+
+// 받은 데미지 로그
+std::string
+ConsoleUI::PrintMonsterAttackResult(
+    const std::string& monsterName,
+    const std::string& playerName,
+    int damage)
+{
+    return monsterName +
+        "의 공격! " +
+        playerName +
+        "에게 " +
+        std::to_string(damage) +
+        " 데미지!";
+}
+
+
+// 도망 성공
+std::string
+ConsoleUI::PrintRunawaySuccess()
+{
+    return "도망에 성공했습니다.";
+}
+
+
+// 도망 실패
+std::string
+ConsoleUI::PrintRunawayFail()
+{
+    return "도망에 실패했습니다.";
+}
+
+// 승리
+std::string
+ConsoleUI::PrintBattleVictory(
+    const std::string& monsterName)
+{
+    return monsterName +
+        " 처치 성공!";
+}
+
+// 패배
+std::string
+ConsoleUI::PrintBattleDefeat(
+    const std::string& playerName)
+{
+    return playerName +
+        "이(가) 쓰러졌습니다.";
+}
+
+// 리워드
+std::string
+ConsoleUI::PrintReward(
+    int exp,
+    int gold)
+{
+    return "EXP +" +
+        std::to_string(exp) +
+        " / GOLD +" +
+        std::to_string(gold);
+}
+
+// 렙업
+std::string
+ConsoleUI::PrintLevelUp(
+    const std::string& playerName,
+    int level)
+{
+    return playerName +
+        " Level Up! Lv." +
+        std::to_string(level);
+}
+
+//감나빗
+std::string
+ConsoleUI::PrintAttackMiss()
+{
+    return "공격이 빗나갔습니다.";
+}
+
+// 박스 크기 고정
+void ConsoleUI::DrawFrame(
+    int width,
+    int height)
+{
+    std::cout << "┌";
+
+    for (int i = 0; i < width - 2; ++i)
+    {
+        std::cout << "─";
+    }
+
+    std::cout << "┐\n";
+
+    for (int y = 0; y < height - 2; ++y)
+    {
+        std::cout << "│";
+
+        for (int x = 0; x < width - 2; ++x)
+        {
+            std::cout << " ";
+        }
+
+        std::cout << "│\n";
+    }
+
+    std::cout << "└";
+
+    for (int i = 0; i < width - 2; ++i)
+    {
+        std::cout << "─";
+    }
+
+    std::cout << "┘\n";
+}
+
+
+void ConsoleUI::DrawFullLayout(const UIScreen& screen)
+{
+    ClearScreen();
+    MoveCursor(0, 0);
+
+    const int leftWidth = 75;
+    const int rightWidth = 75;
+
+    const int topHeight = 22;
+    const int bottomHeight = 14;
+
+    auto FitText =
+        [](const std::string& text, int width)
+        {
+            std::string output = text;
+
+            if ((int)output.size() > width)
+            {
+                output = output.substr(0, width);
+            }
+
+            output +=
+                std::string(
+                    width - output.size(),
+                    ' '
+                );
+
+            return output;
+        };
+
+    // ✅ screen 기준으로 연결
+    const auto& leftTop = screen.a;
+    const auto& rightTop = screen.b;
+    const auto& leftBottom = screen.c;
+    const auto& rightBottom = screen.d;
+
+    // 상단 프레임
+    std::cout
+        << "┌"
+        << Repeat("─", leftWidth)
+        << "┬"
+        << Repeat("─", rightWidth)
+        << "┐\n";
+
+    // 상단 내용
+    for (int i = 0; i < topHeight; i++)
+    {
+        std::string left =
+            (i < leftTop.size()) ?
+            leftTop[i] : "";
+
+        std::string right =
+            (i < rightTop.size()) ?
+            rightTop[i] : "";
+
+        std::cout
+            << "│"
+            << FitText(left, leftWidth)
+            << "│"
+            << FitText(right, rightWidth)
+            << "│\n";
+    }
+
+    // 중간 프레임
+    std::cout
+        << "├"
+        << Repeat("─", leftWidth)
+        << "┼"
+        << Repeat("─", rightWidth)
+        << "┤\n";
+
+    // 하단 내용
+    for (int i = 0; i < bottomHeight; i++)
+    {
+        std::string left =
+            (i < leftBottom.size()) ?
+            leftBottom[i] : "";
+
+        std::string right =
+            (i < rightBottom.size()) ?
+            rightBottom[i] : "";
+
+        std::cout
+            << "│"
+            << FitText(left, leftWidth)
+            << "│"
+            << FitText(right, rightWidth)
+            << "│\n";
+    }
+
+    // 하단 프레임
+    std::cout
+        << "└"
+        << Repeat("─", leftWidth)
+        << "┴"
+        << Repeat("─", rightWidth)
+        << "┘\n";
+}
+
+std::string ConsoleUI::Repeat(const std::string& text, int count)
+{
+    std::string result;
+
+    for (int i = 0; i < count; i++)
+    {
+        result += text;
+    }
+
+    return result;
 }
 
