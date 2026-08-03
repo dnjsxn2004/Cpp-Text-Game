@@ -146,17 +146,14 @@ void GameManager::SelectCharacter()
 {
     ConsoleUI::ClearScreen();
 
+    ConsoleUI::ShowJinRyuIntroAnimation();
+
     while (context.IsGameRunning())
     {
-        ConsoleUI::PrintLine();
-        std::cout << "캐릭터를 선택하세요." << endl;
-        ConsoleUI::PrintLine();
+        ConsoleUI::ClearScreen();
 
-        std::cout << "1. 진태식" << endl;
-        std::cout << "2. 류노스케" << endl;
-        std::cout << "0. 게임 종료" << endl;
-
-        ConsoleUI::PrintLine();
+        // 캐릭터 선택 화면은 반복 출력
+        ConsoleUI::ShowCharacterIntro();
 
         int choice = InputManager::InputInMassegeToRange("선택: ", 0, 2);
 

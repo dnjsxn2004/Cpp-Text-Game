@@ -134,7 +134,7 @@ public:
     static void PrintShopMenu();
 
     // 상점 메뉴를 실행하고 사용자 선택에 따라 아이템 구매, 판매, 뒤로가기 기능을 수행하는 함수
-    static void SwitchShopMenu();
+    static void SwitchShopMenu(GameContext& context, Shop& shop);
 
     // 상점에 판매 중인 아이템 목록을 출력하는 함수
     static void PrintShopItems(const std::vector<Item>& shopItems);
@@ -144,11 +144,21 @@ public:
 
     // 아이템 구매 실패 메시지를 출력문은 Shop.h 에서 처리
 
+	// 상점 메뉴에서 구매 카테고리를 선택하고 해당 카테고리의 아이템 목록을 출력하는 함수
+    static void SwitchPurchaseCategoryMenu(GameContext& context, Shop& shop);
+
+	// 상점 메뉴에서 카테고리 별 상품 출력 및 구매 목록 함수
+    static void PurchaseByCategory(GameContext& context, Shop& shop, ShopCategory category);
+
+	// 상점 메뉴에서 판매 카테고리를 선택하고 해당 카테고리의 아이템 목록을 출력하는 함수
+    static void SwitchSellMenu(GameContext& context, Shop& shop);
+
 
 
     // 직업 선택 메뉴 함수
     // 항목: 진태식 / 류
     static void PrintJobSelectMenu();
+
 
 
 
@@ -332,6 +342,9 @@ public:
 
     // 류노스케 캐릭터 로고(간단한 이미지, 픽토그래픽) 출력 함수
     static void PrintRyuLogo();
+
+	// 진과 류 캐릭터 선택 장면 이미지 애니메이션 함수
+    static void ShowJinRyuIntroAnimation();
 
 
     // 진태식 캐릭터 등장 장면과 소개 문구 출력 함수
