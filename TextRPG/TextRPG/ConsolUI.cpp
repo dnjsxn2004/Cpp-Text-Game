@@ -27,7 +27,6 @@
 
 
 
-using namespace std;
 class Shop;
 
 ConsoleUI::ConsoleUI()
@@ -63,15 +62,15 @@ void ConsoleUI::PrintTitleLine()
     int lineLength = 178;
 
     // '=' 문자를 lineLength개 가진 문자열
-    string line(lineLength, lineChar);
+    std::string line(lineLength, lineChar);
 
-    // TODO: cout.write에 문자열 데이터와 길이 전달
-    cout.write(line.c_str(), lineLength);
+    // TODO: std::cout.write에 문자열 데이터와 길이 전달
+    std::cout.write(line.c_str(), lineLength);
 
     // TODO: 줄바꿈 출력
-    cout << endl;
+    std::cout << std::endl;;
 
-    /*cout.flush();*/
+    /*std::cout.flush();*/
 }
 std::vector<std::string>
 ConsoleUI::SplitLines(const std::string& text)
@@ -93,32 +92,32 @@ ConsoleUI::SplitLines(const std::string& text)
 
 void ConsoleUI::PrintLine()
 {
-    cout << "========================================================================================================" << endl;
+    std::cout << "========================================================================================================" << std::endl;;
 }
 
 void ConsoleUI::PrintTitle(const std::string& title)
 {
-	cout << "                            [ " << title << " ]                     " << endl;
+	std::cout << "                            [ " << title << " ]                     " << std::endl;;
 }
 
 void ConsoleUI::PrintMessage(const std::string& message)
 {
-	cout << message << endl;
+	std::cout << message << std::endl;;
 }
 
 void ConsoleUI::PrintMessageValue(const std::string& message, int value)
 {
-	cout << message << ": " << value << endl;
+	std::cout << message << ": " << value << std::endl;;
 }
 
 void ConsoleUI::PrintError(const std::string& message)
 {
-	cout  << message << endl;
+	std::cout  << message << std::endl;;
 }
 
 void ConsoleUI::PrintSuccess(const std::string& message)
 {
-	cout  << message << endl;
+	std::cout  << message << std::endl;;
 }
 
 
@@ -130,14 +129,14 @@ void ConsoleUI::PrintMainMenu()
 	PrintTitle("메인 메뉴");
 	PrintLine();
 
-    cout << endl;
+    std::cout << std::endl;;
     PrintMessage("1. 일반 전투");
     PrintMessage("2. 메인 스토리");
     PrintMessage("3. 상태창");
     PrintMessage("4. 인벤토리");
     PrintMessage("5. 상점");
     PrintMessage("0. 게임 종료");
-    cout << endl;
+    std::cout << std::endl;;
 
 	PrintLine();
 }
@@ -191,10 +190,10 @@ void ConsoleUI::SwitchMainMenu()
 void ConsoleUI::PrintPlayerStatusEveryTime(GameContext& context)
 {
     Player& player = context.GetPlayer();
-    cout << "레벨 : " << player.GetLevel() << " ( " << player.GetExp() << " / " << player.GetMaxExp() << " ) " <<
+    std::cout << "레벨 : " << player.GetLevel() << " ( " << player.GetExp() << " / " << player.GetMaxExp() << " ) " <<
         "  HP : " << player.GetHp() << " / " << player.GetMaxHp() <<
         "  MP : " << player.GetMp() << " / " << player.GetMaxMp() <<
-        endl;
+        std::endl;;
 }
 
 void ConsoleUI::PrintStatus(GameContext& context, Battle& battle, StatBonus& equipBonus, StatBonus& potionBonus)
@@ -203,39 +202,39 @@ void ConsoleUI::PrintStatus(GameContext& context, Battle& battle, StatBonus& equ
     Inventory& inventory = context.GetInventory();
     Item& item = context.GetItem();
     
-    string weaponName = context.GetInventory().GetEquippedWeaponName();
-    string armorName = context.GetInventory().GetEquippedArmorName();
+    std::string weaponName = context.GetInventory().GetEquippedWeaponName();
+    std::string armorName = context.GetInventory().GetEquippedArmorName();
 
 
     PrintLine();
     PrintTitle("플레이어 상태");
     PrintLine();
 
-    cout << endl;
-    cout << player.GetName() << endl;
+    std::cout << std::endl;;
+    std::cout << player.GetName() << std::endl;;
     PrintLine();
-    cout << "골드 : " << player.GetGold() << endl;
-    cout << "레벨 : " << player.GetLevel() << endl;
-    cout << "경험치 : " << player.GetExp() << " / " << player.GetMaxExp() << endl;
-    cout << "HP : " << player.GetHp() << " / " << player.GetMaxHp() << endl;
-    cout << "MP : " << player.GetMp() << " / " << player.GetMaxMp() << endl;
-    cout << "공격력 : " << player.GetMeleeDamage(equipBonus, potionBonus) << endl;
-    cout << "방어력 : " << player.GetTrueDefense(equipBonus, potionBonus) << endl;
+    std::cout << "골드 : " << player.GetGold() << std::endl;;
+    std::cout << "레벨 : " << player.GetLevel() << std::endl;;
+    std::cout << "경험치 : " << player.GetExp() << " / " << player.GetMaxExp() << std::endl;;
+    std::cout << "HP : " << player.GetHp() << " / " << player.GetMaxHp() << std::endl;;
+    std::cout << "MP : " << player.GetMp() << " / " << player.GetMaxMp() << std::endl;;
+    std::cout << "공격력 : " << player.GetMeleeDamage(equipBonus, potionBonus) << std::endl;;
+    std::cout << "방어력 : " << player.GetTrueDefense(equipBonus, potionBonus) << std::endl;;
     PrintLine();
 
-    cout << endl;
+    std::cout << std::endl;;
     PrintMessage("내가 장착하고 있는 장비 아이템");
     PrintLine();
 
-    cout << "장착 중인 무기: " << weaponName << endl;
-    cout << "장착 중인 방어구: " << armorName << endl;
+    std::cout << "장착 중인 무기: " << weaponName << std::endl;;
+    std::cout << "장착 중인 방어구: " << armorName << std::endl;;
     PrintLine();
 
-    cout << endl;
+    std::cout << std::endl;;
     PrintMessage("전투 기록");
     PrintLine();
 
-    cout << "전투에서 이긴 횟수 : "<< battle.GetMonsterKillCount() << endl;
+    std::cout << "전투에서 이긴 횟수 : "<< battle.GetMonsterKillCount() << std::endl;;
 
     //캐릭 이름, 골드, 레벨, 경험치, HP, MP, 공격력, 방어력
     // 내가 장착하고 있는 (장비) 아이템
@@ -247,7 +246,7 @@ void ConsoleUI::PrintStatus(GameContext& context, Battle& battle, StatBonus& equ
 
 
 // 아이템, 인벤토리
-string ConsoleUI::ItemTypeToString(const Item& item)
+std::string ConsoleUI::ItemTypeToString(const Item& item)
 {
     switch (item.GetType())
     {
@@ -263,11 +262,11 @@ string ConsoleUI::ItemTypeToString(const Item& item)
     }
 }
 
-void ConsoleUI::PrintItemListWithIndex(const vector<Item>& items)
+void ConsoleUI::PrintItemListWithIndex(const std::vector<Item>& items)
 {
     for (int i = 0; i < items.size(); i++)
     {
-        cout << i + 1 << ". " << items[i].GetName() << endl;
+        std::cout << i + 1 << ". " << items[i].GetName() << std::endl;;
     }
 }
 
@@ -289,22 +288,22 @@ void ConsoleUI::PrintInventoryMenu()
 void ConsoleUI::PrintItem(const Item& item)
 {
     PrintLine();
-    cout << item.GetName() << endl;
+    std::cout << item.GetName() << std::endl;;
     PrintLine();
-    cout << "가격 : " << item.GetPrice() << endl;
-    cout << "타입 : " << ItemTypeToString(item) << endl;
+    std::cout << "가격 : " << item.GetPrice() << std::endl;;
+    std::cout << "타입 : " << ItemTypeToString(item) << std::endl;;
     PrintLine();
 }
 
 void ConsoleUI::PrintItemName(const Item& item)
 {
-    cout << item.GetName() << endl;
+    std::cout << item.GetName() << std::endl;;
 }
 
 void ConsoleUI::PrintAllItems(GameContext& context)
 {
     Inventory& inventory = context.GetInventory();
-    const vector<Item>& items = inventory.GetItems();
+    const std::vector<Item>& items = inventory.GetItems();
 
     if (items.empty())
     {
@@ -324,7 +323,7 @@ void ConsoleUI::PrintAllItems(GameContext& context)
 void ConsoleUI::PrintEquipmentItems(GameContext& context)
 {
     Inventory& inventory = context.GetInventory();
-    vector<Item> equipmentItems = inventory.GetItemsByType(ItemType::Equipment);
+    std::vector<Item> equipmentItems = inventory.GetItemsByType(ItemType::Equipment);
 
     if (equipmentItems.empty())
     {
@@ -344,7 +343,7 @@ void ConsoleUI::PrintEquipmentItems(GameContext& context)
 void ConsoleUI::PrintConsumableItems(GameContext& context)
 {
     Inventory& inventory = context.GetInventory();
-    vector<Item> consumableItems = inventory.GetItemsByType(ItemType::Consumable);
+    std::vector<Item> consumableItems = inventory.GetItemsByType(ItemType::Consumable);
 
     if (consumableItems.empty())
     {
@@ -408,7 +407,7 @@ void ConsoleUI::SwitchShopMenu(GameContext& context, Shop& shop)
     {
         PrintShopMenu();
 
-        PrintMessage("현재 골드 : " + to_string(context.GetPlayer().GetGold()) + "G");
+        PrintMessage("현재 골드 : " + std::to_string(context.GetPlayer().GetGold()) + "G");
         int choice = InputManager::InputInMassegeToRange("상점에서 선택하세요: ", 0, 2);
         switch (choice)
         {
@@ -426,7 +425,7 @@ void ConsoleUI::SwitchShopMenu(GameContext& context, Shop& shop)
     }
 }
 
-void ConsoleUI::PrintShopItems(const vector<Item>& shopItems)
+void ConsoleUI::PrintShopItems(const std::vector<Item>& shopItems)
 {
     if (shopItems.empty())
     {
@@ -523,38 +522,38 @@ void ConsoleUI::PurchaseByCategory(GameContext& context, Shop& shop, ShopCategor
         const Item& item = shopItems[i];
         const StatBonus& bonus = item.GetStatBonus();
 
-        string message = to_string(i + 1) + ". " + item.GetName() + "/ 가격: " + to_string(item.GetPrice()) + "G";
+        std::string message = std::to_string(i + 1) + ". " + item.GetName() + "/ 가격: " + std::to_string(item.GetPrice()) + "G";
 
         if (bonus.hp != 0) {
-            message += " / HP " + to_string(bonus.hp);
+            message += " / HP " + std::to_string(bonus.hp);
         }
 
         if (bonus.mp != 0) {
-            message += " / MP " + to_string(bonus.mp);
+            message += " / MP " + std::to_string(bonus.mp);
         }
 
         if (bonus.att != 0) {
-            message += " / 공격력 " + to_string(bonus.att);
+            message += " / 공격력 " + std::to_string(bonus.att);
         }
 
         if (bonus.def != 0) {
-            message += " / 방어력 " + to_string(bonus.def);
+            message += " / 방어력 " + std::to_string(bonus.def);
         }
 
         if (bonus.str != 0) {
-            message += " / 힘 " + to_string(bonus.str);
+            message += " / 힘 " + std::to_string(bonus.str);
         }
 
         if (bonus.dex != 0) {
-            message += " / 민첩 " + to_string(bonus.dex);
+            message += " / 민첩 " + std::to_string(bonus.dex);
         }
 
         if (bonus.intel != 0) {
-            message += " / 지능 " + to_string(bonus.intel);
+            message += " / 지능 " + std::to_string(bonus.intel);
         }
 
         if (bonus.luk != 0) {
-            message += " / 행운 " + to_string(bonus.luk);
+            message += " / 행운 " + std::to_string(bonus.luk);
         }
 
         PrintMessage(message);
@@ -583,9 +582,9 @@ void ConsoleUI::PurchaseByCategory(GameContext& context, Shop& shop, ShopCategor
     if (success) {
         PrintPurchaseSuccess(shopItems[categoryIndex]);
 
-        PrintMessage("구매 수량: " + to_string(quantity));
+        PrintMessage("구매 수량: " + std::to_string(quantity));
 
-        PrintMessage("남은 골드: " + to_string(context.GetPlayer().GetGold()) + "G");
+        PrintMessage("남은 골드: " + std::to_string(context.GetPlayer().GetGold()) + "G");
     }
 
     else {
@@ -625,7 +624,7 @@ void ConsoleUI::SwitchSellMenu(GameContext& context, Shop& shop)
 
         const Item& item = allItems[realIndex];
 
-        string message = to_string(i + 1) + ". " + item.GetName() + " / 보유 수량: " + to_string(item.GetQuantity()) + " / 판매가: " + to_string(shop.GetSellPrice(item)) + "G";
+        std::string message = std::to_string(i + 1) + ". " + item.GetName() + " / 보유 수량: " + std::to_string(item.GetQuantity()) + " / 판매가: " + std::to_string(shop.GetSellPrice(item)) + "G";
 
         PrintMessage(message);
     }
@@ -661,11 +660,11 @@ void ConsoleUI::SwitchSellMenu(GameContext& context, Shop& shop)
     if (success) {
         PrintMessage(itemName + "을(를) 판매했습니다.");
 
-        PrintMessage("판매 수량: " + to_string(quantity));
+        PrintMessage("판매 수량: " + std::to_string(quantity));
 
-        PrintMessage("획득 골드: " + to_string(totalSellPrice) + "G");
+        PrintMessage("획득 골드: " + std::to_string(totalSellPrice) + "G");
 
-        PrintMessage("현재 골드: " + to_string(context.GetPlayer().GetGold()) + "G");
+        PrintMessage("현재 골드: " + std::to_string(context.GetPlayer().GetGold()) + "G");
     }
 
     else {
@@ -793,8 +792,8 @@ void ConsoleUI::BattleReward(GameContext& context)
 
 void ConsoleUI::PrintNormalDiceResult(int diceValue) const
 {
-    cout << "주사위를 굴렸습니다." << endl;
-    cout << "주사위 결과: " << diceValue << endl;
+    std::cout << "주사위를 굴렸습니다." << std::endl;;
+    std::cout << "주사위 결과: " << diceValue << std::endl;;
 }
 
 void ConsoleUI::PrintPlayerMeleeAttackResult(const std::string& playerName, const std::string& monsterName, int diceNumber, int damage, bool isStunSuccess, Battle& battle, GameContext& player, GameContext& monster) const
@@ -802,12 +801,12 @@ void ConsoleUI::PrintPlayerMeleeAttackResult(const std::string& playerName, cons
     Player& p = player.GetPlayer();
     Monster& m = monster.GetMonster();
     Battle& b = battle;
-    cout << p.GetName() << "(이) 가 " << m.GetName() << "에게 일반 공격을 시도했습니다." << endl;
-    cout << "주사위 결과: " << b.GetLastDiceValue() << endl;
-    cout << m.GetName() << "에게 " << damage << "의 피해를 입혔습니다." << endl;
+    std::cout << p.GetName() << "(이) 가 " << m.GetName() << "에게 일반 공격을 시도했습니다." << std::endl;;
+    std::cout << "주사위 결과: " << b.GetLastDiceValue() << std::endl;;
+    std::cout << m.GetName() << "에게 " << damage << "의 피해를 입혔습니다." << std::endl;;
     if (isStunSuccess)
     {
-        cout << m.GetName() << "이 기절 상태가 되었습니다!" << endl;
+        std::cout << m.GetName() << "이 기절 상태가 되었습니다!" << std::endl;;
     }
 }
 
@@ -816,13 +815,13 @@ void ConsoleUI::PrintPlayerSkillAttackResult(const std::string& playerName, cons
     Player& p = player.GetPlayer();
     Monster& m = monster.GetMonster();
     Battle& b = battle;
-    cout << p.GetName() << "(이) 가 " << m.GetName() << "에게 스킬 공격을 시도했습니다." << endl;
-    cout << "주사위 결과: " << b.GetLastDiceValue() << endl;
-    cout << m.GetName() << "에게 " << damage << "의 피해를 입혔습니다." << endl;
+    std::cout << p.GetName() << "(이) 가 " << m.GetName() << "에게 스킬 공격을 시도했습니다." << std::endl;;
+    std::cout << "주사위 결과: " << b.GetLastDiceValue() << std::endl;;
+    std::cout << m.GetName() << "에게 " << damage << "의 피해를 입혔습니다." << std::endl;;
 
     if (isStunSuccess)
     {
-        cout << m.GetName() << "이 기절 상태가 되었습니다!" << endl;
+        std::cout << m.GetName() << "이 기절 상태가 되었습니다!" << std::endl;;
     }
 }
 
@@ -846,7 +845,7 @@ void ConsoleUI::PrintPlayerTurnCount(int TurnCount)
     PrintTitle("플레이어 턴");
     PrintLine();
 
-	cout << TurnCount << "턴째 입니다." << endl;
+	std::cout << TurnCount << "턴째 입니다." << std::endl;;
     PrintLine();
 }
 
@@ -858,13 +857,13 @@ void ConsoleUI::PrintBattleResult(GameContext& player, GameContext& monster, Bat
 
     if (b.CheckBattleResult(player, monster))
     {
-        cout << m.GetName() << "을(를) 처치했습니다." << endl;
-        cout << "전투에서 승리했습니다." << endl;
+        std::cout << m.GetName() << "을(를) 처치했습니다." << std::endl;;
+        std::cout << "전투에서 승리했습니다." << std::endl;;
     }
     else
     {
-        cout << p.GetName() << "체력이 모두 소진되었습니다." << endl;
-        cout << "전투에서 패배했습니다." << endl;
+        std::cout << p.GetName() << "체력이 모두 소진되었습니다." << std::endl;;
+        std::cout << "전투에서 패배했습니다." << std::endl;;
     }
 }
 
@@ -873,8 +872,8 @@ void ConsoleUI::PrintJobSelectMenu()
 	PrintLine();
 	PrintTitle("캐릭터 선택");
 	PrintLine();
-	cout << "1. 진태식 유도" << endl;
-	cout << "2. 류노스케 가라데" << endl;
+	std::cout << "1. 진태식 유도" << std::endl;;
+	std::cout << "2. 류노스케 가라데" << std::endl;;
 	PrintLine();
 }
 
@@ -885,7 +884,7 @@ void ConsoleUI::PrintGameOver()
 	PrintLine();
 	PrintTitle("게임 패배");
 	PrintLine();
-	cout << "캐릭터가 사망했습니다." << endl;
+	std::cout << "캐릭터가 사망했습니다." << std::endl;;
 	PrintLine();
 }
 
@@ -967,13 +966,13 @@ void ConsoleUI::PrintStartScreen()
         }
 
        
-        cout << waveColor << BOLD;
+        std::cout << waveColor << BOLD;
 
         // TODO: 프레임별 파도 ASCII ART 출력 분기
         switch (currentFrame)
         {
         case 0:
-            cout << R"(
+            std::cout << R"(
                                                                                                     
                                                                                                     
                                                                           .--..                     
@@ -996,11 +995,11 @@ void ConsoleUI::PrintStartScreen()
                                                                                                     
                                                                                                     
 
-            )" << endl;
+            )" << std::endl;;
             break;
 
         case 1:
-            cout << R"(
+            std::cout << R"(
                                                      
                                                
                                                                            .:---::.                 
@@ -1023,11 +1022,11 @@ void ConsoleUI::PrintStartScreen()
                                                                                                     
                                                                                                     
 
-            )" << endl;
+            )" << std::endl;;
             break;
 
         case 2:
-            cout << R"(                                                                     
+            std::cout << R"(                                                                     
                                                                                                     
                                                                                                     
                                                                           -===-:.                   
@@ -1050,11 +1049,11 @@ void ConsoleUI::PrintStartScreen()
                                                                                    
                
                                                                                                     
-            )" << endl;
+            )" << std::endl;;
             break;
 
         case 3:
-            cout << R"(
+            std::cout << R"(
                                                                                                                                                                                                         
                                  
                                                                       .+**+++===---::...            
@@ -1077,11 +1076,11 @@ void ConsoleUI::PrintStartScreen()
                                                                                   
                   
                                                                                                     
-            )" << endl;
+            )" << std::endl;;
             break;
 
         case 4:
-            cout << R"(
+            std::cout << R"(
                                                                                                     
                                                                                                     
                                                                               .=**=+##*++=-:.       
@@ -1104,16 +1103,16 @@ void ConsoleUI::PrintStartScreen()
                                                                                   
                   
 
-            )" << endl;
+            )" << std::endl;;
             break;
         }
 
-        cout << RESET; // 파도 색상 초기화
+        std::cout << RESET; // 파도 색상 초기화
 
         // 3. 타이틀 로고 ASCII ART : 파도 (중앙 정렬)
-        cout << RED << BOLD;
+        std::cout << RED << BOLD;
 
-        cout << R"(
+        std::cout << R"(
                                                                                                                         
                                                 ~?]}{11[<.            .|xtx              <(uXXu(i           [rrrxrrrx                    
                                                 [//|frvcXY{           'YUJ1            <YOmwZwbbp}          nkhkbkkkc                    
@@ -1124,9 +1123,9 @@ void ConsoleUI::PrintStartScreen()
                                                 _->]1)))(}l            ffj+            :|zYUJCCJU}          )LLLLLLQt                    
                                                 :I!!iiiI`              ><~I              ,~]1{]<'           !--------                    
                                                                                                                         
-         )" << endl;
+         )" << std::endl;;
 
-        cout << RESET;
+        std::cout << RESET;
 
         // 구분선
         
@@ -1134,7 +1133,7 @@ void ConsoleUI::PrintStartScreen()
         
 
         // 4. 게임 서사 문구
-        cout << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n";
+        std::cout << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n";
 
         // 구분선
         
@@ -1142,7 +1141,7 @@ void ConsoleUI::PrintStartScreen()
         
 
         // 5. 시작 안내 문구
-        cout << "                   >> 아무 키나 누르면 시작됩니다 <<\n";
+        std::cout << "                   >> 아무 키나 누르면 시작됩니다 <<\n";
 
         // 하단 구분선
         
@@ -1151,7 +1150,7 @@ void ConsoleUI::PrintStartScreen()
 
         // 프레임 증가 및 대기 (300ms 간격으로 파도가 출렁거림)
         frame++;
-        this_thread::sleep_for(chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
     }
 
     ClearInputBuffer();
@@ -1261,7 +1260,7 @@ ConsoleUI::PrintJinWhiteImage()
 
 void ConsoleUI::PrintKangBlackImage()
 {
-    cout << R"( 
+    std::cout << R"( 
                                                             
                               ..:.                          
                              ...:.                          
@@ -1296,12 +1295,12 @@ void ConsoleUI::PrintKangBlackImage()
  .-=#+...    .. ...-=#=     +*-......*%+.   ......-=.=##%%%=
 .::-=-.         ..=*+*#.    .-. . ..+%#*-. ....  ..::--*%#*.
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintKangWhiteImage()
 {
-    cout << R"( 
+    std::cout << R"( 
 *@@@@@@@@@@@@@@@@@@@@@@@%.    .::. =%@@@@@@@@@@@@@@@@@@@@@# 
 @@@@@@@@@@@@@@@@@@@@@@@@-    ..::.  =@@@@@@@@@@@@@@@@@@@@@@:
 @@@@@@@@@@@@@@@@@@@@@@%*:           :*%@@@@@@@@@@@@@@@@@@@@:
@@ -1335,7 +1334,7 @@ void ConsoleUI::PrintKangWhiteImage()
 *.-+#+...    .  ..:=+%-    .+*:  ...:%%=.   .:....-=:+#%%%%.
 .::--:.         ..=*=**     ::     .+#**:. ....   .::--*#*= 
 
-)" << endl;
+)" << std::endl;;
 }
 
 
@@ -1426,16 +1425,16 @@ ConsoleUI::PrintRyuWhiteImage()
 void ConsoleUI::ShowJinRyuIntroAnimation()
 {
     PrintJinBlackImage();
-    this_thread::sleep_for(chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     ClearScreen();
     PrintJinWhiteImage();
-    this_thread::sleep_for(chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     ClearScreen();
     PrintRyuBlackImage();
-    this_thread::sleep_for(chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     ClearScreen();
     PrintRyuWhiteImage();
-    this_thread::sleep_for(chrono::milliseconds(1000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	ClearScreen();
 }
 
@@ -1443,7 +1442,7 @@ void ConsoleUI::ShowJinRyuIntroAnimation()
 
 void ConsoleUI::PrintJinLogo()
 {
-    cout << R"( 
+    std::cout << R"( 
                                   .@@@@@@@@@@%                                  
                                  .@@@@@@@@@@@@%..                               
                                 .@@@@@@@@@@@@@@@                                
@@ -1479,12 +1478,12 @@ void ConsoleUI::PrintJinLogo()
                  .@@            .*@..      . .@.   .        .@@                 
                   .@@.         .@#.           .@+          :@#                  
                     -:::::::::::.  .            ::::::::::::. .                 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintKangLogo()
 {
-    cout << R"( 
+    std::cout << R"( 
                                  . .@. ..       .@%.  .                         
                               .@-  %.: ..:*= .     -@. .                        
                            .*@  =%#@+.-        :.    .#.  .                     
@@ -1521,12 +1520,12 @@ void ConsoleUI::PrintKangLogo()
          . @        .. @.@@@@@@%#+:@.%@@@-@@@...-+#%@@@@@@ @.          @        
           .+          .@ @@@@@@@@@@=+@@.@-@@@.+@@@@@@@@@@@ @           =.       
          .#.          %. @@@@@@@@-@@@@@.@=@@@.@@@*@@@@@@@@ .#         ..%.      
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintRyuLogo()
 {
-     cout << R"( 
+     std::cout << R"( 
                                  *@@-@@@.@@:%@:@@.                              
                                .%@@@@@@@@@@@@@@@@@- .                           
                                 @@@.            @@@.                            
@@ -1561,7 +1560,7 @@ void ConsoleUI::PrintRyuLogo()
                           @@.# ...      ..    .   .   .@@                       
                .          @@@@@@@@@@@.@@@@@@@@@@@@@@@@@@@          .            
                           @@@@@@@@:@@@@@-@@@@@@@#@@@@@@@@          .            
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::ShowJinIntro()
@@ -1621,9 +1620,9 @@ void ConsoleUI::ShowCharacterIntro()
     PrintLine();
     PrintTitle("캐릭터 선택");
     PrintLine();
-    cout << "1. 진태식: 유도 선수 출신, 강력한 근접 공격과 방어 능력을 가진 캐릭터." << endl;
-    cout << "2. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << endl;
-    cout << "0. 게임 종료" << endl;
+    std::cout << "1. 진태식: 유도 선수 출신, 강력한 근접 공격과 방어 능력을 가진 캐릭터." << std::endl;;
+    std::cout << "2. 류노스케: 가라데 선수 출신, 균형 잡힌 능력과 특수 기술을 가진 캐릭터." << std::endl;;
+    std::cout << "0. 게임 종료" << std::endl;;
     PrintLine();
 }
 
@@ -1751,7 +1750,7 @@ void ConsoleUI::ShowCutScene7()
 
 void ConsoleUI::PrintCutScene1Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                                 
          .....                                              
       .::     ...                                           
@@ -1779,12 +1778,12 @@ void ConsoleUI::PrintCutScene1Image()
      ....:..:::::.        ....           ...        .-.     
        . ........                                           
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PrintCutScene2Image()
 {
-    cout << R"(
+    std::cout << R"(
                       ....    .     ....:..                     
                 .......   .  ....:::..:--.                  
                    .:-:..  ..   .:..::::-=:                 
@@ -1817,12 +1816,12 @@ void ConsoleUI::PrintCutScene2Image()
    .:--:..             .-=+++-     .+=:.:=                  
    ::.                 ::::::.     ..  ..:                  
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PrintCutScene3Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                 .:::.           
             .::::::.                     .::... :::.        
           .::......::-.                 ::.    ....::       
@@ -1853,12 +1852,12 @@ void ConsoleUI::PrintCutScene3Image()
        .-            .==-----. :   .---:-:               :  
       -:             .-::::::. -    :::::-               :  
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PrintCutScene4Image()
 {
-    cout << R"(
+    std::cout << R"(
                 ..                                              
         .::::-:--: .                      .:. .... .        
        .:. .  ::.:--.                   ::.:+=:-:-.  .      
@@ -1889,12 +1888,12 @@ void ConsoleUI::PrintCutScene4Image()
                       ..... ........ .              .:      
                                                     :-.     
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PrintCutScene5Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                                 
                                =-:.                         
                    .:-++      -====+.                       
@@ -1925,12 +1924,12 @@ void ConsoleUI::PrintCutScene5Image()
          ....              . ......          .....          
                                                             
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PrintCutScene6Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                                 
                                    .:::::-.                 
                ::::.           .:--:......:--               
@@ -1965,12 +1964,12 @@ void ConsoleUI::PrintCutScene6Image()
           .   .                             .               
           .  :                              .               
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PrintCutScene7Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                                 
                     ....::                                  
                   ....  .:.                                 
@@ -1999,12 +1998,12 @@ void ConsoleUI::PrintCutScene7Image()
     .::::::::::......................:..+: =-:+.:-.....:.   
      ......       ..........:....... ...:..:..::....::-:    
 
-    )" << endl;
+    )" << std::endl;;
 }
 
 void ConsoleUI::PlayCutScene5Animation()
 {
-    string Frames[] =
+    std::string Frames[] =
     {
         R"(
       :--:.  .                   .-===:     .--::::-        
@@ -2163,10 +2162,10 @@ R"(
         for (int i = 0; i < FrameCount; i++)
         {
             // 현재 i번째 프레임 출력
-            cout << Frames[i] << endl;
+            std::cout << Frames[i] << std::endl;;
 
             // 700밀리초 동안 잠깐 멈춤
-            this_thread::sleep_for(chrono::milliseconds(700));
+            std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
             if (i != FrameCount - 1)
             {
@@ -2179,7 +2178,7 @@ R"(
 
 void ConsoleUI::PlayCutScene6Animation()
 {
-    string Frames[] =
+    std::string Frames[] =
     {
         R"(
                                                                                 
@@ -2335,10 +2334,10 @@ void ConsoleUI::PlayCutScene6Animation()
         for (int i = 0; i < FrameCount; i++)
         {
             // 현재 i번째 프레임 출력
-            cout << Frames[i] << endl;
+            std::cout << Frames[i] << std::endl;;
 
             // 700밀리초 동안 잠깐 멈춤
-            this_thread::sleep_for(chrono::milliseconds(700));
+            std::this_thread::sleep_for(std::chrono::milliseconds(700));
 
             if (i != FrameCount - 1)
             {
@@ -2569,7 +2568,7 @@ void ConsoleUI::ShowNewCutScene24()
 
 void ConsoleUI::PrintNewCutScene1Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
           .                              .::                
@@ -2598,12 +2597,12 @@ void ConsoleUI::PrintNewCutScene1Image()
                                                             
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene2Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                  .  .                                       
@@ -2636,12 +2635,12 @@ void ConsoleUI::PrintNewCutScene2Image()
                                                             
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene3Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2673,12 +2672,12 @@ void ConsoleUI::PrintNewCutScene3Image()
              .:...  .....::... .....:                       
               : .   .    ..   .   ..                        
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene4Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2710,12 +2709,12 @@ void ConsoleUI::PrintNewCutScene4Image()
                                                             
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene5Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2750,12 +2749,12 @@ void ConsoleUI::PrintNewCutScene5Image()
           :.          ..::.           .::.  :::.:::..       
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene6Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2787,12 +2786,12 @@ void ConsoleUI::PrintNewCutScene6Image()
                   :.:.:..    .::.:.:                        
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene7Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2819,12 +2818,12 @@ void ConsoleUI::PrintNewCutScene7Image()
               .:.  .::..     :   .:.          ...           
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene8Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2856,12 +2855,12 @@ void ConsoleUI::PrintNewCutScene8Image()
        :...::::..   ..#@@#@@#   #@@#@@@.    ..  .     .     
        . ......      .:::::::   :::::::.                    
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene9Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -2893,12 +2892,12 @@ void ConsoleUI::PrintNewCutScene9Image()
         .....:...   ....:*:           ..      .             
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene10Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
      ...................................................    
      %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:   
@@ -2931,12 +2930,12 @@ void ConsoleUI::PrintNewCutScene10Image()
      +**************************************************.   
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene11Image()
 {
-    cout << R"(
+    std::cout << R"(
     ....................................................    
    :            .::::.                                 ..   
    :          :*:. ..:*.                               ..   
@@ -2969,12 +2968,12 @@ void ConsoleUI::PrintNewCutScene11Image()
  .......*.                 .::......::.     :....    *....  
   ..... ..   .    .         ...........     .. ..    . ...  
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene12Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                 ....                        
@@ -3002,12 +3001,12 @@ void ConsoleUI::PrintNewCutScene12Image()
                                                             
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene13Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -3043,12 +3042,12 @@ void ConsoleUI::PrintNewCutScene13Image()
                   .....      ....                           
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene14Image()
 {
-    cout << R"(                                
+    std::cout << R"(                                
                                                             
                                                             
                    .::                                      
@@ -3081,12 +3080,12 @@ void ConsoleUI::PrintNewCutScene14Image()
            ...                       .:   :.                
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene15Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                                                 
                                                                                 
                                        .                                        
@@ -3117,12 +3116,12 @@ void ConsoleUI::PrintNewCutScene15Image()
                                :.:*:.  ....  ..:*#*  .::.                       
                                ::*:.. .   .. .:.:**: ...                        
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene16Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
      ...................................................    
      %@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@:   
@@ -3155,12 +3154,12 @@ void ConsoleUI::PrintNewCutScene16Image()
      +**************************************************.   
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene17Image()
 {
-    cout << R"( 
+    std::cout << R"( 
                                                             
          .:::::.                                            
   .::::::* ..:.*:::::::::::::::::::::::::::::::::***::::::. 
@@ -3185,12 +3184,12 @@ void ConsoleUI::PrintNewCutScene17Image()
      ::::   ......                           :::..  *#*     
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene18Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -3216,12 +3215,12 @@ void ConsoleUI::PrintNewCutScene18Image()
                              ...                            
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene19Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -3246,12 +3245,12 @@ void ConsoleUI::PrintNewCutScene19Image()
                          .#*:::*::*.                        
                            ..                               
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene20Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -3288,12 +3287,12 @@ void ConsoleUI::PrintNewCutScene20Image()
                                                             
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene21Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -3325,12 +3324,12 @@ void ConsoleUI::PrintNewCutScene21Image()
                %:..:.:%          .%=:.-=-=+==--.=#+         
                #:..: :*.        .++-:=+=-:.    .::*-        
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene22Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
                                                             
@@ -3369,12 +3368,12 @@ void ConsoleUI::PrintNewCutScene22Image()
          *#...........::::.**.::::..........:#*             
         .@:..........      .:      ..........:@.            
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene23Image()
 {
-    cout << R"(
+    std::cout << R"(
                                                             
                                                             
      *:::::::::                                             
@@ -3408,12 +3407,12 @@ void ConsoleUI::PrintNewCutScene23Image()
      ..                                                     
                                                             
 
-)" << endl;
+)" << std::endl;;
 }
 
 void ConsoleUI::PrintNewCutScene24Image()
 {
-    cout << R"(                                
+    std::cout << R"(                                
                                                             
                                                             
  ...**......::***:..:::::*::......*:....*.                  
@@ -3444,7 +3443,7 @@ void ConsoleUI::PrintNewCutScene24Image()
                          .:.             :.                 
                                         :*  .  .            
 
-)" << endl;
+)" << std::endl;;
 }
 
 
@@ -3670,7 +3669,7 @@ void ConsoleUI::PrintDiceAnimationBySpeed(int delayMilliseconds)
 {
     int frame = 0;
 
-    string Frames[5] =
+    std::string Frames[5] =
     {
         R"(
                                                                     
@@ -3830,15 +3829,15 @@ void ConsoleUI::PrintDiceAnimationBySpeed(int delayMilliseconds)
         int currentFrame = frame % FrameCount;
 
         // 현재 프레임 아스키 이미지 출력 코드
-        cout << CYAN << BOLD;
-        cout << Frames[currentFrame] << endl;
-        cout << RESET;
+        std::cout << CYAN << BOLD;
+        std::cout << Frames[currentFrame] << std::endl;;
+        std::cout << RESET;
 
         // 프레임 증가 코드
         frame++;
 
         // 프레임 간 대기 시간 코드
-        this_thread::sleep_for(chrono::milliseconds(delayMilliseconds));
+        std::this_thread::sleep_for(std::chrono::milliseconds(delayMilliseconds));
     }
 
     // 버퍼에 남아있는 키 입력 소모
@@ -3878,9 +3877,9 @@ void ConsoleUI::PrintBattleStart(GameContext& context)
     Monster& monster = context.GetMonster();
 
     PrintLine();
-    cout << "전투 시작!" << endl;
-    cout << "플레이어: " << player.GetName() << endl;
-    cout << "상대: " << monster.GetName() << endl;
+    std::cout << "전투 시작!" << std::endl;;
+    std::cout << "플레이어: " << player.GetName() << std::endl;;
+    std::cout << "상대: " << monster.GetName() << std::endl;;
     PrintLine();
 }
 
@@ -3992,7 +3991,7 @@ void ConsoleUI::DrawCutSceneScreen(
             dialogueLines[i] : "";
 
         std::string message =
-            "계속하려면 Enter를 누르세요...";
+    "계속하려면 Enter를 누르세요...";
 
         if ((int)line.length() > width - 4)
         {
@@ -4090,7 +4089,7 @@ void ConsoleUI::DrawGameScreen(
                 << "+"
                 << Repeat("─", rightWidth)
                 << "+"
-                << std::endl;
+                << std::endl;;
         };
 
     PrintBorder();
@@ -4128,7 +4127,7 @@ void ConsoleUI::DrawGameScreen(
             PrintCell("", rightWidth);
         }
 
-        std::cout << "|" << std::endl;
+        std::cout << "|" << std::endl;;
     }
 
     PrintBorder();
@@ -4187,7 +4186,7 @@ void ConsoleUI::DrawGameScreen(
             PrintCell("", monsterStatusWidth);
         }
 
-        std::cout << "|" << std::endl;
+        std::cout << "|" << std::endl;;
     }
 
     PrintBorder();
@@ -4558,4 +4557,52 @@ std::string ConsoleUI::Repeat(const std::string& text, int count)
 
     return result;
 }
+
+
+std::vector<std::string>
+ConsoleUI::Redtest()
+{
+    return SplitLines(R"( 
+
+                 ..:-::...            ...  ...:::.... .  ...:::::::::: ..  .      
+              ==.. .:::-:.     :.  .:::  ::::::.:::.:::-==--:::::--=.-+ .:.:    
+      .      +:  :-..: .:::      :.:...  ::---==---::.::----===++++=.:- .-.-  . 
+      :...:.:+       .   .=.    .==:.:- .---::::::---:--+++++==-----.:- .-.-    
+ -:.. -+##+-*+.      .-:.==   ..*- .---  ---==++++***++=*+++*=--*##..:- .=::    
+ ....::-++#%%*      =.+:%=  ... :-+=+*= .+*@@@*-:...:+%%@@@@%+..*@-::.:  *: . . 
+ ..:-: :..  .*.   .+%.+#@. ..::    :++%..++@@=----:.:::@@@%%= .:.:....:  +- ..  
+ ..-+::+*#%@+:...=+%@:*@*. ::.:  . .##+:.::%%.= :+#%-: +++=+===--==.--=..:-: .  
+    ..:=-=*+... ...:+..#.   .:  :- :%#+: ...*-#.+#%*#---..      -=. .-: - -= .  
+ : -*-==+#-. .  .-==-=-:    .: ..:  :.:+*::====.:=:=#*+-  ====-::-. =+..+ :.:   
+ :-+%#+-=.  .    .-+#@*=*=:  . :.- .=  -#*-:  -:.###**-. . .-::=::    -:*- -..  
+ :%+-:  .:        .:.-#*==-#+  . -..-..+-.:+=  =..+#*-#. ..   . .::   ..=-..::  
+ .*: :   :      :   :...=.=.#=   :. ..-=-   :::..:=+:#@  :.  .. -:::  ..==.  .. 
+ .:  :   .       .. -.:..*. .*   .. .=#:.   .   .=.[31m:-[0m+#   :    .:*.=+ . :: . :: 
+ = . :            -  :..-= ..+  .  :+-::    :.   --[31m:[0m=@=   :     ..=*#-  :- :  . 
+ + - .            .. .  :. :*:- ..*+-..      --. -[31m=:-[0m#.  :.[31m:[0m.    . .-=+:   : -- 
+ .  .   ..         ... :.   *#= .-:++-.  .+= ...  .[31m--[0m. ... .       .--==*. . -- 
+  -   .  .          ..    -  =%.-..::**:.:. . .    [31m:.[0m  .-.      .:**=::.:-.:::  
+      .  ..          . .  .   ++.. .+=##**#=:           ..=*#++*=**. .. =:+.:   
+ .. .  .  -            -    .-#=.. .:.--*+::=- ...-++: :+-=#####= == .  -:=:::::
+       .               :  .::==*+.. *  ...  ::  :+%@%:   .. :-:-.--:-=::=.+:.=+.
+ :....     .              :--. -:  ..  . :+:#:.=+%@%%= ...:=* .=.-#==::-= -  :+ 
+.:..    .               :.  :..+%:...:::::::-::--==+++===+**##+...=-....  +-..:.
+ ..     ..:    .:.       ..   ..==        ...:::::::::.::::...   ::-:.......... 
+  =..    : --...        -.    .:++            .........::.    .:......          
+   :..   :   :: .  .:.    :. . .%%                                ......:-:::.. 
+   :.. .-           ..    :*: .::@.              . .              .      -      
+    .  .:     . ..  .:.    .*  - -=              . .              ...  . -      
+                   ..      -.: :. -                                      .      
+[0m
+  
+)");
+}
+
+
+struct SavedAsciiCell
+{
+    char ch;
+    unsigned char red;
+};
+
 

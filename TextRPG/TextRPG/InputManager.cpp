@@ -127,5 +127,11 @@ void InputManager::Wait()
 {
 	std::cout << std::endl;
 	std::cout << "계속하려면 Enter를 누르세요....";
-	std::cin.get();
+
+	std::cin.ignore(
+		std::numeric_limits<std::streamsize>::max(),
+		'\n'
+	);
 }
+
+

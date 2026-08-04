@@ -42,7 +42,7 @@ int Player::GetMaxLevel() const {
 }
 
 int Player::GetAttack() const {
-    return Attack;
+    return Attack + EquipBonus.att + PotionBonus.att;
 }
 
 int Player::GetExp() const {
@@ -54,7 +54,7 @@ int Player::GetMaxExp() const {
 }
 
 int Player::GetDefense() const {
-    return Defense;
+   return Defense + EquipBonus.def + PotionBonus.def;
 }
 
 int Player::GetGold() const {
