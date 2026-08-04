@@ -300,34 +300,75 @@ void GameManager::StartNormalBattle()
 
 void GameManager::StartStoryBattleFlow()
 {
-    ConsoleUI::PrintMessage("스토리 진행을 시작합니다.");
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "중간 보스 사진",
+
+
+        },
+        {
+            "중간 보스 왈"
+        }
+        );
+
+    InputManager::Wait();
+
     InputManager::Wait();
 
     bool middleBossWin = StartMiddleBossBattle();
 
     if (!middleBossWin)
     {
-        context.SetGameOver(true);
+        GameOver();
         context.SetGameRunning(false);
         return;
     }
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "보스 사진",
+
+
+        },
+        {
+            "보스 왈"
+        }
+        );
+
+    InputManager::Wait();
+
 
     bool finalBossWin = StartFinalBossBattle();
 
     if (!finalBossWin)
     {
-        context.SetGameOver(true);
+        GameOver();
         context.SetGameRunning(false);
         return;
     }
 
-    isWin = true;
     Ending();
 
-
-    isWin = false;
-    Initialize();
+    currentState = GameState::MainMenu;
 }
+
+
+void GameManager::HandleStoryInput()
+{
+    InputManager::Wait();
+
+    StartStoryBattleFlow();
+
+    if (context.IsGameRunning())
+    {
+        currentState = GameState::MainMenu;
+    }
+}
+
 
 
 bool GameManager::StartMiddleBossBattle()
@@ -869,76 +910,6 @@ void GameManager::RenderStory()
     ConsoleUI::DrawFullLayout(screen);
 }
 
-
-void GameManager::HandleStoryInput()
-{
-    InputManager::Wait();
-
-    StartStoryBattleFlow();
-
-    if (context.IsGameRunning())
-    {
-        currentState = GameState::MainMenu;
-    }
-}
-
-void GameManager::StartStoryBattleFlow()
-{
-    ConsoleUI::ClearScreen();
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-
-            "중간 보스 사진",
-
-
-        },
-        {
-            "중간 보스 왈"
-        }
-        );
-
-    InputManager::Wait();
-    
-    InputManager::Wait();
-
-    bool middleBossWin = StartMiddleBossBattle();
-
-    if (!middleBossWin)
-    {
-        GameOver();
-        context.SetGameRunning(false);
-        return;
-    }
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-         
-            "보스 사진",
-      
-        
-        },
-        {
-            "보스 왈"
-        }
-        );
-
-    InputManager::Wait();
-
-
-    bool finalBossWin = StartFinalBossBattle();
-
-    if (!finalBossWin)
-    {
-        GameOver();
-        context.SetGameRunning(false);
-        return;
-    }
-
-    Ending();
-
-    currentState = GameState::MainMenu;
-}
 
 
 
