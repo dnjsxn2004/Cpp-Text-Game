@@ -154,13 +154,7 @@ void Battle::RunBattle(GameContext& context)
 					)
 				);
 
-				player.SetExp(
-					player.GetExp() + monster.GetExpReward()
-				);
-
-				player.SetGold(
-					player.GetGold() + monster.GetGoldReward()
-				);
+				BattleReward(context, context);
 
 				break;
 			}
@@ -251,6 +245,17 @@ void Battle::RunBattle(GameContext& context)
 						monster.GetName()
 					)
 				);
+
+				ConsoleUI::AddLog(
+					logLines,
+					ConsoleUI::PrintReward(
+						monster.GetExpReward(),
+						monster.GetGoldReward()
+					)
+				);
+
+				BattleReward(context, context);
+
 				break;
 			}
 
@@ -360,7 +365,8 @@ void Battle::RunBattle(GameContext& context)
 
 	ConsoleUI::DrawFullLayout(screen);
 
-	system("pause");
+	InputManager::Wait();
+
 }
 
 

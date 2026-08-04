@@ -104,6 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -127,6 +128,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AnsiPlayer.cpp" />
     <ClCompile Include="Battle.cpp" />
     <ClCompile Include="Cell.cpp" />
     <ClCompile Include="ConsolUI.cpp" />
@@ -147,6 +149,7 @@
     <ClCompile Include="UIScreen.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AnsiPlayer.h" />
     <ClInclude Include="Battle.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="ConsolUI.h" />

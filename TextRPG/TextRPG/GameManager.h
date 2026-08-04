@@ -37,6 +37,9 @@ private:
     std::vector<std::string> playerStatus;
     std::vector<std::string> monsterStatus;
 
+    std::vector<int> shopIndexMap;
+
+
     //캐릭터 선택 변수 0 :진, 1 : 류
     int selectedCharacterIndex = 0; 
 

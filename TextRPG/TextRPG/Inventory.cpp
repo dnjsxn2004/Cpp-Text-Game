@@ -73,6 +73,9 @@ bool Inventory::UseItem(int index, GameContext& context)
 
 	const StatBonus& bonus = item.GetStatBonus();
 
+	// GameContext에서 Player 가져오기
+	Player& player = context.GetPlayer();
+
 	// HP와 MP 효과가 모두 없으면 사용할 수 없음
 	if (bonus.hp == 0 && bonus.mp == 0 && bonus.str ==0 && bonus.att ==0 &&
 		bonus.def == 0 && bonus.dex == 0 &&  bonus.intel == 0 && bonus.luk ==0)
@@ -80,11 +83,24 @@ bool Inventory::UseItem(int index, GameContext& context)
 		return false;
 	}
 
-	// GameContext에서 Player 가져오기
-	Player& player = context.GetPlayer();
+	if (bonus.hp > 0)
+	{
+		player.SetHp(player.GetHp() + bonus.hp);
+	}
+
+	if (bonus.mp > 0)
+	{
+		player.SetMp(player.GetMp() + bonus.mp);
+	}	
 
 	// 실제 HP/MP 효과는 Player에서 적용
-	player.DrinkPotion(item.GetStatBonus());
+	if (bonus.att > 0 || bonus.def > 0 ||
+		bonus.str > 0 || bonus.dex > 0 ||
+		bonus.intel > 0 || bonus.luk > 0)
+	{
+		player.DrinkPotion(bonus);
+	}
+
 
 	// 수량 1 감소
 	item.SetQuantity(item.GetQuantity() - 1);
@@ -111,7 +127,7 @@ bool Inventory::UseItem(int index, GameContext& context)
 
 //장비 장착 함수
 bool Inventory::EquipItem(int index, GameContext& context) {
-
+	 
 	//잘못된 인덱스인지 확인
 	if (index < 0 || index >= static_cast<int>(items.size())) {
 		return false;
@@ -127,6 +143,19 @@ bool Inventory::EquipItem(int index, GameContext& context) {
 
 	EquipmentType equipmentType = newItem.GetEquipmentType();
 	Player& player = context.GetPlayer();
+
+	// 기존 장비 해제
+	if (newItem.IsEquipped())
+	{
+		if (equipmentType == EquipmentType::Weapon)
+		{
+			return UnequipWeapon(context);
+		}
+		else if (equipmentType == EquipmentType::Armor)
+		{
+			return UnequipArmor(context);
+		}
+	}
 
 	//무기 장착
 	if (equipmentType == EquipmentType::Weapon) {
