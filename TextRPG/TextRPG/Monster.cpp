@@ -150,14 +150,22 @@ Monster SpawnMiddleBoss(GameContext& Context)
 {
     Player& player = Context.GetPlayer();
     int level = player.GetLevel();
+    std::string playerName = player.GetName();
 
     int hpScale = (level - 1) * 40;
     int attackScale = (level - 1) * 7;
     int defenseScale = (level - 1) * 3;
     int rewardScale = (level - 1) * 30;
 
+    if (playerName == "진태식")
+        return Monster("류노스케", 260 + hpScale, 35 + attackScale, 15 + defenseScale, 120 + rewardScale, 200 + rewardScale, "압도적인 연격", 40, 1.8f);
+
+    if (playerName == "류노스케")
+        return Monster("진태식", 260 + hpScale, 35 + attackScale, 15 + defenseScale, 120 + rewardScale, 200 + rewardScale, "압도적인 연격", 40, 1.8f);
+
     return Monster("중간보스", 260 + hpScale, 35 + attackScale, 15 + defenseScale, 120 + rewardScale, 200 + rewardScale, "압도적인 연격", 40, 1.8f);
 }
+
 
 Monster SpawnFinalBoss(GameContext& Context)
 {

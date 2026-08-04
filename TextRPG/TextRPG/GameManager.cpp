@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "GameState.h"
 #include "AnsiPlayer.h"
+#include "BattleResult.h"
 
 
 
@@ -300,39 +301,102 @@ void GameManager::StartNormalBattle()
 
 void GameManager::StartStoryBattleFlow()
 {
-    ConsoleUI::PrintMessage("스토리 진행을 시작합니다.");
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "중간 보스 사진",
+
+
+        },
+        {
+            "중간 보스 왈"
+        }
+        );
+
     InputManager::Wait();
 
-    bool middleBossWin = StartMiddleBossBattle();
+    BattleResult middleResult = StartMiddleBossBattle();
 
-    if (!middleBossWin)
+    // 패배
+    if (middleResult == BattleResult::Lose)
     {
-        context.SetGameOver(true);
+        GameOver();
+
         context.SetGameRunning(false);
+
         return;
     }
 
-    bool finalBossWin = StartFinalBossBattle();
-
-    if (!finalBossWin)
+    // 도망 성공
+    if (middleResult == BattleResult::Escape)
     {
-        context.SetGameOver(true);
-        context.SetGameRunning(false);
+        Ending();
+
+        currentState = GameState::MainMenu;
+
         return;
     }
 
-    isWin = true;
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "보스 사진",
+
+
+        },
+        {
+            "보스 왈"
+        }
+        );
+
+    InputManager::Wait();
+
+
+    BattleResult finalResult =  StartFinalBossBattle();
+
+    if (finalResult == BattleResult::Lose)
+    {
+        GameOver();
+
+        context.SetGameRunning(false);
+
+        return;
+    }
+
+    if (finalResult == BattleResult::Escape)
+    {
+        Ending();
+
+        currentState = GameState::MainMenu;
+
+        return;
+    }
+
     Ending();
 
-
-    isWin = false;
-    Initialize();
+    currentState = GameState::MainMenu;
 }
 
 
-bool GameManager::StartMiddleBossBattle()
+void GameManager::HandleStoryInput()
 {
-    ConsoleUI::PrintMessage("중간보스전이 시작됩니다.");
+    InputManager::Wait();
+
+    StartStoryBattleFlow();
+
+    if (context.IsGameRunning())
+    {
+        currentState = GameState::MainMenu;
+    }
+}
+
+
+
+BattleResult GameManager::StartMiddleBossBattle()
+{
     InputManager::Wait();
 
     Monster middleBoss = SpawnMiddleBoss(context);
@@ -340,16 +404,16 @@ bool GameManager::StartMiddleBossBattle()
 
     Battle battle(context);
 
-    battle.RunBattle(context);
+    BattleResult result = battle.RunBattle(context);
 
     InputManager::Wait();
 
-    return context.GetPlayer().GetHp() > 0;
+    return result;
 }
 
-bool GameManager::StartFinalBossBattle()
+
+BattleResult GameManager::StartFinalBossBattle()
 {
-    ConsoleUI::PrintMessage("최종보스전이 시작됩니다.");
     InputManager::Wait();
 
     Monster finalBoss = SpawnFinalBoss(context);
@@ -357,12 +421,13 @@ bool GameManager::StartFinalBossBattle()
 
     Battle battle(context);
 
-    battle.RunBattle(context);
+    BattleResult result = battle.RunBattle(context);
 
     InputManager::Wait();
 
-    return context.GetPlayer().GetHp() > 0;
+    return result;
 }
+
 
 void GameManager::Ending()
 {
@@ -870,76 +935,6 @@ void GameManager::RenderStory()
 }
 
 
-void GameManager::HandleStoryInput()
-{
-    InputManager::Wait();
-
-    StartStoryBattleFlow();
-
-    if (context.IsGameRunning())
-    {
-        currentState = GameState::MainMenu;
-    }
-}
-
-void GameManager::StartStoryBattleFlow()
-{
-    ConsoleUI::ClearScreen();
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-
-            "중간 보스 사진",
-
-
-        },
-        {
-            "중간 보스 왈"
-        }
-        );
-
-    InputManager::Wait();
-    
-    InputManager::Wait();
-
-    bool middleBossWin = StartMiddleBossBattle();
-
-    if (!middleBossWin)
-    {
-        GameOver();
-        context.SetGameRunning(false);
-        return;
-    }
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-         
-            "보스 사진",
-      
-        
-        },
-        {
-            "보스 왈"
-        }
-        );
-
-    InputManager::Wait();
-
-
-    bool finalBossWin = StartFinalBossBattle();
-
-    if (!finalBossWin)
-    {
-        GameOver();
-        context.SetGameRunning(false);
-        return;
-    }
-
-    Ending();
-
-    currentState = GameState::MainMenu;
-}
-
 
 
 
@@ -1067,6 +1062,7 @@ void GameManager::HandleInventoryInput()
         AddLog(itemName + " 사용 완료");
     }
 }
+
 
 
 

@@ -4,6 +4,7 @@
 #include "ConsolUI.h"
 #include "InputManager.h"
 #include "StatBonus.h"
+#include "BattleResult.h"
 
 #include <iostream>
 #include <algorithm>
@@ -34,7 +35,7 @@ Battle::Battle(GameContext& context)
 }
 
 // [추가] 전투 전체 실행 함수
-void Battle::RunBattle(GameContext& context)
+BattleResult Battle::RunBattle(GameContext & context)
 {
 	Player& player = context.GetPlayer();
 	Monster& monster = context.GetMonster();
@@ -246,6 +247,7 @@ void Battle::RunBattle(GameContext& context)
 					)
 				);
 
+
 				ConsoleUI::AddLog(
 					logLines,
 					ConsoleUI::PrintReward(
@@ -255,6 +257,8 @@ void Battle::RunBattle(GameContext& context)
 				);
 
 				BattleReward(context, context);
+
+				return BattleResult::Win;
 
 				break;
 			}
@@ -283,6 +287,8 @@ void Battle::RunBattle(GameContext& context)
 						player.GetName()
 					)
 				);
+				return BattleResult::Lose;
+
 				break;
 			}
 		}
@@ -315,6 +321,8 @@ void Battle::RunBattle(GameContext& context)
 					logLines,
 					ConsoleUI::PrintRunawaySuccess()
 				);
+
+				return BattleResult::Escape;
 
 				break;
 			}
@@ -481,7 +489,7 @@ int Battle::PlayerDiceMeleeDamage(GameContext& context1, GameContext& context2, 
 		break;
 
 	case 3:
-		Damage = (player.GetSkillDamage(equipBonus, potionBonus) - monster.GetDefense());
+		Damage = (player.GetMeleeDamage(equipBonus, potionBonus) - monster.GetDefense());
 		break;
 	case 4:
 		Damage = (player.GetMeleeDamage(equipBonus, potionBonus) - monster.GetDefense());
