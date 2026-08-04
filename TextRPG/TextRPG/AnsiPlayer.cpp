@@ -1,4 +1,5 @@
 #include "AnsiPlayer.h"
+#define NOMINMAX
 
 #include <windows.h>
 #include <filesystem>
@@ -107,24 +108,89 @@ namespace AnsiPlayer
         Sleep(600);
         Play(files, delayMs, loop);
     }
-
-    std::vector<std::string> LoadLines(const std::string& filePath)
+    std::vector<std::string> LoadLines(
+        const std::string& filePath,
+        int offsetX,
+        int offsetY,
+        int maxWidth,
+        int maxHeight)
     {
-        std::ifstream file(filePath, std::ios::binary);
-        if (!file) return { "[이미지 로드 실패]" };
+        std::ifstream file(filePath);
 
-        std::vector<std::string> lines;
+        if (!file)
+        {
+            return { "[이미지 로드 실패] " + filePath };
+        }
+
+        std::vector<std::string> raw;
         std::string line;
 
         while (std::getline(file, line))
         {
             if (!line.empty() && line.back() == '\r')
+            {
                 line.pop_back();
+            }
 
-            lines.push_back(line);
+            raw.push_back(line);
         }
 
-        return lines;
+        std::vector<std::string> result;
+
+        for (int y = 0; y < maxHeight; y++)
+        {
+            int srcY = y + offsetY;
+
+            std::string output;
+
+            if (srcY < static_cast<int>(raw.size()))
+            {
+                std::string srcLine = raw[srcY];
+
+                if (offsetX < static_cast<int>(srcLine.size()))
+                {
+                    output = srcLine.substr(offsetX);
+                }
+            }
+
+            result.push_back(output);
+        }
+
+        return result;
     }
+
+
+
+
+
+
+    void DrawPanelAscii(
+        const std::vector<std::string>& ascii,
+        int panelWidth,
+        int panelHeight)
+    {
+        for (int y = 0; y < panelHeight; y++)
+        {
+            if (y >= ascii.size())
+            {
+                std::cout << '\n';
+                continue;
+            }
+
+            std::string line = ascii[y];
+
+            if (line.length() > panelWidth)
+            {
+                line = line.substr(0, panelWidth);
+            }
+
+            std::cout << line << '\n';
+        }
+    }
+
+
+
+
+
 
 } // namespace AnsiPlayer

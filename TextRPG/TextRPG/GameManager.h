@@ -7,6 +7,7 @@
 #include "Inventory.h"
 #include "ConsolUI.h"
 #include "InputManager.h"
+#include "BattleResult.h"
 
 
 class GameManager
@@ -79,11 +80,13 @@ private:
 
     void StartStoryBattleFlow();
 
-    bool StartMiddleBossBattle();
+    BattleResult StartMiddleBossBattle();
 
-    bool StartFinalBossBattle();
+    BattleResult StartFinalBossBattle();
 
     bool ShowCharacterPreview(int choice);
+
+   
 
 
     // Á¾·á

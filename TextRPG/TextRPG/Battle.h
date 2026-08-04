@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <random>
 #include <iostream>
+#include "BattleResult.h"
 
 class GameContext;
 class Player;
@@ -43,7 +44,7 @@ public:
 	Battle(GameContext& context);
 
 	// [추가] 전투 전체 진행을 담당
-	void RunBattle(GameContext& context);
+	BattleResult RunBattle(GameContext& context);
 
 	// 확률생성
 	int CheckChance();

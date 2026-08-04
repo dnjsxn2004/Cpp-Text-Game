@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "GameState.h"
 #include "AnsiPlayer.h"
+#include "BattleResult.h"
 
 
 
@@ -119,19 +120,28 @@ void GameManager::Initialize()
 void GameManager::PlayOpeningCutscenes()
 {
     ConsoleUI::DrawCutSceneScreen(
+        AnsiPlayer::LoadLines(
+            R"(C:\ascii\RedNewCut1.txt)",//메인 1 -3명 , 2 - 강사라 불법 시술, 3- 강사라 대치, 4- 류 진 도박 승부, 5- 도박방 습격 류 진 맞짱, 6- 진태식 칼찌, 7- 진태식 치명상 메인 끝 
+            0,
+            0,
+            120,
+            28
+        ),
         {
-            "",
-            "",
-            "",
-            "                                      ACT 1",
-     
-            "",
-            "",
-            "",
-            "",
-            "",
-            ""
-        },
+            "대사"
+        }
+        );
+
+    InputManager::Wait();
+
+    ConsoleUI::DrawCutSceneScreen( // 1 - 주사위, 2- 류 3- 진 4- 강사라 5- 류 후계자 6- 경찰 언더커버 7- 조직원 맞짱 8- 대치 9- 류 진 경계 페이드 10 - 강사라 제지 11- 류 압박 12- 류 카지노 습격 13 - 진태식 진료소 14- 류 진료소 습격 15- 태식 아웃 16- 강사라 칼찌 17- 류가 강사라 칼찌 18- 강사라 죽음 19- 진태식 죽음 20 -류 고독하구만 21- 류 무릎 22- 류 한탄 23- 류 자살 애니 24- 류 떨어짐
+        AnsiPlayer::LoadLines(
+            R"(C:\ascii\MainCut2.txt)",
+            0,
+            0,
+            120,
+            28
+        ),
         {
             "대사"
         }
@@ -140,35 +150,13 @@ void GameManager::PlayOpeningCutscenes()
     InputManager::Wait();
 
     ConsoleUI::DrawCutSceneScreen(
-        {
-            "",
-            "",
-            "",
-            "                                      ACT 2",
-          
-          
-        },
-        {
-            "대사"
-        }
-        );
-
-    InputManager::Wait();
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-            "",
-            "",
-            "",
-            "                                      ACT 3",
-            
-            "",
-            "",
-            "",
-            "",
-            "",
-            ""
-        },
+        AnsiPlayer::LoadLines(
+            R"(C:\ascii\MainCut3.txt)",
+            0,
+            0,
+            120,
+            28
+        ),
         {
            "대사"
         }
@@ -203,9 +191,13 @@ void GameManager::RenderMainMenu()
         );
     }
 
-    screen.a =
-        ConsoleUI::Redtest();
-   
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
 
     screen.b = logs;
 
@@ -300,39 +292,102 @@ void GameManager::StartNormalBattle()
 
 void GameManager::StartStoryBattleFlow()
 {
-    ConsoleUI::PrintMessage("스토리 진행을 시작합니다.");
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "중간 보스 사진",
+
+
+        },
+        {
+            "중간 보스 왈"
+        }
+        );
+
     InputManager::Wait();
 
-    bool middleBossWin = StartMiddleBossBattle();
+    BattleResult middleResult = StartMiddleBossBattle();
 
-    if (!middleBossWin)
+    // 패배
+    if (middleResult == BattleResult::Lose)
     {
-        context.SetGameOver(true);
+        GameOver();
+
         context.SetGameRunning(false);
+
         return;
     }
 
-    bool finalBossWin = StartFinalBossBattle();
-
-    if (!finalBossWin)
+    // 도망 성공
+    if (middleResult == BattleResult::Escape)
     {
-        context.SetGameOver(true);
-        context.SetGameRunning(false);
+        Ending();
+
+        currentState = GameState::MainMenu;
+
         return;
     }
 
-    isWin = true;
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "보스 사진",
+
+
+        },
+        {
+            "보스 왈"
+        }
+        );
+
+    InputManager::Wait();
+
+
+    BattleResult finalResult =  StartFinalBossBattle();
+
+    if (finalResult == BattleResult::Lose)
+    {
+        GameOver();
+
+        context.SetGameRunning(false);
+
+        return;
+    }
+
+    if (finalResult == BattleResult::Escape)
+    {
+        Ending();
+
+        currentState = GameState::MainMenu;
+
+        return;
+    }
+
     Ending();
 
-
-    isWin = false;
-    Initialize();
+    currentState = GameState::MainMenu;
 }
 
 
-bool GameManager::StartMiddleBossBattle()
+void GameManager::HandleStoryInput()
 {
-    ConsoleUI::PrintMessage("중간보스전이 시작됩니다.");
+    InputManager::Wait();
+
+    StartStoryBattleFlow();
+
+    if (context.IsGameRunning())
+    {
+        currentState = GameState::MainMenu;
+    }
+}
+
+
+
+BattleResult GameManager::StartMiddleBossBattle()
+{
     InputManager::Wait();
 
     Monster middleBoss = SpawnMiddleBoss(context);
@@ -340,16 +395,16 @@ bool GameManager::StartMiddleBossBattle()
 
     Battle battle(context);
 
-    battle.RunBattle(context);
+    BattleResult result = battle.RunBattle(context);
 
     InputManager::Wait();
 
-    return context.GetPlayer().GetHp() > 0;
+    return result;
 }
 
-bool GameManager::StartFinalBossBattle()
+
+BattleResult GameManager::StartFinalBossBattle()
 {
-    ConsoleUI::PrintMessage("최종보스전이 시작됩니다.");
     InputManager::Wait();
 
     Monster finalBoss = SpawnFinalBoss(context);
@@ -357,12 +412,13 @@ bool GameManager::StartFinalBossBattle()
 
     Battle battle(context);
 
-    battle.RunBattle(context);
+    BattleResult result = battle.RunBattle(context);
 
     InputManager::Wait();
 
-    return context.GetPlayer().GetHp() > 0;
+    return result;
 }
+
 
 void GameManager::Ending()
 {
@@ -631,12 +687,14 @@ void GameManager::RenderShop()
         displayIndex++;
     }
 
-    screen.a =
-    {
-        "      [ 암시장 ]",
-        "",
-        "   어둠 속 상인이 웃는다."
-    };
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
+
 
     screen.b = productLines;
 
@@ -769,12 +827,13 @@ void GameManager::RenderStatus()
     Inventory& inventory = context.GetInventory();
 
 
-    screen.a =
-    {
-        "      [ 상태 ]",
-        "",
-        "   거울 속의 자신을 바라본다."
-    };
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
 
     screen.b =
     {
@@ -837,12 +896,13 @@ void GameManager::RenderStory()
 
     Player& player = context.GetPlayer();
 
-    screen.a =
-    {
-        "     [ 폐쇄된 진료소 ]",
-        "",
-        "   비가 창문을 두드린다."
-    };
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
 
     screen.b =
     {
@@ -869,76 +929,6 @@ void GameManager::RenderStory()
     ConsoleUI::DrawFullLayout(screen);
 }
 
-
-void GameManager::HandleStoryInput()
-{
-    InputManager::Wait();
-
-    StartStoryBattleFlow();
-
-    if (context.IsGameRunning())
-    {
-        currentState = GameState::MainMenu;
-    }
-}
-
-void GameManager::StartStoryBattleFlow()
-{
-    ConsoleUI::ClearScreen();
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-
-            "중간 보스 사진",
-
-
-        },
-        {
-            "중간 보스 왈"
-        }
-        );
-
-    InputManager::Wait();
-    
-    InputManager::Wait();
-
-    bool middleBossWin = StartMiddleBossBattle();
-
-    if (!middleBossWin)
-    {
-        GameOver();
-        context.SetGameRunning(false);
-        return;
-    }
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-         
-            "보스 사진",
-      
-        
-        },
-        {
-            "보스 왈"
-        }
-        );
-
-    InputManager::Wait();
-
-
-    bool finalBossWin = StartFinalBossBattle();
-
-    if (!finalBossWin)
-    {
-        GameOver();
-        context.SetGameRunning(false);
-        return;
-    }
-
-    Ending();
-
-    currentState = GameState::MainMenu;
-}
 
 
 
@@ -994,8 +984,15 @@ void GameManager::RenderInventory()
     }
 
     screen.a = AnsiPlayer::LoadLines(
-        R"(C:\asd\testred\ascii_output.txt)"
+        R"(C:\asd\testred\ascii_output.txt)",
+        10,
+        5,
+        50,
+        22
     );
+
+
+
 
     screen.b = itemLines;
 
@@ -1067,6 +1064,7 @@ void GameManager::HandleInventoryInput()
         AddLog(itemName + " 사용 완료");
     }
 }
+
 
 
 
