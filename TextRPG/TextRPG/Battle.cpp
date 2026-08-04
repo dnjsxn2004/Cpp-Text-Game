@@ -5,6 +5,7 @@
 #include "InputManager.h"
 #include "StatBonus.h"
 #include "BattleResult.h"
+#include "AnsiPlayer.h"
 
 #include <iostream>
 #include <algorithm>
@@ -33,6 +34,8 @@ Battle::Battle(GameContext& context)
 	// [추가] 현재 사용하는 주사위 종류 초기화
 	CurrentDiceType = DiceType::Normal;
 }
+
+
 
 // [추가] 전투 전체 실행 함수
 BattleResult Battle::RunBattle(GameContext & context)

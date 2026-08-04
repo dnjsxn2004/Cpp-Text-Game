@@ -16,7 +16,7 @@ protected:
     int Exp = 0;
     int MaxExp = 100;
     int Defense = 10;
-    int Gold = 0;
+    int Gold = 50000; // 0
     StatBonus PotionBonus;
     StatBonus EquipBonus;
     int PotionEffectCount = 0;

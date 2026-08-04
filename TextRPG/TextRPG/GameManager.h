@@ -86,6 +86,8 @@ private:
 
     bool ShowCharacterPreview(int choice);
 
+   
+
 
     // Á¾·á
 

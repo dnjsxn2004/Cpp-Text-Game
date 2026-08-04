@@ -120,19 +120,28 @@ void GameManager::Initialize()
 void GameManager::PlayOpeningCutscenes()
 {
     ConsoleUI::DrawCutSceneScreen(
+        AnsiPlayer::LoadLines(
+            R"(C:\ascii\RedNewCut1.txt)",//메인 1 -3명 , 2 - 강사라 불법 시술, 3- 강사라 대치, 4- 류 진 도박 승부, 5- 도박방 습격 류 진 맞짱, 6- 진태식 칼찌, 7- 진태식 치명상 메인 끝 
+            0,
+            0,
+            120,
+            28
+        ),
         {
-            "",
-            "",
-            "",
-            "                                      ACT 1",
-     
-            "",
-            "",
-            "",
-            "",
-            "",
-            ""
-        },
+            "대사"
+        }
+        );
+
+    InputManager::Wait();
+
+    ConsoleUI::DrawCutSceneScreen( // 1 - 주사위, 2- 류 3- 진 4- 강사라 5- 류 후계자 6- 경찰 언더커버 7- 조직원 맞짱 8- 대치 9- 류 진 경계 페이드 10 - 강사라 제지 11- 류 압박 12- 류 카지노 습격 13 - 진태식 진료소 14- 류 진료소 습격 15- 태식 아웃 16- 강사라 칼찌 17- 류가 강사라 칼찌 18- 강사라 죽음 19- 진태식 죽음 20 -류 고독하구만 21- 류 무릎 22- 류 한탄 23- 류 자살 애니 24- 류 떨어짐
+        AnsiPlayer::LoadLines(
+            R"(C:\ascii\MainCut2.txt)",
+            0,
+            0,
+            120,
+            28
+        ),
         {
             "대사"
         }
@@ -141,35 +150,13 @@ void GameManager::PlayOpeningCutscenes()
     InputManager::Wait();
 
     ConsoleUI::DrawCutSceneScreen(
-        {
-            "",
-            "",
-            "",
-            "                                      ACT 2",
-          
-          
-        },
-        {
-            "대사"
-        }
-        );
-
-    InputManager::Wait();
-
-    ConsoleUI::DrawCutSceneScreen(
-        {
-            "",
-            "",
-            "",
-            "                                      ACT 3",
-            
-            "",
-            "",
-            "",
-            "",
-            "",
-            ""
-        },
+        AnsiPlayer::LoadLines(
+            R"(C:\ascii\MainCut3.txt)",
+            0,
+            0,
+            120,
+            28
+        ),
         {
            "대사"
         }
@@ -204,9 +191,13 @@ void GameManager::RenderMainMenu()
         );
     }
 
-    screen.a =
-        ConsoleUI::Redtest();
-   
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
 
     screen.b = logs;
 
@@ -696,12 +687,14 @@ void GameManager::RenderShop()
         displayIndex++;
     }
 
-    screen.a =
-    {
-        "      [ 암시장 ]",
-        "",
-        "   어둠 속 상인이 웃는다."
-    };
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
+
 
     screen.b = productLines;
 
@@ -834,12 +827,13 @@ void GameManager::RenderStatus()
     Inventory& inventory = context.GetInventory();
 
 
-    screen.a =
-    {
-        "      [ 상태 ]",
-        "",
-        "   거울 속의 자신을 바라본다."
-    };
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
 
     screen.b =
     {
@@ -902,12 +896,13 @@ void GameManager::RenderStory()
 
     Player& player = context.GetPlayer();
 
-    screen.a =
-    {
-        "     [ 폐쇄된 진료소 ]",
-        "",
-        "   비가 창문을 두드린다."
-    };
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut13.txt)",
+        0,
+        0,
+        50,
+        22
+    );
 
     screen.b =
     {
@@ -989,8 +984,15 @@ void GameManager::RenderInventory()
     }
 
     screen.a = AnsiPlayer::LoadLines(
-        R"(C:\asd\testred\ascii_output.txt)"
+        R"(C:\asd\testred\ascii_output.txt)",
+        10,
+        5,
+        50,
+        22
     );
+
+
+
 
     screen.b = itemLines;
 

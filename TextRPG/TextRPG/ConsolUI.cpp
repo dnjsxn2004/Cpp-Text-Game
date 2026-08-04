@@ -3926,11 +3926,185 @@ void ConsoleUI::PrintFixedWidthText(const std::string& text, int width)
     std::cout << std::left << std::setw(width) << output;
 }
 
+namespace
+{
+    std::string StripAnsiCode(const std::string& text)
+    {
+        std::string result;
+
+        for (size_t i = 0; i < text.size();)
+        {
+            if (
+                i + 1 < text.size() &&
+                text[i] == '\033' &&
+                text[i + 1] == '['
+                )
+            {
+                i += 2;
+
+                while (i < text.size())
+                {
+                    unsigned char ch =
+                        static_cast<unsigned char>(text[i]);
+
+                    if (std::isalpha(ch))
+                    {
+                        i++;
+                        break;
+                    }
+
+                    i++;
+                }
+
+                continue;
+            }
+
+            result += text[i];
+            i++;
+        }
+
+        return result;
+    }
+
+    std::string RTrimCopy(const std::string& text)
+    {
+        std::string result = text;
+
+        while (!result.empty() &&
+            (result.back() == ' ' ||
+                result.back() == '\t' ||
+                result.back() == '\r'))
+        {
+            result.pop_back();
+        }
+
+        return result;
+    }
+
+    int CountLeadingSpaces(const std::string& text)
+    {
+        int count = 0;
+
+        while (count < static_cast<int>(text.size()) &&
+            text[count] == ' ')
+        {
+            count++;
+        }
+
+        return count;
+    }
+
+    std::vector<std::string> NormalizeAsciiLines(
+        const std::vector<std::string>& lines)
+    {
+        std::vector<std::string> cleaned;
+
+        for (const std::string& line : lines)
+        {
+            std::string noAnsi = StripAnsiCode(line);
+            std::string trimmedRight = RTrimCopy(noAnsi);
+
+            cleaned.push_back(trimmedRight);
+        }
+
+        while (!cleaned.empty() && cleaned.front().empty())
+        {
+            cleaned.erase(cleaned.begin());
+        }
+
+        while (!cleaned.empty() && cleaned.back().empty())
+        {
+            cleaned.pop_back();
+        }
+
+        int minLeadingSpaces = 999999;
+
+        for (const std::string& line : cleaned)
+        {
+            if (line.empty())
+            {
+                continue;
+            }
+
+            int leadingSpaces = CountLeadingSpaces(line);
+
+            if (leadingSpaces < minLeadingSpaces)
+            {
+                minLeadingSpaces = leadingSpaces;
+            }
+        }
+
+        if (minLeadingSpaces == 999999)
+        {
+            minLeadingSpaces = 0;
+        }
+
+        for (std::string& line : cleaned)
+        {
+            if (static_cast<int>(line.size()) >= minLeadingSpaces)
+            {
+                line = line.substr(minLeadingSpaces);
+            }
+        }
+
+        return cleaned;
+    }
+
+
+    std::string FitLeftText(
+        const std::string& text,
+        int width)
+    {
+        std::string output = text;
+
+        if (static_cast<int>(output.size()) > width)
+        {
+            output = output.substr(0, width);
+        }
+
+        if (static_cast<int>(output.size()) < width)
+        {
+            output += std::string(width - output.size(), ' ');
+        }
+
+        return output;
+    }
+
+    std::string FitCenterText(
+        const std::string& text,
+        int width)
+    {
+        std::string output = text;
+
+        if (static_cast<int>(output.size()) > width)
+        {
+            output = output.substr(0, width);
+        }
+
+        int remain = width - static_cast<int>(output.size());
+
+        if (remain < 0)
+        {
+            remain = 0;
+        }
+
+        int left = remain / 2;
+        int right = remain - left;
+
+        return std::string(left, ' ') +
+            output +
+            std::string(right, ' ');
+    }
+}
+
+
+
 void ConsoleUI::DrawCutSceneScreen(
     const std::vector<std::string>& sceneLines,
     const std::vector<std::string>& dialogueLines)
 {
     ClearScreen();
+    MoveCursor(0, 0);
 
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
 
@@ -3938,82 +4112,105 @@ void ConsoleUI::DrawCutSceneScreen(
 
     GetConsoleScreenBufferInfo(hConsole, &csbi);
 
-    int width =
+    int consoleWidth =
         csbi.srWindow.Right -
         csbi.srWindow.Left + 1;
 
-    int height =
+    int consoleHeight =
         csbi.srWindow.Bottom -
         csbi.srWindow.Top + 1;
 
-    width -= 2;
-    height -= 2;
+    // 오른쪽 끝 자동 줄바꿈 방지용 여유
+    int width = consoleWidth - 10;
+    int height = consoleHeight - 7;
 
-    int sceneHeight = height * 3 / 4;
-    int dialogueHeight = height - sceneHeight - 2;
-
-    // 상단
-    std::cout
-        << "┌"
-        << Repeat("─", width - 2)
-        << "┐\n";
-
-    // 컷신 영역
-    for (int i = 0; i < sceneHeight; i++)
+    if (width < 80)
     {
-        std::string line =
-            (i < sceneLines.size()) ?
-            sceneLines[i] : "";
+        width = 80;
+    }
 
-        if ((int)line.length() > width - 4)
+    if (height < 24)
+    {
+        height = 24;
+    }
+
+    int innerWidth = width - 2;
+
+    int sceneHeight = height * 4 / 5;
+    int dialogueHeight = height - sceneHeight - 3;
+
+    if (dialogueHeight < 4)
+    {
+        dialogueHeight = 4;
+        sceneHeight = height - dialogueHeight - 3;
+    }
+
+    std::vector<std::string> normalizedScene =
+        NormalizeAsciiLines(sceneLines);
+
+    int imageStartY = 0;
+
+    if (static_cast<int>(normalizedScene.size()) < sceneHeight)
+    {
+        imageStartY =
+            (sceneHeight - static_cast<int>(normalizedScene.size())) / 2;
+    }
+
+    // 상단 테두리
+    std::cout
+        << "+"
+        << std::string(innerWidth, '-')
+        << "+\n";
+
+    // 이미지 영역
+    for (int y = 0; y < sceneHeight; y++)
+    {
+        std::string line = "";
+
+        int imageIndex = y - imageStartY;
+
+        if (imageIndex >= 0 &&
+            imageIndex < static_cast<int>(normalizedScene.size()))
         {
-            line = line.substr(0, width - 4);
+            line = normalizedScene[imageIndex];
         }
 
         std::cout
-            << "│ "
-            << line
-            << std::string(width - 3 - line.length(), ' ')
-            << "│\n";
+            << "|"
+            << FitCenterText(line, innerWidth)
+            << "|\n";
     }
 
-    // 중간선
+    // 중간 테두리
     std::cout
-        << "├"
-        << Repeat("─", width - 2)
-        << "┤\n";
+        << "+"
+        << std::string(innerWidth, '-')
+        << "+\n";
 
     // 대사 영역
-    for (int i = 0; i < dialogueHeight; i++)
+    for (int y = 0; y < dialogueHeight; y++)
     {
-        std::string line =
-            (i < dialogueLines.size()) ?
-            dialogueLines[i] : "";
+        std::string line = "";
 
-        std::string message =
-    "계속하려면 Enter를 누르세요...";
-
-        if ((int)line.length() > width - 4)
+        if (y < static_cast<int>(dialogueLines.size()))
         {
-            line = line.substr(0, width - 4);
+            line = StripAnsiCode(dialogueLines[y]);
         }
 
         std::cout
-            << "│ "
-            << line
-            << std::string(width - 3 - line.length(), ' ')
-            << "│\n";
+            << "|"
+            << FitLeftText(line, innerWidth)
+            << "|\n";
     }
 
-    // 하단
+    // 하단 테두리
     std::cout
-        << "└"
-        << Repeat("─", width - 2)
-        << "┘\n";
+        << "+"
+        << std::string(innerWidth, '-')
+        << "+\n";
+
+    std::cout << "\033[0m";
 }
-
-
-
 
 
     
@@ -4427,6 +4624,112 @@ void ConsoleUI::DrawFrame(
 }
 
 
+namespace
+{
+    bool IsAnsiEscapeStart(const std::string& text, size_t index)
+    {
+        return index + 1 < text.size()
+            && text[index] == '\033'
+            && text[index + 1] == '[';
+    }
+
+    size_t FindAnsiEscapeEnd(const std::string& text, size_t index)
+    {
+        size_t i = index + 2;
+
+        while (i < text.size())
+        {
+            unsigned char ch =
+                static_cast<unsigned char>(text[i]);
+
+            if (std::isalpha(ch))
+            {
+                return i;
+            }
+
+            i++;
+        }
+
+        return std::string::npos;
+    }
+
+    int GetVisibleLengthAnsi(const std::string& text)
+    {
+        int visibleLength = 0;
+
+        for (size_t i = 0; i < text.size();)
+        {
+            if (IsAnsiEscapeStart(text, i))
+            {
+                size_t end = FindAnsiEscapeEnd(text, i);
+
+                if (end == std::string::npos)
+                {
+                    break;
+                }
+
+                i = end + 1;
+                continue;
+            }
+
+            visibleLength++;
+            i++;
+        }
+
+        return visibleLength;
+    }
+
+    std::string FitTextAnsi(
+        const std::string& text,
+        int width)
+    {
+        std::string output;
+        int visibleLength = 0;
+        bool hasAnsi = false;
+
+        for (size_t i = 0; i < text.size();)
+        {
+            if (IsAnsiEscapeStart(text, i))
+            {
+                size_t end = FindAnsiEscapeEnd(text, i);
+
+                if (end == std::string::npos)
+                {
+                    break;
+                }
+
+                output += text.substr(i, end - i + 1);
+                hasAnsi = true;
+                i = end + 1;
+                continue;
+            }
+
+            if (visibleLength >= width)
+            {
+                break;
+            }
+
+            output += text[i];
+            visibleLength++;
+            i++;
+        }
+
+        if (hasAnsi)
+        {
+            output += "\033[0m";
+        }
+
+        if (visibleLength < width)
+        {
+            output += std::string(width - visibleLength, ' ');
+        }
+
+        return output;
+    }
+}
+
+
+
 
 void ConsoleUI::DrawFullLayout(const UIScreen& screen)
 {
@@ -4442,7 +4745,6 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
         hConsole,
         &csbi);
 
-   
     int consoleWidth =
         csbi.srWindow.Right -
         csbi.srWindow.Left + 1;
@@ -4451,9 +4753,18 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
         csbi.srWindow.Bottom -
         csbi.srWindow.Top + 1;
 
-   
     int totalWidth = consoleWidth - 4;
     int totalHeight = consoleHeight - 4;
+
+    if (totalWidth < 80)
+    {
+        totalWidth = 80;
+    }
+
+    if (totalHeight < 24)
+    {
+        totalHeight = 24;
+    }
 
     int leftWidth = totalWidth / 2;
     int rightWidth = totalWidth - leftWidth - 1;
@@ -4461,32 +4772,11 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
     int topHeight = totalHeight * 2 / 3;
     int bottomHeight = totalHeight - topHeight - 1;
 
-    auto FitText =
-        [](const std::string& text, int width)
-        {
-            std::string output = text;
-
-            if ((int)output.size() > width)
-            {
-                output = output.substr(0, width);
-            }
-
-            output +=
-                std::string(
-                    width - output.size(),
-                    ' '
-                );
-
-            return output;
-        };
-
-    // 데이터 연결
     const auto& leftTop = screen.a;
     const auto& rightTop = screen.b;
     const auto& leftBottom = screen.c;
     const auto& rightBottom = screen.d;
 
- 
     std::cout
         << "┌"
         << Repeat("─", leftWidth)
@@ -4497,18 +4787,20 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
     for (int i = 0; i < topHeight; i++)
     {
         std::string left =
-            (i < leftTop.size()) ?
-            leftTop[i] : "";
+            (i < static_cast<int>(leftTop.size()))
+            ? leftTop[i]
+            : "";
 
         std::string right =
-            (i < rightTop.size()) ?
-            rightTop[i] : "";
+            (i < static_cast<int>(rightTop.size()))
+            ? rightTop[i]
+            : "";
 
         std::cout
             << "│"
-            << FitText(left, leftWidth)
+            << FitTextAnsi(left, leftWidth)
             << "│"
-            << FitText(right, rightWidth)
+            << FitTextAnsi(right, rightWidth)
             << "│\n";
     }
 
@@ -4522,18 +4814,20 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
     for (int i = 0; i < bottomHeight; i++)
     {
         std::string left =
-            (i < leftBottom.size()) ?
-            leftBottom[i] : "";
+            (i < static_cast<int>(leftBottom.size()))
+            ? leftBottom[i]
+            : "";
 
         std::string right =
-            (i < rightBottom.size()) ?
-            rightBottom[i] : "";
+            (i < static_cast<int>(rightBottom.size()))
+            ? rightBottom[i]
+            : "";
 
         std::cout
             << "│"
-            << FitText(left, leftWidth)
+            << FitTextAnsi(left, leftWidth)
             << "│"
-            << FitText(right, rightWidth)
+            << FitTextAnsi(right, rightWidth)
             << "│\n";
     }
 
@@ -4543,7 +4837,10 @@ void ConsoleUI::DrawFullLayout(const UIScreen& screen)
         << "┴"
         << Repeat("─", rightWidth)
         << "┘\n";
+
+    std::cout << "\033[0m";
 }
+
 
 
 std::string ConsoleUI::Repeat(const std::string& text, int count)

@@ -3,12 +3,12 @@
 Jin::Jin()
 {
     name = "진태식";
-    Hp = 300;
+    Hp = 1000;
     MaxHp = 300;
     Mp = 100;
     MaxMp = 100;
-    Attack = 45;
-    Defense = 25;
+    Attack = 200; //45
+    Defense = 200; // 25
     Str = 20;
     Dex = 10;
     Intel = 5;
