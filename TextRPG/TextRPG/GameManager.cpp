@@ -12,9 +12,8 @@
 #include "Monster.h"
 #include "Player.h"
 #include "GameState.h"
+#include "AnsiPlayer.h"
 
-
-using namespace std;
 
 
 GameManager::GameManager()
@@ -205,12 +204,8 @@ void GameManager::RenderMainMenu()
     }
 
     screen.a =
-    {
-        "",
-        "   [ 거점 ]",
-        "",
-        "   메인 화면"
-    };
+        ConsoleUI::Redtest();
+   
 
     screen.b = logs;
 
@@ -538,20 +533,102 @@ void GameManager::RenderShop()
     Player& player = context.GetPlayer();
 
     std::vector<std::string> productLines;
+    std::vector<int> displayToRealIndex;
 
-    const std::vector<Item>& products = shop.GetProducts();
+    int displayIndex = 1;
 
-    for (int i = 0; i < static_cast<int>(products.size()); i++)
+    const auto& all = shop.GetProducts();
+
+    // ===== 무기 =====
+    productLines.push_back("[ 무기 ]");
+
+    auto weapons = shop.GetProductsByCategory(ShopCategory::Weapon);
+
+    for (const Item& item : weapons)
     {
-        const Item& item = products[i];
+        const StatBonus& b = item.GetStatBonus();
 
         std::string line =
-            std::to_string(i + 1) + ". " +
-            item.GetName() +
-            " - " +
-            std::to_string(item.GetPrice()) + "G";
+            std::to_string(displayIndex) + ". " +
+            item.GetName() + " | " +
+            std::to_string(item.GetPrice()) + "G | " +
+            "ATK+" + std::to_string(b.att);
 
         productLines.push_back(line);
+
+        for (int i = 0; i < all.size(); i++)
+        {
+            if (all[i].GetName() == item.GetName())
+            {
+                displayToRealIndex.push_back(i);
+                break;
+            }
+        }
+
+        displayIndex++;
+    }
+
+    productLines.push_back("");
+
+    // ===== 방어구 =====
+    productLines.push_back("[ 방어구 ]");
+
+    auto armors = shop.GetProductsByCategory(ShopCategory::Armor);
+
+    for (const Item& item : armors)
+    {
+        const StatBonus& b = item.GetStatBonus();
+
+        std::string line =
+            std::to_string(displayIndex) + ". " +
+            item.GetName() + " | " +
+            std::to_string(item.GetPrice()) + "G | " +
+            "DEF+" + std::to_string(b.def);
+
+        productLines.push_back(line);
+
+        for (int i = 0; i < all.size(); i++)
+        {
+            if (all[i].GetName() == item.GetName())
+            {
+                displayToRealIndex.push_back(i);
+                break;
+            }
+        }
+
+        displayIndex++;
+    }
+
+    productLines.push_back("");
+
+    // ===== 소비 아이템 =====
+    productLines.push_back("[ 소비아이템 ]");
+
+    auto consumables = shop.GetProductsByCategory(ShopCategory::Consumable);
+
+    for (const Item& item : consumables)
+    {
+        const StatBonus& b = item.GetStatBonus();
+
+        std::string line =
+            std::to_string(displayIndex) + ". " +
+            item.GetName() + " | " +
+            std::to_string(item.GetPrice()) + "G | " +
+            "HP+" + std::to_string(b.hp) +
+            " MP+" + std::to_string(b.mp);
+
+        productLines.push_back(line);
+
+        for (int i = 0; i < all.size(); i++)
+        {
+            if (all[i].GetName() == item.GetName())
+            {
+                displayToRealIndex.push_back(i);
+                break;
+            }
+        }
+
+        displayIndex++;
     }
 
     screen.a =
@@ -582,11 +659,15 @@ void GameManager::RenderShop()
     };
 
     ConsoleUI::DrawFullLayout(screen);
+
+    shopIndexMap = displayToRealIndex; 
 }
+
 
 
 void GameManager::HandleShopInput()
 {
+
     int choice =
         InputManager::InputInMassegeToRange(
             "선택: ",
@@ -598,15 +679,19 @@ void GameManager::HandleShopInput()
     {
     case 1:
     {
-        const std::vector<Item>& products =
-            shop.GetProducts();
+        if (shopIndexMap.empty())
+        {
+            AddLog("상품이 없습니다.");
+            break;
+        }
 
-        int itemIndex =
-            InputManager::InputInMassegeToRange(
-                "구매할 상품 번호: ",
-                1,
-                products.size()
-            ) - 1;
+        int index = InputManager::InputInMassegeToRange(
+            "구매할 상품 번호: ",
+            1,
+            shopIndexMap.size()
+        ) - 1;
+
+        int realIndex = shopIndexMap[index];
 
         int quantity =
             InputManager::InputInMassegeToRange(
@@ -615,7 +700,7 @@ void GameManager::HandleShopInput()
                 99
             );
 
-        if (shop.BuyItem(itemIndex, quantity, context))
+        if (shop.BuyItem(realIndex, quantity, context))
         {
             AddLog("구매 완료");
         }
@@ -629,8 +714,7 @@ void GameManager::HandleShopInput()
 
     case 2:
     {
-        Inventory& inventory =
-            context.GetInventory();
+        Inventory& inventory = context.GetInventory();
 
         std::vector<int> sellable =
             inventory.GetSellableItemIndices();
@@ -676,12 +760,14 @@ void GameManager::HandleShopInput()
 }
 
 
+
 void GameManager::RenderStatus()
 {
     UIScreen screen;
 
     Player& player = context.GetPlayer();
     Inventory& inventory = context.GetInventory();
+
 
     screen.a =
     {
@@ -693,14 +779,29 @@ void GameManager::RenderStatus()
     screen.b =
     {
         "이름 : " + player.GetName(),
+        "레벨 : " + std::to_string(player.GetLevel()),
         "",
-        "HP  : " + std::to_string(player.GetHp()),
-        "MP  : " + std::to_string(player.GetMp()),
+
+        "HP   : " +
+            std::to_string(player.GetHp()) + " / " +
+            std::to_string(player.GetMaxHp()),
+
+        "MP   : " +
+            std::to_string(player.GetMp()) + " / " +
+            std::to_string(player.GetMaxMp()),
+
+        "EXP  : " +
+            std::to_string(player.GetExp()) + " / " +
+            std::to_string(player.GetMaxExp()),
+
         "",
-        "ATK : " + std::to_string(player.GetAttack()),
+        "ATK  : " + std::to_string(player.GetAttack()),
+        "DEF  : " + std::to_string(player.GetDefense()),
         "",
         "Gold : " + std::to_string(player.GetGold())
     };
+
+
 
     screen.c =
     {
@@ -773,91 +874,175 @@ void GameManager::HandleStoryInput()
 {
     InputManager::Wait();
 
+    StartStoryBattleFlow();
+
+    if (context.IsGameRunning())
+    {
+        currentState = GameState::MainMenu;
+    }
+}
+
+void GameManager::StartStoryBattleFlow()
+{
+    ConsoleUI::ClearScreen();
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+
+            "중간 보스 사진",
+
+
+        },
+        {
+            "중간 보스 왈"
+        }
+        );
+
+    InputManager::Wait();
+    
+    InputManager::Wait();
+
+    bool middleBossWin = StartMiddleBossBattle();
+
+    if (!middleBossWin)
+    {
+        GameOver();
+        context.SetGameRunning(false);
+        return;
+    }
+
+    ConsoleUI::DrawCutSceneScreen(
+        {
+         
+            "보스 사진",
+      
+        
+        },
+        {
+            "보스 왈"
+        }
+        );
+
+    InputManager::Wait();
+
+
+    bool finalBossWin = StartFinalBossBattle();
+
+    if (!finalBossWin)
+    {
+        GameOver();
+        context.SetGameRunning(false);
+        return;
+    }
+
+    Ending();
+
     currentState = GameState::MainMenu;
 }
 
+
+
+
 void GameManager::RenderInventory()
 {
-    Inventory& inventory = context.GetInventory();
+    UIScreen screen;
+
     Player& player = context.GetPlayer();
-
-    std::vector<std::string> leftTop;
-    std::vector<std::string> rightTop;
-    std::vector<std::string> leftBottom;
-    std::vector<std::string> rightBottom;
-
-    leftTop.push_back("=== 인벤토리 ===");
-    leftTop.push_back("");
+    Inventory& inventory = context.GetInventory();
 
     const auto& items = inventory.GetItems();
 
-    if (items.empty())
+    std::vector<std::string> itemLines;
+
+    for (int i = 0; i < items.size(); i++)
     {
-        leftTop.push_back("아이템이 없습니다.");
-    }
-    else
-    {
-        for (int i = 0; i < items.size(); i++)
+        const Item& item = items[i];
+        const StatBonus& b = item.GetStatBonus();
+
+        int sellPrice = shop.GetSellPrice(item);
+
+        std::string line =
+
+            std::to_string(i + 1) + ". " +
+            item.GetName() + " | " +
+            std::to_string(sellPrice) + "G | ";
+
+        if (item.GetType() == ItemType::Equipment)
         {
-            leftTop.push_back(
-                std::to_string(i + 1) +
-                ". " +
-                items[i].GetName()
-            );
+            if (item.GetEquipmentType() == EquipmentType::Weapon)
+            {
+                line += "ATK+" + std::to_string(b.att);
+            }
+            else
+            {
+                line += "DEF+" + std::to_string(b.def);
+            }
         }
+        else
+        {
+            line +=
+                "HP+" + std::to_string(b.hp) +
+                " MP+" + std::to_string(b.mp);
+        }
+
+        if (item.IsEquipped())
+        {
+            line += " [장착중]";
+        }
+
+        itemLines.push_back(line);
     }
 
-    rightTop.push_back("=== 플레이어 정보 ===");
-    rightTop.push_back("");
-    rightTop.push_back("이름 : " + player.GetName());
-
-    rightTop.push_back(
-        "HP : " +
-        std::to_string(player.GetHp()) +
-        "/" +
-        std::to_string(player.GetMaxHp())
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\asd\testred\ascii_output.txt)"
     );
 
-    rightTop.push_back(
-        "MP : " +
-        std::to_string(player.GetMp()) +
-        "/" +
-        std::to_string(player.GetMaxMp())
-    );
+    screen.b = itemLines;
 
-    leftBottom.push_back("1 ~ N : 아이템 선택");
-    leftBottom.push_back("0 : 뒤로가기");
+    screen.c =
+    {
+        "1 ~ N : 사용 / 장착",
+        "0 : 뒤로가기"
+    };
 
-    rightBottom.push_back("인벤토리 메뉴");
-
-    UIScreen screen;
-
-    screen.a = leftTop;
-    screen.b = rightTop;
-    screen.c = leftBottom;
-    screen.d = rightBottom;
+    screen.d =
+    {
+        "이름 : " + player.GetName(),
+        "Gold : " + std::to_string(player.GetGold()),
+        "",
+        "아이템 수 : " +
+        std::to_string(items.size())
+    };
 
     ConsoleUI::DrawFullLayout(screen);
 }
+
 
 
 void GameManager::HandleInventoryInput()
 {
     Inventory& inventory = context.GetInventory();
 
-    int itemCount =
-        static_cast<int>(
-            inventory.GetItems().size()
-            );
+    auto& items = inventory.GetItems();
+
+    if (items.empty())
+    {
+        AddLog("인벤토리가 비어 있습니다.");
+
+        InputManager::Wait();
+
+        currentState = GameState::MainMenu;
+
+        return;
+    }
 
     int choice =
         InputManager::InputInMassegeToRange(
-            "선택 : ",
+            "선택: ",
             0,
-            itemCount
+            items.size()
         );
 
-    // 뒤로가기
     if (choice == 0)
     {
         currentState = GameState::MainMenu;
@@ -866,15 +1051,22 @@ void GameManager::HandleInventoryInput()
 
     int index = choice - 1;
 
-    auto& items = inventory.GetItems();
+    std::string itemName = items[index].GetName();
+    ItemType type = items[index].GetType();
 
-    if (index >= 0 && index < items.size())
+    if (type == ItemType::Equipment)
     {
-        ConsoleUI::PrintMessage(
-            items[index].GetName() +
-            " 선택됨"
-        );
+        inventory.EquipItem(index, context);
+
+        AddLog(itemName + " 장착 완료");
+    }
+    else
+    {
+        inventory.UseItem(index, context);
+
+        AddLog(itemName + " 사용 완료");
     }
 }
+
 
 

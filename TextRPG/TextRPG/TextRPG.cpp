@@ -17,10 +17,14 @@ int main()
     SetConsoleCP(CP_UTF8);
     SetConsoleOutputCP(CP_UTF8);
 
-    system("mode con cols=220 lines=60");
-
     HWND console = GetConsoleWindow();
     ShowWindow(console, SW_MAXIMIZE);
+
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    DWORD dwMode = 0;
+    GetConsoleMode(hOut, &dwMode);
+    dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
+    SetConsoleMode(hOut, dwMode);
 
     GameManager gameManager;
     gameManager.Run();

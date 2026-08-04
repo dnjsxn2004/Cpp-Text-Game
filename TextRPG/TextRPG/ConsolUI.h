@@ -590,4 +590,7 @@ public:
 
     static std::string Repeat(const std::string& text, int count);
 
+    static std::vector<std::string>
+        Redtest();
+
 };
