@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="AnsiPlayer.h" />
     <ClInclude Include="Battle.h" />
+    <ClInclude Include="BattleResult.h" />
     <ClInclude Include="Cell.h" />
     <ClInclude Include="ConsolUI.h" />
     <ClInclude Include="GameContext.h" />

@@ -173,5 +173,8 @@
     <ClInclude Include="AnsiPlayer.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="BattleResult.h">
+      <Filter>헤더 파일\Battle</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

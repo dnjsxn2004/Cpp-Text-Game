@@ -13,6 +13,7 @@
 #include "Player.h"
 #include "GameState.h"
 #include "AnsiPlayer.h"
+#include "BattleResult.h"
 
 
 
@@ -316,16 +317,28 @@ void GameManager::StartStoryBattleFlow()
 
     InputManager::Wait();
 
-    InputManager::Wait();
+    BattleResult middleResult = StartMiddleBossBattle();
 
-    bool middleBossWin = StartMiddleBossBattle();
-
-    if (!middleBossWin)
+    // 패배
+    if (middleResult == BattleResult::Lose)
     {
         GameOver();
+
         context.SetGameRunning(false);
+
         return;
     }
+
+    // 도망 성공
+    if (middleResult == BattleResult::Escape)
+    {
+        Ending();
+
+        currentState = GameState::MainMenu;
+
+        return;
+    }
+
 
     ConsoleUI::DrawCutSceneScreen(
         {
@@ -342,12 +355,23 @@ void GameManager::StartStoryBattleFlow()
     InputManager::Wait();
 
 
-    bool finalBossWin = StartFinalBossBattle();
+    BattleResult finalResult =  StartFinalBossBattle();
 
-    if (!finalBossWin)
+    if (finalResult == BattleResult::Lose)
     {
         GameOver();
+
         context.SetGameRunning(false);
+
+        return;
+    }
+
+    if (finalResult == BattleResult::Escape)
+    {
+        Ending();
+
+        currentState = GameState::MainMenu;
+
         return;
     }
 
@@ -371,9 +395,8 @@ void GameManager::HandleStoryInput()
 
 
 
-bool GameManager::StartMiddleBossBattle()
+BattleResult GameManager::StartMiddleBossBattle()
 {
-    ConsoleUI::PrintMessage("중간보스전이 시작됩니다.");
     InputManager::Wait();
 
     Monster middleBoss = SpawnMiddleBoss(context);
@@ -381,16 +404,16 @@ bool GameManager::StartMiddleBossBattle()
 
     Battle battle(context);
 
-    battle.RunBattle(context);
+    BattleResult result = battle.RunBattle(context);
 
     InputManager::Wait();
 
-    return context.GetPlayer().GetHp() > 0;
+    return result;
 }
 
-bool GameManager::StartFinalBossBattle()
+
+BattleResult GameManager::StartFinalBossBattle()
 {
-    ConsoleUI::PrintMessage("최종보스전이 시작됩니다.");
     InputManager::Wait();
 
     Monster finalBoss = SpawnFinalBoss(context);
@@ -398,12 +421,13 @@ bool GameManager::StartFinalBossBattle()
 
     Battle battle(context);
 
-    battle.RunBattle(context);
+    BattleResult result = battle.RunBattle(context);
 
     InputManager::Wait();
 
-    return context.GetPlayer().GetHp() > 0;
+    return result;
 }
+
 
 void GameManager::Ending()
 {
@@ -1038,6 +1062,7 @@ void GameManager::HandleInventoryInput()
         AddLog(itemName + " 사용 완료");
     }
 }
+
 
 
 
