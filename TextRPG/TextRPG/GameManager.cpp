@@ -1014,11 +1014,105 @@ void GameManager::RenderShop()
     shopIndexMap = displayToRealIndex; 
 }
 
+void GameManager::RenderSellItemList()
+{
+    UIScreen screen;
+
+    Player& player = context.GetPlayer();
+    Inventory& inventory = context.GetInventory();
+
+    const std::vector<Item>& items = inventory.GetItems();
+    std::vector<int> sellable = inventory.GetSellableItemIndices();
+
+    std::vector<std::string> itemLines;
+
+    itemLines.push_back("[ 판매 가능 아이템 ]");
+    itemLines.push_back("");
+
+    if (sellable.empty())
+    {
+        itemLines.push_back("판매 가능한 아이템이 없습니다.");
+    }
+    else
+    {
+        for (int i = 0; i < static_cast<int>(sellable.size()); i++)
+        {
+            int realIndex = sellable[i];
+
+            const Item& item = items[realIndex];
+            const StatBonus& b = item.GetStatBonus();
+
+            int sellPrice = shop.GetSellPrice(item);
+
+            std::string line =
+                std::to_string(i + 1) + ". " +
+                item.GetName() +
+                " | 판매가 " + std::to_string(sellPrice) + "G" +
+                " | 수량 " + std::to_string(item.GetQuantity()) +
+                " | ";
+
+            if (item.GetType() == ItemType::Equipment)
+            {
+                if (item.GetEquipmentType() == EquipmentType::Weapon)
+                {
+                    line += "ATK+" + std::to_string(b.att);
+                }
+                else if (item.GetEquipmentType() == EquipmentType::Armor)
+                {
+                    line += "DEF+" + std::to_string(b.def);
+                }
+                else
+                {
+                    line += "장비";
+                }
+            }
+            else if (item.GetType() == ItemType::Consumable)
+            {
+                line +=
+                    "HP+" + std::to_string(b.hp) +
+                    " MP+" + std::to_string(b.mp);
+            }
+            else
+            {
+                line += "기타";
+            }
+
+            itemLines.push_back(line);
+        }
+    }
+
+    screen.a = AnsiPlayer::LoadLines(
+        R"(C:\ascii\RedNewCut4.txt)",
+        0,
+        0,
+        50,
+        22
+    );
+
+    screen.b = itemLines;
+
+    screen.c =
+    {
+        "판매할 아이템 번호 입력",
+        "0. 취소"
+    };
+
+    screen.d =
+    {
+        "이름 : " + player.GetName(),
+        "Gold : " + std::to_string(player.GetGold()),
+        "",
+        "판매 가능 수 : " + std::to_string(sellable.size())
+    };
+
+    ConsoleUI::DrawFullLayout(screen);
+}
+
+
 
 
 void GameManager::HandleShopInput()
 {
-
     int choice =
         InputManager::InputInMassegeToRange(
             "선택: ",
@@ -1039,17 +1133,36 @@ void GameManager::HandleShopInput()
         int index = InputManager::InputInMassegeToRange(
             "구매할 상품 번호: ",
             1,
-            shopIndexMap.size()
+            static_cast<int>(shopIndexMap.size())
         ) - 1;
 
         int realIndex = shopIndexMap[index];
 
-        int quantity =
-            InputManager::InputInMassegeToRange(
-                "수량: ",
-                1,
-                99
-            );
+        const std::vector<Item>& products = shop.GetProducts();
+
+        if (realIndex < 0 || realIndex >= static_cast<int>(products.size()))
+        {
+            AddLog("잘못된 상품입니다.");
+            break;
+        }
+
+        const Item& product = products[realIndex];
+
+        int quantity = 1;
+
+        if (product.GetType() == ItemType::Equipment)
+        {
+            quantity = 1;
+        }
+        else
+        {
+            quantity =
+                InputManager::InputInMassegeToRange(
+                    "수량: ",
+                    1,
+                    99
+                );
+        }
 
         if (shop.BuyItem(realIndex, quantity, context))
         {
@@ -1076,21 +1189,51 @@ void GameManager::HandleShopInput()
             break;
         }
 
-        int sellIndex =
+        RenderSellItemList();
+
+        int sellChoice =
             InputManager::InputInMassegeToRange(
-                "판매할 아이템 번호: ",
-                1,
-                sellable.size()
-            ) - 1;
+                "판매할 아이템 번호, 취소는 0: ",
+                0,
+                static_cast<int>(sellable.size())
+            );
+
+        if (sellChoice == 0)
+        {
+            break;
+        }
+
+        int sellIndex = sellChoice - 1;
 
         int realIndex = sellable[sellIndex];
 
-        int quantity =
-            InputManager::InputInMassegeToRange(
-                "판매 수량: ",
-                1,
-                99
-            );
+        const std::vector<Item>& items = inventory.GetItems();
+
+        if (realIndex < 0 || realIndex >= static_cast<int>(items.size()))
+        {
+            AddLog("잘못된 아이템입니다.");
+            break;
+        }
+
+        const Item& item = items[realIndex];
+
+        int maxQuantity = item.GetQuantity();
+
+        int quantity = 1;
+
+        if (item.GetType() == ItemType::Equipment)
+        {
+            quantity = 1;
+        }
+        else
+        {
+            quantity =
+                InputManager::InputInMassegeToRange(
+                    "판매 수량: ",
+                    1,
+                    maxQuantity
+                );
+        }
 
         if (shop.SellItem(realIndex, quantity, context))
         {
@@ -1109,6 +1252,7 @@ void GameManager::HandleShopInput()
         break;
     }
 }
+
 
 
 
@@ -1284,9 +1428,6 @@ void GameManager::RenderInventory()
         22
     );
 
-
-
-
     screen.b = itemLines;
 
     screen.c =
@@ -1313,7 +1454,7 @@ void GameManager::HandleInventoryInput()
 {
     Inventory& inventory = context.GetInventory();
 
-    auto& items = inventory.GetItems();
+    const auto& items = inventory.GetItems();
 
     if (items.empty())
     {
@@ -1330,7 +1471,7 @@ void GameManager::HandleInventoryInput()
         InputManager::InputInMassegeToRange(
             "선택: ",
             0,
-            items.size()
+            static_cast<int>(items.size())
         );
 
     if (choice == 0)
@@ -1344,19 +1485,38 @@ void GameManager::HandleInventoryInput()
     std::string itemName = items[index].GetName();
     ItemType type = items[index].GetType();
 
+    bool result = false;
+
     if (type == ItemType::Equipment)
     {
-        inventory.EquipItem(index, context);
+        result = inventory.EquipItem(index, context);
 
-        AddLog(itemName + " 장착 완료");
+        if (result)
+        {
+            AddLog(itemName + " 장착 완료");
+        }
+        else
+        {
+            AddLog(itemName + " 장착 실패");
+        }
     }
     else
     {
-        inventory.UseItem(index, context);
+        result = inventory.UseItem(index, context);
 
-        AddLog(itemName + " 사용 완료");
+        if (result)
+        {
+            AddLog(itemName + " 사용 완료");
+        }
+        else
+        {
+            AddLog(itemName + " 사용 실패");
+        }
     }
 }
+
+
+
 
 
 

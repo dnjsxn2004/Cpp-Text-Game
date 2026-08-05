@@ -1133,7 +1133,7 @@ void ConsoleUI::PrintStartScreen()
         
 
         // 4. 게임 서사 문구
-        std::cout << "\n           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n";
+        std::cout << "\n                                                           \"우리는 서로의 천국이자, 가장 잔인한 지옥이었다.\"\n\n";
 
         // 구분선
         
@@ -1141,7 +1141,7 @@ void ConsoleUI::PrintStartScreen()
         
 
         // 5. 시작 안내 문구
-        std::cout << "                   >> 아무 키나 누르면 시작됩니다 <<\n";
+        std::cout << "                                                                   >> 아무 키나 누르면 시작됩니다 <<\n";
 
         // 하단 구분선
         
