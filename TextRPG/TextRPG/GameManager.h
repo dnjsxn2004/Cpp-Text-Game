@@ -32,6 +32,7 @@ private:
     bool loadSuccess;
     bool isWin;
     bool playerLevelUp;
+    bool IsShop;
 
     // UI ตฅภฬลอ
     std::vector<std::string> logs;
@@ -85,6 +86,8 @@ private:
     BattleResult StartFinalBossBattle();
 
     bool ShowCharacterPreview(int choice);
+
+    void RenderSellItemList();
 
    
 
